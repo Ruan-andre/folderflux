@@ -32,7 +32,7 @@ const Sidebar = () => {
         <img
           src={logo}
           alt="Logo"
-          style={{ maxHeight: 180, objectFit: "contain" }}
+          style={{ maxHeight: 150, objectFit: "contain" }}
           hidden={isOpen ? false : true}
         />
         <List>
@@ -48,7 +48,7 @@ const Sidebar = () => {
               <Icon icon="gala:settings" width="30" height="30" color="#00ceff" />
             </MenuButton>
 
-            <MenuButton text="Perfis">
+            <MenuButton text="Perfis" to="profiles">
               <Icon icon="fluent-color:person-add-24" width="30" height="30" />
             </MenuButton>
           </div>
@@ -57,7 +57,7 @@ const Sidebar = () => {
             <h3 className="sidebar-title" hidden={isOpen ? false : true}>
               Ferramentas
             </h3>
-            <MenuButton text="Relatórios">
+            <MenuButton text="Relatórios" to="report">
               <Icon icon="nimbus:stats" width="30" height="30" color="#e52e2e" />
             </MenuButton>
           </div>
@@ -65,7 +65,7 @@ const Sidebar = () => {
             <h3 className="sidebar-title" hidden={isOpen ? false : true}>
               Configurações
             </h3>
-            <MenuButton text="Preferências">
+            <MenuButton text="Preferências" to="settings">
               <Icon icon="flat-color-icons:settings" width="30" height="30" />
             </MenuButton>
 
