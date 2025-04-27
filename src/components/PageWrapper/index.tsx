@@ -16,6 +16,9 @@ type PageWrapperProps = {
   minHeightStyle?: string;
   wrapStyle?: string;
   gap?: string;
+  padding?: string;
+  hr?: boolean;
+  alignItems?: string;
 };
 const PageWrapper = ({
   children,
@@ -28,6 +31,9 @@ const PageWrapper = ({
   minHeightStyle,
   wrapStyle,
   gap,
+  padding,
+  hr,
+  alignItems,
 }: PageWrapperProps) => {
   const theme = useTheme();
   let btnField;
@@ -54,24 +60,29 @@ const PageWrapper = ({
         flexDirection: "column",
         flexWrap: wrapStyle ? wrapStyle : "",
         justifyContent: "center",
-        alignContent: "center",
+        alignItems: alignItems ?? "",
         gap: gap ? gap : "3rem",
         backgroundColor: bgColor ?? theme.palette.background.paper,
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)",
-        padding: "1.5rem",
+        padding: padding ?? "1.5rem",
         borderRadius: theme.shape.borderRadius,
         fontSize: theme.typography.fontSize,
+        overflow: "auto",
         scrollBehavior: "smooth",
         width: "100%",
         minHeight: minHeightStyle ? minHeightStyle : "",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant={titleTagType ? titleTagType : "h1"} fontSize={titleSize || 32}>
-          {title}
-        </Typography>
-        {btnField}
-      </div>
+      {(title || btnField) && (
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography variant={titleTagType ? titleTagType : "h1"} fontSize={titleSize || 32}>
+            {title}
+          </Typography>
+          {btnField}
+        </div>
+      )}
+
+      {hr && <hr />}
       {children}
     </Box>
   );

@@ -27,26 +27,30 @@ const Home = () => {
     },
   ];
   return (
-    <PageWrapper minHeightStyle="100vh">
+    <PageWrapper minHeightStyle="95vh">
       <div className="flex-center">
-        <GenericCard title="Organizar Agora" subtitle="Execute a organização imediata">
-          <Icon icon="openmoji:broom" width="45" height="45" />
-        </GenericCard>
-        <GenericCard title="Como usar?" subtitle="Guia rápido de início">
-          <Icon icon="fluent-emoji-flat:graduation-cap" width="45" height="45" />
-        </GenericCard>
+        <GenericCard
+          title="Organizar Agora"
+          subtitle="Execute a organização imediata"
+          icon={<Icon icon="openmoji:broom" width="45" height="45" />}
+          widthCard="33rem"
+          heightCard="11rem"
+        ></GenericCard>
+        <GenericCard
+          title="Como usar?"
+          subtitle="Guia rápido de início"
+          icon={<Icon icon="fluent-emoji-flat:graduation-cap" width="45" height="45" />}
+          widthCard="33rem"
+          heightCard="11rem"
+        ></GenericCard>
       </div>
       <FolderDropZone
         onDrop={(folder) => {
           console.log("Arquivos da pasta:", folder);
         }}
       />
-      <PageWrapper
-        title="Pastas Adicionadas"
-        btnAction={() => {
-          console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        }}
-      >
+
+      <PageWrapper title="Pastas Adicionadas">
         <GenericListItems list={listaPastasMock} />
       </PageWrapper>
     </PageWrapper>
