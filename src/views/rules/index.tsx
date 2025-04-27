@@ -1,8 +1,11 @@
+import { useState } from "react";
 import GenericTabs from "../../components/GenericTabs";
 import PageWrapper from "../../components/PageWrapper";
 import Rule from "../../components/Rule";
+import RulePopup from "../../components/RulePopup";
 
 const Rules = () => {
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <PageWrapper
       title="Regras de Organização"
@@ -10,7 +13,7 @@ const Rules = () => {
       btn={{
         style: "contained",
         Action: () => {
-          console.log("aaaa");
+          setIsOpen(true);
         },
         text: "Adicionar Regra",
       }}
@@ -30,6 +33,7 @@ const Rules = () => {
           />,
         ]}
       />
+      <RulePopup isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </PageWrapper>
   );
 };
