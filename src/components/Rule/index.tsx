@@ -24,11 +24,11 @@ const Rule = ({ title, extension, description }: RuleProps) => {
             <span
               style={{
                 border: "1px solid",
-                borderColor: theme.palette.primary.main,
+                borderColor: "turquoise",
                 padding: "5px 8px",
                 borderRadius: "8px",
-                fontSize: "12px",
-                color: theme.palette.primary.main,
+                fontSize: "10px",
+                color: "turquoise",
               }}
               key={index}
             >
@@ -39,18 +39,28 @@ const Rule = ({ title, extension, description }: RuleProps) => {
       </div>
 
       <div style={{ display: "flex", gap: 5 }}>
-        <Button variant="outlined">Editar</Button>
+        <Button variant="outlined" color="info" sx={{ fontSize: 12, borderRadius: theme.shape.borderRadius }}>
+          Editar
+        </Button>
         <Button
           variant="outlined"
           color="warning"
-          sx={{ ":hover": { backgroundColor: "darkgoldenrod", color: "white" } }}
+          sx={{
+            fontSize: 12,
+            borderRadius: theme.shape.borderRadius,
+            ":hover": { backgroundColor: "darkgoldenrod", color: "white" },
+          }}
         >
           Duplicar
         </Button>
         <Button
           variant="outlined"
           color="error"
-          sx={{ ":hover": { backgroundColor: "brown", color: "white" } }}
+          sx={{
+            fontSize: 12,
+            borderRadius: theme.shape.borderRadius,
+            ":hover": { backgroundColor: "brown", color: "white" },
+          }}
         >
           Excluir
         </Button>

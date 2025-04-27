@@ -6,49 +6,89 @@ import {
   ListItemIcon,
   ListItemText,
   useTheme,
+  Box,
 } from "@mui/material";
 import GenericListItemsType from "../../types/GenericListItemsType";
 
-const GenericListItems = ({ list }: { list: GenericListItemsType[] }) => {
+interface GenericListItemsProps {
+  list: GenericListItemsType[];
+  isButton?: boolean;
+  titleSize?: string;
+  subtitleSize?: string;
+  noGutters?: boolean;
+  listItemPadding?: string;
+  maxListHeight?: string;
+}
+
+const GenericListItems = ({
+  list,
+  isButton = true,
+  titleSize,
+  subtitleSize,
+  noGutters,
+  listItemPadding,
+  maxListHeight,
+}: GenericListItemsProps) => {
   const theme = useTheme();
 
-  if (list.length === 0) return;
+  if (list.length === 0) return null;
 
   return (
-    <List sx={{ width: "100%" }}>
-      {list.map((item, index) => {
-        return (
-          <ListItemButton key={index} sx={{ borderRadius: theme.shape.borderRadius }}>
-            <ListItem
-              secondaryAction={
-                <div style={{ display: "flex", gap: "1rem" }}>
-                  {item.iconsAction?.map((item, index) => {
-                    return (
-                      <IconButton key={index} edge="end" aria-label="Editar">
-                        {item}
-                      </IconButton>
-                    );
-                  })}
-                </div>
-              }
-            >
+    <List
+      sx={{ width: "100%", overflowY: "scroll", overflowX: "hidden", maxHeight: maxListHeight ?? "inherit" }}
+    >
+      {list.map((item, index) => (
+        <ListItem
+          key={index}
+          sx={{ padding: listItemPadding ?? 0 }}
+          disableGutters={noGutters ?? false}
+          secondaryAction={
+            item.iconsAction && (
+              <Box style={{ display: "flex", gap: "1rem" }}>
+                {item.iconsAction.map((icon, iconIndex) => (
+                  <IconButton key={iconIndex} edge="end" aria-label="Ação">
+                    {icon}
+                  </IconButton>
+                ))}
+              </Box>
+            )
+          }
+        >
+          {isButton ? (
+            <ListItemButton sx={{ borderRadius: theme.shape.borderRadius }}>
               {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
               <ListItemText
                 sx={{
                   "& .MuiListItemText-primary": {
-                    fontSize: theme.typography.caption,
+                    fontSize: titleSize ?? theme.typography.caption,
                   },
                   "& .MuiListItemText-secondary": {
-                    fontSize: theme.typography.subtitle1,
+                    fontSize: subtitleSize ?? theme.typography.subtitle1,
                   },
                 }}
                 primary={item.title}
-                secondary={item.subtitle ? item.subtitle : ""}
+                secondary={item.subtitle || ""}
               />
-            </ListItem>
-          </ListItemButton>
-        );
-      })}
+            </ListItemButton>
+          ) : (
+            <>
+              {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
+              <ListItemText
+                sx={{
+                  "& .MuiListItemText-primary": {
+                    fontSize: titleSize ?? theme.typography.caption,
+                  },
+                  "& .MuiListItemText-secondary": {
+                    fontSize: subtitleSize ?? theme.typography.subtitle1,
+                  },
+                }}
+                primary={item.title}
+                secondary={item.subtitle || ""}
+              />
+            </>
+          )}
+        </ListItem>
+      ))}
     </List>
   );
 };
