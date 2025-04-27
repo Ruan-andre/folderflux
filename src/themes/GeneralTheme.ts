@@ -6,7 +6,7 @@ export const GeneralTheme = createTheme({
     primary: {
       main: "#4361ee",
     },
-    text: { primary: "#FFFFFF", secondary: "#7f8fa6" },
+    text: { primary: "#e0e0e0", secondary: "#7f8fa6" },
     background: {
       default: "#1a1d24",
       paper: "#242a35",
@@ -19,6 +19,7 @@ export const GeneralTheme = createTheme({
     fontSize: 16,
     caption: { fontSize: "1.8rem" },
     subtitle1: { fontSize: "1.5rem" },
+    fontWeightBold: "bold",
   },
   components: {
     MuiButton: {
