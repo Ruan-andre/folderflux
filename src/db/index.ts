@@ -13,17 +13,15 @@ const dbPath =
 const sqlite = new Database(dbPath);
 export const db = drizzle(sqlite);
 
-interface SqliteTable {
-  name: string;
-  type: "table" | "index" | "view";
-  tbl_name?: string;
-  sql?: string;
-}
+// interface SqliteTable {
+//   name: string;
+//   type: "table" | "index" | "view";
+//   tbl_name?: string;
+//   sql?: string;
+// }
 
 export async function runMigrations() {
   const migrationsDir = path.join(__dirname, "db/migrations");
-
-  debugger;
 
   try {
     // Se existirem migrations, aplica elas
