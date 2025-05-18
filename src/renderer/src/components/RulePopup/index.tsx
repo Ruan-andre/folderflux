@@ -6,7 +6,7 @@ import { useState } from "react";
 import ConditionsGroup from "../ConditionsGroup";
 import ActionInput from "../ActionInput";
 
-const RulePopup = ({ isOpen, onClose }: GenericPopupProps) => {
+const RulePopup = ({ isOpen, onClose, popupTitle }: GenericPopupProps) => {
   const theme = useTheme();
   const [formData, setFormData] = useState({
     description: "",
@@ -20,6 +20,19 @@ const RulePopup = ({ isOpen, onClose }: GenericPopupProps) => {
       [name]: value,
     }));
   };
+
+  async function handleAdd() {
+    const newRule = {
+      name: formData.name,
+      description: formData.description,
+      isActive: true,
+    };
+    const response = await window.api.insertNewRule(newRule);
+    if (response) {
+      onClose();
+      alert("Regra inserida com sucesso");
+    }
+  }
 
   return (
     <Modal
@@ -40,7 +53,7 @@ const RulePopup = ({ isOpen, onClose }: GenericPopupProps) => {
         }}
       >
         <ContentWrapper
-          title="Criar Novo Perfil"
+          title={popupTitle ?? "Criar Novo Perfil"}
           titleSize={22}
           action="btn"
           btn={{
@@ -96,8 +109,9 @@ const RulePopup = ({ isOpen, onClose }: GenericPopupProps) => {
                   fontSize: 12,
                   borderRadius: theme.shape.borderRadius,
                 }}
+                onClick={handleAdd}
               >
-                Criar Perfil
+                Criar
               </Button>
             </Stack>
           </Box>
