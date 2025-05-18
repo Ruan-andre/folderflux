@@ -3,7 +3,7 @@ import { useState } from "react";
 
 type GenericTabsProps = {
   tabNames: string[];
-  tabContents: React.ReactNode[];
+  tabContents: React.ReactNode[] | undefined;
   tabTitle?: string;
 };
 const GenericTabs = ({ tabNames, tabTitle, tabContents }: GenericTabsProps) => {
@@ -28,7 +28,11 @@ const GenericTabs = ({ tabNames, tabTitle, tabContents }: GenericTabsProps) => {
           );
         })}
       </Tabs>
-      {value > 0 ? tabContents[value] : tabContents}
+      {value > 0 && tabContents
+        ? tabContents[value]
+        : tabContents?.map((item) => {
+            return item;
+          })}
     </Box>
   );
 };
