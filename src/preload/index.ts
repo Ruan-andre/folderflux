@@ -1,5 +1,7 @@
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import { ElectronAPI, electronAPI } from "@electron-toolkit/preload";
+import { RuleProps } from "../renderer/src/types/RulesProps";
+import { NewRule } from "../db/schema";
 
 declare global {
   interface Window {
@@ -9,7 +11,15 @@ declare global {
 }
 
 // Custom APIs for renderer
-const api = {};
+const api = {
+  getAllRules: async (): Promise<RuleProps[]> => {
+    return await ipcRenderer.invoke("fetch-all-rules");
+  },
+  insertNewRule: async (rule: NewRule): Promise<boolean> => {
+    return await ipcRenderer.invoke("add-new-rule", rule);
+  },
+  deleteRule: async (idRule: number) => await ipcRenderer.invoke("delete-rule", idRule),
+};
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
@@ -22,8 +32,6 @@ if (process.contextIsolated) {
     console.error(error);
   }
 } else {
-  // @ts-ignore (define in dts)
   window.electron = electronAPI;
-  // @ts-ignore (define in dts)
   window.api = api;
 }
