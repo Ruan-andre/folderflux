@@ -1,11 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GenericTabs from "../../components/GenericTabs";
 import ContentWrapper from "../../components/ContentWrapper";
 import Rule from "../../components/Rule";
 import RulePopup from "../../components/RulePopup";
 
+const tabNames: string[] = ["Todas", "Ativas", "Sistema", "Personalizadas"];
+
 const RulePage = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [rules, setRules] = useState<React.ReactNode[]>();
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await window.api.getAllRules();
+      const items = result.map((item) => {
+        return (
+          <Rule
+            key={item.id}
+            id={item.id}
+            name={item.name}
+            description={item?.description}
+            extensions={item?.extensions}
+          />
+        );
+      });
+
+      setRules(items);
+    };
+
+    fetchData();
+  }, [isOpen]);
   return (
     <ContentWrapper
       title="Regras de Organização"
@@ -18,22 +41,8 @@ const RulePage = () => {
         text: "Adicionar Regra",
       }}
     >
-      <GenericTabs
-        tabNames={["Todas", "Ativas", "Sistema", "Personalizadas"]}
-        tabContents={[
-          <Rule
-            title="Fotos por data"
-            extension={["PDF", "TIFF", "JPG"]}
-            description="Organiza fotos em pastas por ano/mês (ex: Imagens/2024/03-Março)"
-          />,
-          <Rule
-            title="Sistema"
-            extension={["PDF", "TIFF", "JPG"]}
-            description="Organiza fotos em pastas por ano/mês (ex: Imagens/2024/03-Março)"
-          />,
-        ]}
-      />
-      <RulePopup isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <GenericTabs tabNames={tabNames} tabContents={rules} />
+      <RulePopup popupTitle="Criar Nova Regra" isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </ContentWrapper>
   );
 };
