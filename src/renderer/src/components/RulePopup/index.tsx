@@ -1,17 +1,39 @@
 import { Box, Button, Modal, Stack, useTheme } from "@mui/material";
-import GenericPopupProps from "../../types/GenericPopupProps";
 import ContentWrapper from "../ContentWrapper";
 import GenericInput from "../GenericInput";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ConditionsGroup from "../ConditionsGroup";
 import ActionInput from "../ActionInput";
+import { useSnackbar } from "../../context/SnackBarContext";
+import { useRuleStore } from "../../store/ruleStore";
+import { useRulePopupStore } from "../../store/popupRuleStore";
+import { ConditionsType } from "../../types/ConditionsType";
+import { NewCondition, NewRule } from "~/src/db/schema";
 
-const RulePopup = ({ isOpen, onClose, popupTitle }: GenericPopupProps) => {
+type ActionsType = {
+  type: "move" | "copy" | "rename" | "delete";
+  value?: string;
+};
+
+type FormType = {
+  name: string;
+  description?: string;
+  conditions?: ConditionsType[];
+  action?: ActionsType[];
+};
+
+type RulePopupProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+const RulePopup = ({ isOpen, onClose }: RulePopupProps) => {
+  const { showMessage } = useSnackbar();
   const theme = useTheme();
-  const [formData, setFormData] = useState({
-    description: "",
-    name: "",
-  });
+  const { addRule } = useRuleStore();
+  const { ruleToEdit } = useRulePopupStore();
+  const [conditions, setConditions] = useState<NewCondition>();
+  const [formData, setFormData] = useState<FormType>();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -21,18 +43,53 @@ const RulePopup = ({ isOpen, onClose, popupTitle }: GenericPopupProps) => {
     }));
   };
 
-  async function handleAdd() {
-    const newRule = {
-      name: formData.name,
-      description: formData.description,
+  async function handleAddOrUpdate() {
+    if (!formData?.name) {
+      showMessage("O nome da regra não pode ser vazio", "error");
+      return;
+    }
+
+    const newRule: NewRule = {
+      name: formData?.name,
+      description: formData?.description,
       isActive: true,
+      isSystem: false,
+      
     };
-    const response = await window.api.insertNewRule(newRule);
-    if (response) {
-      onClose();
-      alert("Regra inserida com sucesso");
+
+    try {
+      const response = await addRule(newRule);
+      if (response.status) {
+        showMessage(response.message, "success");
+        onClose();
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      const e = error as { message: string; code?: string };
+      showMessage(e.message, "error");
     }
   }
+
+  useEffect(() => {
+    if (!ruleToEdit) {
+      setFormData({
+        name: "",
+        description: "",
+        conditions: [],
+        action: [],
+      });
+    } else {
+      setFormData({
+        name: ruleToEdit.name,
+        description: ruleToEdit.description,
+        conditions: [],
+        action: [],
+      });
+    }
+  }, [isOpen, ruleToEdit]);
+
+  if (!isOpen) return;
 
   return (
     <Modal
@@ -53,10 +110,9 @@ const RulePopup = ({ isOpen, onClose, popupTitle }: GenericPopupProps) => {
         }}
       >
         <ContentWrapper
-          title={popupTitle ?? "Criar Novo Perfil"}
+          title={ruleToEdit ? "Editar Regra" : "Criar Nova Regra"}
           titleSize={22}
-          action="btn"
-          btn={{
+          commonBtn={{
             style: "outlined",
             text: "X",
             Action: () => onClose(),
@@ -70,7 +126,7 @@ const RulePopup = ({ isOpen, onClose, popupTitle }: GenericPopupProps) => {
               label="Nome da Regra"
               fontSize="1.5rem"
               placeholder="Ex: Organizador de boletos"
-              value={formData.name}
+              value={formData?.name}
               onChange={handleInputChange}
               required
             />
@@ -83,11 +139,10 @@ const RulePopup = ({ isOpen, onClose, popupTitle }: GenericPopupProps) => {
               rows={2}
               maxLength={150}
               placeholder="Descreva o que esta regra faz"
-              value={formData.description}
+              value={formData?.description}
               onChange={handleInputChange}
-              required
             />
-            <ConditionsGroup />
+            <ConditionsGroup conditionsProps={[]} onAdd={() => setConditions} />
             <ActionInput />
             <hr />
             <Stack spacing={2} direction={"row"} justifyContent={"end"}>
@@ -104,14 +159,16 @@ const RulePopup = ({ isOpen, onClose, popupTitle }: GenericPopupProps) => {
                 Cancelar
               </Button>
               <Button
-                variant="contained"
+                variant={ruleToEdit ? "outlined" : "contained"}
                 sx={{
                   fontSize: 12,
                   borderRadius: theme.shape.borderRadius,
+                  ":hover": { backgroundColor: ruleToEdit ? "green" : "", color: "white" },
                 }}
-                onClick={handleAdd}
+                color={ruleToEdit ? "success" : "primary"}
+                onClick={handleAddOrUpdate}
               >
-                Criar
+                {ruleToEdit ? "Salvar" : "Criar"}
               </Button>
             </Stack>
           </Box>
