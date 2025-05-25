@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { ElectronAPI, electronAPI } from "@electron-toolkit/preload";
-import { RuleProps } from "../renderer/src/types/RulesProps";
-import { NewRule } from "../db/schema";
+import { Condition, NewCondition, NewRule, Rule } from "../db/schema";
+import { DbResponse } from "../renderer/src/types/DbResponse";
 
 declare global {
   interface Window {
@@ -12,13 +12,31 @@ declare global {
 
 // Custom APIs for renderer
 const api = {
-  getAllRules: async (): Promise<RuleProps[]> => {
-    return await ipcRenderer.invoke("fetch-all-rules");
+  rule: {
+    getAllRules: async (): Promise<DbResponse> => {
+      return await ipcRenderer.invoke("fetch-all-rules");
+    },
+    insertNewRule: async (rule: NewRule): Promise<DbResponse> => {
+      return await ipcRenderer.invoke("add-new-rule", rule);
+    },
+    deleteRule: async (idRule: number): Promise<DbResponse> =>
+      await ipcRenderer.invoke("delete-rule", idRule),
+    updateRule: async (rule: Rule): Promise<DbResponse> => await ipcRenderer.invoke("update-rule", rule),
+    toggleActive: async (idRule: number): Promise<DbResponse> =>
+      await ipcRenderer.invoke("toggle-active", idRule),
   },
-  insertNewRule: async (rule: NewRule): Promise<boolean> => {
-    return await ipcRenderer.invoke("add-new-rule", rule);
+  condition: {
+    getConditions: async (idRule: number): Promise<DbResponse> => {
+      return await ipcRenderer.invoke("fetch-conditions", idRule);
+    },
+    insertNewCondition: async (condition: NewCondition, ruleId: number): Promise<DbResponse> => {
+      return await ipcRenderer.invoke("add-new-condition", condition, ruleId);
+    },
+    deleteCondition: async (idCondition: number): Promise<DbResponse> =>
+      await ipcRenderer.invoke("delete-rule", idCondition),
+    updateCondition: async (idRule: number, condition: Condition): Promise<DbResponse> =>
+      await ipcRenderer.invoke("update-condition", idRule, condition),
   },
-  deleteRule: async (idRule: number) => await ipcRenderer.invoke("delete-rule", idRule),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to
