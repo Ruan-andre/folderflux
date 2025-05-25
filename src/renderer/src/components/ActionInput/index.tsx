@@ -18,6 +18,7 @@ const ActionInput = () => {
       <GenericInput
         name="options"
         select
+        required
         selectOptions={options}
         label="Ação"
         value={action.toString()}
