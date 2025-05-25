@@ -9,35 +9,19 @@ import GenericInput from "../GenericInput";
 
 const listaRegrasMock: GenericListItemsType[] = [
   {
-    title: "Pasta 1",
+    title: "Regra 1",
     iconsAction: [<Checkbox />],
   },
   {
-    title: "Pasta 2",
+    title: "Regra 2",
     iconsAction: [<Checkbox />],
   },
   {
-    title: "Pasta 3",
+    title: "Regra 3",
     iconsAction: [<Checkbox />],
   },
   {
-    title: "Pasta 4",
-    iconsAction: [<Checkbox />],
-  },
-  {
-    title: "Pasta 5",
-    iconsAction: [<Checkbox />],
-  },
-  {
-    title: "Pasta 6",
-    iconsAction: [<Checkbox />],
-  },
-  {
-    title: "Pasta 7",
-    iconsAction: [<Checkbox />],
-  },
-  {
-    title: "Pasta 8",
+    title: "Regra 4",
     iconsAction: [<Checkbox />],
   },
 ];

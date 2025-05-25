@@ -89,7 +89,6 @@ const GenericInput = ({
         onChange={onChange}
         type={type}
         select={select}
-        inputProps={maxLength ? { maxLength } : undefined}
         sx={{
           backgroundColor: bgColor ?? "#2d3646", // Melhor fallback no tema
           "& .MuiOutlinedInput-root": {

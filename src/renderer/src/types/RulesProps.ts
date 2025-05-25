@@ -1,6 +1,8 @@
 export type RuleProps = {
-  id: number;
+  id?: number;
   name: string;
+  isSystem?: boolean;
+  isActive?: boolean;
   extensions?: string;
   description?: string;
 };

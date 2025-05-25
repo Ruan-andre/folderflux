@@ -1,48 +1,32 @@
-import { useEffect, useState } from "react";
-import GenericTabs from "../../components/GenericTabs";
+import { useEffect } from "react";
+import { useRuleStore } from "../../store/ruleStore";
+import RuleTabs from "../../components/RuleTabs";
 import ContentWrapper from "../../components/ContentWrapper";
-import Rule from "../../components/Rule";
 import RulePopup from "../../components/RulePopup";
-
-const tabNames: string[] = ["Todas", "Ativas", "Sistema", "Personalizadas"];
+import { useRulePopupStore } from "../../store/popupRuleStore";
 
 const RulePage = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [rules, setRules] = useState<React.ReactNode[]>();
+  const { rules, fetchRules } = useRuleStore();
+  const { closePopup, openPopup, isOpen } = useRulePopupStore();
+
   useEffect(() => {
-    const fetchData = async () => {
-      const result = await window.api.getAllRules();
-      const items = result.map((item) => {
-        return (
-          <Rule
-            key={item.id}
-            id={item.id}
-            name={item.name}
-            description={item?.description}
-            extensions={item?.extensions}
-          />
-        );
-      });
+    fetchRules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      setRules(items);
-    };
+  if (rules.length === 0) return;
 
-    fetchData();
-  }, [isOpen]);
   return (
     <ContentWrapper
       title="Regras de Organização"
-      action="btn"
-      btn={{
+      commonBtn={{
         style: "contained",
-        Action: () => {
-          setIsOpen(true);
-        },
+        Action: () => openPopup("create"),
         text: "Adicionar Regra",
       }}
     >
-      <GenericTabs tabNames={tabNames} tabContents={rules} />
-      <RulePopup popupTitle="Criar Nova Regra" isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <RuleTabs tabContents={rules} />
+      <RulePopup isOpen={isOpen} onClose={() => closePopup()}  />
     </ContentWrapper>
   );
 };

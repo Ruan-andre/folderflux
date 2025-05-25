@@ -14,11 +14,6 @@ const ProfilePage = () => {
     >
       <div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap" }}>
         <Profile />
-        <Profile />
-        <Profile />
-        <Profile />
-        <Profile />
-        <Profile />
       </div>
       <ProfilePopup isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </ContentWrapper>

@@ -32,6 +32,7 @@ const ConditionInput = () => {
       <GenericInput
         name="options"
         select
+        required
         value={field.toString()}
         selectOptions={options}
         onChange={(e) => setField(parseInt(e.target.value))}
@@ -40,8 +41,9 @@ const ConditionInput = () => {
       <GenericInput
         name="conditions"
         select
-        value={operator.toString()} // Alterado para passar valor numérico
-        onChange={(e) => setOperator(parseInt(e.target.value))} // Alterado para lidar com valor numérico
+        required
+        value={operator.toString()} 
+        onChange={(e) => setOperator(parseInt(e.target.value))}
         selectOptions={conditions}
       />
 
@@ -49,6 +51,7 @@ const ConditionInput = () => {
         <GenericInput
           name="commonConditionInput"
           value={value}
+          required
           onChange={(e) => setValue(e.target.value)}
           placeholder="Valor"
         />
@@ -57,12 +60,14 @@ const ConditionInput = () => {
           <GenericInput
             name="initialRangeInput"
             value={rangeValue.from}
+            required
             onChange={(e) => setRangeValue({ ...rangeValue, from: e.target.value })}
             placeholder="De"
           />
           <GenericInput
             name="finalRangeInput"
             value={rangeValue.to}
+            required
             onChange={(e) => setRangeValue({ ...rangeValue, to: e.target.value })}
             placeholder="Até"
           />

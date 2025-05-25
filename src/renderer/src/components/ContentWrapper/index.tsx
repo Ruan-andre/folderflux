@@ -6,8 +6,11 @@ type ContentWrapperProps = {
   title?: string;
   titleTagType?: "h1" | "h2" | "h3" | "h4";
   titleSize?: number;
-  action?: "btn" | "switch";
-  btn?: {
+  switchBtn?: {
+    Action?: () => void;
+    value?: boolean;
+  };
+  commonBtn?: {
     Action?: () => void;
     style?: "outlined" | "contained" | "text";
     text?: string;
@@ -27,8 +30,8 @@ const ContentWrapper = ({
   title,
   titleTagType,
   titleSize,
-  action,
-  btn,
+  switchBtn,
+  commonBtn,
   bgColor,
   minHeightStyle,
   wrapStyle,
@@ -41,20 +44,26 @@ const ContentWrapper = ({
 }: ContentWrapperProps) => {
   const theme = useTheme();
   let btnField;
-  if (action === "btn" && btn) {
+  if (commonBtn) {
     btnField = (
       <>
         <Button
-          variant={btn.style || "contained"}
+          variant={commonBtn.style || "contained"}
           sx={{ fontSize: "1.2rem", borderRadius: "1rem" }}
-          onClick={btn.Action}
+          onClick={commonBtn.Action}
         >
-          {btn.text || "Ver tudo"}
+          {commonBtn.text || "Ver tudo"}
         </Button>
       </>
     );
-  } else if (action === "switch") {
-    btnField = <CustomSwitch defaultChecked />;
+  } else if (switchBtn) {
+    btnField = (
+      <CustomSwitch
+        title={switchBtn.value ? "Desativar" : "Ativar"}
+        onClick={switchBtn.Action}
+        checked={switchBtn.value}
+      />
+    );
   }
 
   return (
