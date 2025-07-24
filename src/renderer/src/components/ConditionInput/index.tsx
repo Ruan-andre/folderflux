@@ -1,78 +1,92 @@
-import { Box } from "@mui/material";
-import { useState } from "react";
+import { Box, Button } from "@mui/material";
 import GenericInput from "../GenericInput";
+import { ICondition } from "../../types/ConditionsType";
 
-const options = [
-  { label: "Nome do arquivo", value: 0 },
-  { label: "Extensão do arquivo", value: 1 },
-  { label: "Data de modificação", value: 2 },
-  { label: "Origem do arquivo", value: 3 },
-  { label: "Tamanho do arquivo", value: 4 },
+const fieldOptions = [
+  { label: "Nome do arquivo", value: "fileName" as const },
+  { label: "Extensão do arquivo", value: "fileExtension" as const },
+  { label: "Data de modificação", value: "modifiedDate" as const },
+  { label: "Origem do arquivo", value: "fileDirectory" as const },
+  { label: "Tamanho do arquivo", value: "fileSize" as const },
 ];
 
-const ConditionInput = () => {
-  const [field, setField] = useState(0);
-  const [operator, setOperator] = useState(0);
-  const [value, setValue] = useState("");
-  const [rangeValue, setRangeValue] = useState({ from: "", to: "" });
+type ConditionInputProps = {
+  condition: ICondition;
+  onChange: (updatedCondition: ICondition) => void;
+  onRemove: () => void;
+};
 
-  const isRangeField = field === 4 || field === 2;
+const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) => {
+  const isRangeField = condition.field === "modifiedDate" || condition.field === "fileSize";
 
-  const conditions = [
-    { label: "contém", value: 0 },
-    { label: "não contém", value: 1 },
-    { label: "começa com", value: 2 },
-    { label: "termina com", value: 3 },
-    { label: "é igual a", value: 4 },
-    ...(isRangeField ? [{ label: "está entre", value: 5 }] : []),
+  const operatorOptions = [
+    { label: "contém", value: "contains" as const },
+    { label: "não contém", value: "notContains" as const },
+    { label: "começa com", value: "startsWith" as const },
+    { label: "termina com", value: "endsWith" as const },
+    { label: "é igual a", value: "equals" as const },
+    ...(isRangeField ? [{ label: "está entre", value: "isBetween" as const }] : []),
   ];
-
+  const handleChange = (field: keyof ICondition, value: string) => {
+    onChange({ ...condition, [field]: value });
+  };
   return (
-    <Box display="flex" gap={1} mb={2} flexWrap="wrap">
+    <Box display="flex" alignItems={"center"} gap={1} mb={2} flexWrap="wrap">
       <GenericInput
-        name="options"
+        name="field"
         select
         required
-        value={field.toString()}
-        selectOptions={options}
-        onChange={(e) => setField(parseInt(e.target.value))}
+        value={condition.field}
+        selectOptions={fieldOptions}
+        onChange={(e) => handleChange("field", e.target.value)}
       />
 
       <GenericInput
-        name="conditions"
+        name="operator"
         select
-        required
-        value={operator.toString()} 
-        onChange={(e) => setOperator(parseInt(e.target.value))}
-        selectOptions={conditions}
+        value={condition.operator}
+        selectOptions={operatorOptions}
+        onChange={(e) => handleChange("operator", e.target.value)}
       />
 
-      {!isRangeField || operator !== 5 ? (
+      {!isRangeField || condition.operator !== "isBetween" ? (
         <GenericInput
-          name="commonConditionInput"
-          value={value}
-          required
-          onChange={(e) => setValue(e.target.value)}
+          name="value"
+          value={condition.value}
+          onChange={(e) => handleChange("value", e.target.value)}
           placeholder="Valor"
         />
       ) : (
         <Box display="flex" gap={1} flex={1}>
           <GenericInput
-            name="initialRangeInput"
-            value={rangeValue.from}
-            required
-            onChange={(e) => setRangeValue({ ...rangeValue, from: e.target.value })}
+            name="value"
+            value={condition.value}
+            onChange={(e) => handleChange("value", e.target.value)}
             placeholder="De"
           />
           <GenericInput
-            name="finalRangeInput"
-            value={rangeValue.to}
-            required
-            onChange={(e) => setRangeValue({ ...rangeValue, to: e.target.value })}
+            name="value2"
+            value={condition.value2 ?? ""}
+            onChange={(e) => handleChange("value2", e.target.value)}
             placeholder="Até"
           />
         </Box>
       )}
+      <Button
+        sx={{
+          ":hover": { backgroundColor: "brown" },
+          padding: "0.5rem 1rem",
+          borderRadius: 4,
+          color: "#fca5a5",
+          fontWeight: "600",
+        }}
+        variant="outlined"
+        color="error"
+        size="small"
+        onClick={onRemove}
+      >
+        Remover
+      </Button>
     </Box>
   );
 };
