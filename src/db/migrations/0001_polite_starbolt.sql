@@ -1,1 +1,0 @@
-ALTER TABLE `condition` RENAME COLUMN "description" TO "value";

@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1747685809154,
-      "tag": "0000_parched_monster_badoon",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1748013272684,
-      "tag": "0001_polite_starbolt",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1748022352491,
-      "tag": "0002_charming_mauler",
+      "when": 1753304253930,
+      "tag": "0000_dizzy_dazzler",
       "breakpoints": true
     }
   ]
