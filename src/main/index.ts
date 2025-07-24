@@ -2,8 +2,10 @@ import { app, shell, BrowserWindow } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { runMigrations } from "../db";
-import { registerRuleHandlers } from "./handlers/rules";
-import { registerConditionHandlers } from "./handlers/conditions";
+import { registerRuleHandlers } from "./handlers/domain/rules";
+import { registerDialogHandlers } from "./handlers/system/dialog";
+import { registerProfileHandlers } from "./handlers/domain/profiles";
+import { registerFolderHandlers } from "./handlers/domain/folders";
 
 function createWindow(): void {
   // Create the browser window.
@@ -72,7 +74,9 @@ app.whenReady().then(async () => {
 });
 
 registerRuleHandlers();
-registerConditionHandlers();
+registerDialogHandlers();
+registerProfileHandlers();
+registerFolderHandlers();
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
