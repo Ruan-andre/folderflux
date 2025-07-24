@@ -14,8 +14,8 @@ export default defineConfig({
             dest: "resources",
           },
           {
-            src: "src/db/migrations/**/*",
-            dest: "db/migrations",
+            src: "src/db/**/*",
+            dest: "db/",
           },
         ],
       }),
