@@ -1,7 +1,10 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { ElectronAPI, electronAPI } from "@electron-toolkit/preload";
-import { Condition, NewCondition, NewRule, Rule } from "../db/schema";
+import { FolderSchema, NewFolder, RuleSchema } from "../db/schema";
 import { DbResponse } from "../renderer/src/types/DbResponse";
+import { FullRule, NewFullRulePayload } from "../renderer/src/types/RuleWithDetails";
+import { FullProfile } from "../renderer/src/types/ProfileWithDetails";
+import { IConditionGroup } from "../renderer/src/types/ConditionsType";
 
 declare global {
   interface Window {
@@ -13,29 +16,66 @@ declare global {
 // Custom APIs for renderer
 const api = {
   rule: {
-    getAllRules: async (): Promise<DbResponse> => {
-      return await ipcRenderer.invoke("fetch-all-rules");
-    },
-    insertNewRule: async (rule: NewRule): Promise<DbResponse> => {
-      return await ipcRenderer.invoke("add-new-rule", rule);
-    },
-    deleteRule: async (idRule: number): Promise<DbResponse> =>
-      await ipcRenderer.invoke("delete-rule", idRule),
-    updateRule: async (rule: Rule): Promise<DbResponse> => await ipcRenderer.invoke("update-rule", rule),
-    toggleActive: async (idRule: number): Promise<DbResponse> =>
-      await ipcRenderer.invoke("toggle-active", idRule),
+    getAllRules: (): Promise<DbResponse<FullRule[]>> => ipcRenderer.invoke("get-all-rules-with-details"),
+
+    getConditionTree: (ruleId: number): Promise<DbResponse<IConditionGroup>> =>
+      ipcRenderer.invoke("get-condition-tree", ruleId),
+
+    createFullRule: (data: NewFullRulePayload): Promise<DbResponse<FullRule>> =>
+      ipcRenderer.invoke("create-full-rule", data),
+
+    updateConditionTree: (ruleId: number, newTree: IConditionGroup): Promise<DbResponse> =>
+      ipcRenderer.invoke("update-condition-tree", ruleId, newTree),
+
+    duplicateRule: (ruleId: number): Promise<DbResponse<FullRule>> =>
+      ipcRenderer.invoke("duplicate-rule", ruleId),
+
+    deleteRule: (idRule: number): Promise<DbResponse> => ipcRenderer.invoke("delete-rule", idRule),
+
+    updateRule: (rule: RuleSchema): Promise<DbResponse> => ipcRenderer.invoke("update-rule", rule),
+
+    toggleActive: (idRule: number): Promise<DbResponse> => ipcRenderer.invoke("toggle-active", idRule),
   },
-  condition: {
-    getConditions: async (idRule: number): Promise<DbResponse> => {
-      return await ipcRenderer.invoke("fetch-conditions", idRule);
-    },
-    insertNewCondition: async (condition: NewCondition, ruleId: number): Promise<DbResponse> => {
-      return await ipcRenderer.invoke("add-new-condition", condition, ruleId);
-    },
-    deleteCondition: async (idCondition: number): Promise<DbResponse> =>
-      await ipcRenderer.invoke("delete-rule", idCondition),
-    updateCondition: async (idRule: number, condition: Condition): Promise<DbResponse> =>
-      await ipcRenderer.invoke("update-condition", idRule, condition),
+  profile: {
+    getAllProfiles: (): Promise<DbResponse<FullProfile[]>> =>
+      ipcRenderer.invoke("get-all-profiles-with-details"),
+
+    createFullProfile: (data: FullProfile): Promise<DbResponse<FullProfile>> =>
+      ipcRenderer.invoke("create-full-profile", data),
+
+    getAssociatedRules: (profileId: number): Promise<DbResponse<RuleSchema[]>> =>
+      ipcRenderer.invoke("get-associated-rules", profileId),
+
+    getMonitoredFolders: (profileId: number): Promise<DbResponse<FolderSchema[]>> =>
+      ipcRenderer.invoke("get-associated-folders", profileId),
+
+    deleteProfile: (profileId: number): Promise<DbResponse> =>
+      ipcRenderer.invoke("delete-profile", profileId),
+
+    duplicateProfile: (profile: FullProfile): Promise<DbResponse<FullProfile>> =>
+      ipcRenderer.invoke("duplicate-profile", profile),
+
+    toggleStatus: (id: number): Promise<DbResponse> => ipcRenderer.invoke("toggle-profile-status", id),
+
+    updateProfile: (data: FullProfile): Promise<DbResponse> => ipcRenderer.invoke("update-profile", data),
+  },
+  folder: {
+    getAllFolders: (): Promise<DbResponse<FolderSchema[]>> => ipcRenderer.invoke("get-all-folders"),
+
+    getFolderById: (folderId: number): Promise<DbResponse<FolderSchema>> =>
+      ipcRenderer.invoke("get-folder-by-id", folderId),
+
+    addFolders: (folders: NewFolder[]): Promise<DbResponse> => ipcRenderer.invoke("add-folders", folders),
+
+    deleteFolder: (folderId: number): Promise<DbResponse> => ipcRenderer.invoke("delete-folder", folderId), // Corrigido para retornar DbResponse
+
+    updateFolder: (folder: FolderSchema): Promise<DbResponse> => ipcRenderer.invoke("update-folder", folder), // Corrigido para retornar DbResponse
+  },
+  dialog: {
+    selectDirectory: (): Promise<string | null> => ipcRenderer.invoke("select-directory"),
+
+    selectMultipleDirectories: (): Promise<string[] | null> =>
+      ipcRenderer.invoke("select-multiple-directories"),
   },
 };
 
