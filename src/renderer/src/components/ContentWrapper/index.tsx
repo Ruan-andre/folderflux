@@ -49,7 +49,7 @@ const ContentWrapper = ({
       <>
         <Button
           variant={commonBtn.style || "contained"}
-          sx={{ fontSize: "1.2rem", borderRadius: "1rem" }}
+          sx={{ fontSize: "1rem", borderRadius: "1rem" }}
           onClick={commonBtn.Action}
         >
           {commonBtn.text || "Ver tudo"}

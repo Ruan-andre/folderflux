@@ -7,6 +7,7 @@ type SelectOption = {
 
 type GenericInputProps = {
   name: string;
+  id: string;
   label?: string;
   labelSize?: string;
   textFieldType?: "outlined" | "standard" | "filled";
@@ -33,6 +34,7 @@ type GenericInputProps = {
 
 const GenericInput = ({
   name,
+  id,
   label,
   labelSize,
   textFieldType,
@@ -74,6 +76,7 @@ const GenericInput = ({
       )}
 
       <TextField
+        id={id}
         name={name}
         variant={textFieldType ?? "outlined"}
         size={inputSize ?? "medium"}
@@ -89,6 +92,11 @@ const GenericInput = ({
         onChange={onChange}
         type={type}
         select={select}
+        slotProps={{
+          htmlInput: {
+            maxLength: maxLength,
+          },
+        }}
         sx={{
           backgroundColor: bgColor ?? "#2d3646", // Melhor fallback no tema
           "& .MuiOutlinedInput-root": {

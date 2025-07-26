@@ -1,4 +1,4 @@
-import { Paper, Typography, Box } from "@mui/material";
+import { Paper, Typography, Box, Tooltip } from "@mui/material";
 
 type GenericCardType = {
   title: string;
@@ -45,6 +45,7 @@ const GenericCard = ({
         p: paddingCard ?? 3,
         display: displayCardStyle ?? "block",
         flexDirection: flexDirectionCard ?? "",
+        justifyContent: "space-between",
         gap: gapCard ?? "0",
         borderRadius: 2,
         backgroundColor: bgColor || "#1e2533",
@@ -73,20 +74,47 @@ const GenericCard = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              flexShrink: 0,
             }}
           >
             {icon}
           </Box>
         )}
 
-        <Box>
-          <Typography fontWeight={700} color="white" fontSize="2rem">
-            {title}
-          </Typography>
-          {subtitle && (
-            <Typography variant="body2" fontSize="1.5rem" color="var(--title-gray-dark)">
-              {subtitle}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Tooltip
+            title={title}
+            slotProps={{ tooltip: { sx: { fontSize: "1.5rem" } } }}
+            placement="bottom-start"
+          >
+            <Typography
+              whiteSpace={"nowrap"}
+              overflow={"hidden"}
+              textOverflow={"ellipsis"}
+              fontWeight={700}
+              color="white"
+              fontSize="2rem"
+            >
+              {title}
             </Typography>
+          </Tooltip>
+          {subtitle && (
+            <Tooltip
+              title={subtitle}
+              slotProps={{ tooltip: { sx: { fontSize: "1.5rem" } } }}
+              placement="bottom-start"
+            >
+              <Typography
+                whiteSpace={"nowrap"}
+                overflow={"hidden"}
+                textOverflow={"ellipsis"}
+                variant="body2"
+                fontSize="1.5rem"
+                color="var(--title-gray-dark)"
+              >
+                {subtitle}
+              </Typography>
+            </Tooltip>
           )}
         </Box>
       </Box>

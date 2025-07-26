@@ -67,6 +67,7 @@ export const SnackbarProvider = ({ children }: { children: React.ReactNode }) =>
             },
             display: "flex",
             alignItems: "center",
+            color: "#FFF",
           }}
         >
           {message}

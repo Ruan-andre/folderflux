@@ -8,22 +8,14 @@ import GenericListItemsType from "../../types/GenericListItemsType";
 const HomePage = () => {
   const listaPastasMock: GenericListItemsType[] = [
     {
+      id: 1,
       title: "Pastas 1",
       subtitle: "Modificado em....",
-      icon: <Icon icon="fluent-emoji-flat:file-folder" width="30" height="30" />,
-      iconsAction: [
-        <Icon icon="icon-park:edit-two" width="30" height="30" />,
-        <Icon icon="material-icon-theme:folder-trash-open" width="30" height="30" />,
-      ],
     },
     {
+      id: 2,
       title: "Pastas 1",
       subtitle: "Modificado em....",
-      icon: <Icon icon="fluent-emoji-flat:file-folder" width="30" height="30" />,
-      iconsAction: [
-        <Icon icon="icon-park:edit-two" width="30" height="30" />,
-        <Icon icon="material-icon-theme:folder-trash-open" width="30" height="30" />,
-      ],
     },
   ];
   return (
