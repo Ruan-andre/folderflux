@@ -9,6 +9,7 @@ export const ProfileTable = sqliteTable("profiles", {
   description: text("description", { length: 150 }),
   iconId: text("icon_id").notNull().default("fluent-emoji:file-folder"),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  isSystem: integer("is_system", { mode: "boolean" }).notNull().default(false),
 });
 
 export const profileRelations = relations(ProfileTable, ({ many }) => ({
