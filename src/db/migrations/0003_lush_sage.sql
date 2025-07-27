@@ -1,0 +1,1 @@
+ALTER TABLE `profiles` ADD `is_system` integer DEFAULT false NOT NULL;
