@@ -6,6 +6,8 @@ import { registerRuleHandlers } from "./handlers/domain/rules";
 import { registerDialogHandlers } from "./handlers/system/dialog";
 import { registerProfileHandlers } from "./handlers/domain/profiles";
 import { registerFolderHandlers } from "./handlers/domain/folders";
+import { registerSettingsHandlers } from "./handlers/domain/settings";
+import { seedDatabase } from "../db/seeds";
 
 function createWindow(): void {
   // Create the browser window.
@@ -56,6 +58,7 @@ app.whenReady().then(async () => {
     app.quit();
     return;
   }
+  seedDatabase();
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -77,6 +80,7 @@ registerRuleHandlers();
 registerDialogHandlers();
 registerProfileHandlers();
 registerFolderHandlers();
+registerSettingsHandlers();
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
