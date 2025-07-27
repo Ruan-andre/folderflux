@@ -8,11 +8,12 @@ import {
   NewRule,
   RuleTable,
   Action,
+  RuleSchema,
 } from "../../db/schema";
-import { eq, like } from "drizzle-orm";
+import { count, eq, like } from "drizzle-orm";
 import { DbResponse } from "../../renderer/src/types/DbResponse";
 import { createResponse, toggleColumnStatus } from "../../db/functions";
-import { FullRule } from "~/src/renderer/src/types/RuleWithDetails";
+import { FullRule, NewFullRulePayload } from "~/src/renderer/src/types/RuleWithDetails";
 import { ICondition, IConditionGroup } from "../../renderer/src/types/ConditionsType";
 
 // --- FUNÇÕES DE LEITURA (READ) ---
@@ -74,12 +75,8 @@ export async function getRuleById(id: number, tx: DbOrTx = db): Promise<DbRespon
 }
 
 // --- FUNÇÕES DE ESCRITA (CREATE, UPDATE, DELETE) ---
-export async function createFullRule(data: {
-  rule: NewRule;
-  conditionsTree: IConditionGroup;
-  action: NewAction;
-}): Promise<DbResponse<FullRule>> {
-  const { rule: newRuleData, conditionsTree, action: newActionData } = data;
+export async function createFullRule(data: NewFullRulePayload): Promise<DbResponse<FullRule>> {
+  const { rule: newRuleData, conditionsTree, action } = data;
 
   const exists = await db.query.RuleTable.findFirst({ where: eq(RuleTable.name, newRuleData.name) });
   if (exists) return createResponse(false, "Já existe uma regra com este nome");
@@ -87,7 +84,7 @@ export async function createFullRule(data: {
   return db.transaction(async (tx) => {
     const [insertedRule] = await tx.insert(RuleTable).values(newRuleData).returning();
     await insertConditionTree(tx, conditionsTree, insertedRule.id, null);
-    await tx.insert(ActionTable).values({ ...newActionData, ruleId: insertedRule.id });
+    await tx.insert(ActionTable).values({ ...action, ruleId: insertedRule.id });
     const finalResult = await getRuleById(insertedRule.id, tx);
     if (!finalResult.items) throw new Error("Falha ao buscar a regra recém-criada.");
     return createResponse(true, "Regra criada com sucesso!", finalResult.items);
@@ -148,6 +145,13 @@ export async function updateRule(ruleUpdated: FullRule): Promise<DbResponse> {
 
 export async function toggleRuleActive(id: number): Promise<DbResponse> {
   return toggleColumnStatus(RuleTable, id);
+}
+
+export async function getSystemRules(): Promise<RuleSchema[]> {
+  return await db.query.RuleTable.findMany({ where: eq(RuleTable.isSystem, true) });
+}
+export async function getSystemRulesCount(): Promise<number> {
+  return (await db.select({ count: count() }).from(RuleTable).where(eq(RuleTable.isSystem, true)))[0].count;
 }
 
 // --- HELPERS INTERNOS ---

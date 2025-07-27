@@ -13,7 +13,7 @@ import {
   RuleSchema,
   RuleTable,
 } from "../../db/schema";
-import { and, eq, inArray, like } from "drizzle-orm";
+import { and, count, eq, inArray, like } from "drizzle-orm";
 
 export async function createFullProfile(data: FullProfile): Promise<DbResponse<FullProfile>> {
   const { folders, rules } = data;
@@ -221,6 +221,11 @@ export async function updateProfile(data: FullProfile): Promise<DbResponse> {
   } catch (error) {
     return handleError(error, "Erro ao atualizar perfil");
   }
+}
+
+export async function getSystemProfilesCount(): Promise<number> {
+  return (await db.select({ count: count() }).from(ProfileTable).where(eq(ProfileTable.isSystem, true)))[0]
+    .count;
 }
 
 // Internal functions
