@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { ElectronAPI, electronAPI } from "@electron-toolkit/preload";
-import { FolderSchema, NewFolder, RuleSchema } from "../db/schema";
+import { FolderSchema, NewFolder, RuleSchema, SettingsSchema } from "../db/schema";
 import { DbResponse } from "../renderer/src/types/DbResponse";
 import { FullRule, NewFullRulePayload } from "../renderer/src/types/RuleWithDetails";
 import { FullProfile } from "../renderer/src/types/ProfileWithDetails";
@@ -70,6 +70,11 @@ const api = {
     deleteFolder: (folderId: number): Promise<DbResponse> => ipcRenderer.invoke("delete-folder", folderId), // Corrigido para retornar DbResponse
 
     updateFolder: (folder: FolderSchema): Promise<DbResponse> => ipcRenderer.invoke("update-folder", folder), // Corrigido para retornar DbResponse
+  },
+  settings: {
+    getSettings: async (): Promise<SettingsSchema[]> => {
+      return ipcRenderer.invoke("get-settings");
+    },
   },
   dialog: {
     selectDirectory: (): Promise<string | null> => ipcRenderer.invoke("select-directory"),
