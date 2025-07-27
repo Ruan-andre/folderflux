@@ -6,4 +6,4 @@ export * from "./folders";
 export * from "./conditions";
 export * from "./actions";
 export * from "./conditionGroups";
-
+export * from "./settings";
