@@ -1,178 +1,238 @@
-import { Box, Button, Modal, Stack, useTheme } from "@mui/material";
+import { Box, Button, Modal, Stack } from "@mui/material";
 import ContentWrapper from "../ContentWrapper";
 import GenericInput from "../GenericInput";
-import { useEffect, useState } from "react";
-import ConditionsGroup from "../ConditionsGroup";
+import ConditionGroupComponent from "../ConditionGroup";
 import ActionInput from "../ActionInput";
+import { useEffect, useState } from "react";
+import isEqual from "fast-deep-equal";
+
 import { useSnackbar } from "../../context/SnackBarContext";
 import { useRuleStore } from "../../store/ruleStore";
 import { useRulePopupStore } from "../../store/popupRuleStore";
-import { ConditionsType } from "../../types/ConditionsType";
-import { NewCondition, NewRule } from "~/src/db/schema";
 
-type ActionsType = {
-  type: "move" | "copy" | "rename" | "delete";
-  value?: string;
-};
+import { useConditionTree } from "../../hooks/ConditionTree";
+import { useActionForm } from "../../hooks/actionHook";
+import { useRuleForm } from "../../hooks/ruleHook";
 
-type FormType = {
-  name: string;
-  description?: string;
-  conditions?: ConditionsType[];
-  action?: ActionsType[];
-};
+import { ICondition, IConditionGroup } from "../../types/ConditionsType";
+import { NewAction } from "~/src/db/schema";
+import { NewFullRulePayload } from "../../types/RuleWithDetails";
+import { formHelper } from "../../functions.ts/form";
 
-type RulePopupProps = {
-  isOpen: boolean;
-  onClose: () => void;
-};
+// Estado inicial para a árvore de condições de uma nova regra
+const initialTreeState: IConditionGroup = { id: "root", type: "group", operator: "AND", children: [] };
+const initialActionState: NewAction = { type: "move", value: "", ruleId: 0 };
 
-const RulePopup = ({ isOpen, onClose }: RulePopupProps) => {
+const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const { showMessage } = useSnackbar();
-  const theme = useTheme();
-  const { addRule } = useRuleStore();
-  const { ruleToEdit } = useRulePopupStore();
-  const [conditions, setConditions] = useState<NewCondition>();
-  const [formData, setFormData] = useState<FormType>();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
+  // Stores globais
+  const { addRule, updateRule } = useRuleStore();
+  const { isOpen, ruleToEdit, closePopup } = useRulePopupStore();
 
-  async function handleAddOrUpdate() {
-    if (!formData?.name) {
-      showMessage("O nome da regra não pode ser vazio", "error");
+  // Hooks de formulário para gerenciar o estado
+  const { name, setName, description, setDescription, reset: resetRuleForm } = useRuleForm();
+  const { rootGroup, setRootGroup, ...conditionTreeHandlers } = useConditionTree(initialTreeState);
+  const { action, setAction, reset: resetActionForm } = useActionForm();
+
+  // Estado para comparar se houve mudanças antes de salvar
+  const [initialData, setInitialData] = useState<{
+    name: string;
+    description: string;
+    rootGroup: IConditionGroup;
+    action: NewAction;
+  } | null>(null);
+
+  // Efeito para carregar ou resetar os dados do formulário quando o popup abre/fecha
+  useEffect(() => {
+    if (isOpen) {
+      if (ruleToEdit) {
+        // MODO EDIÇÃO
+        resetRuleForm({ name: ruleToEdit.name, description: ruleToEdit.description ?? "" });
+        setRootGroup(ruleToEdit.conditionsTree);
+        setAction(ruleToEdit.action);
+        // Guarda o estado inicial para comparação
+        setInitialData(
+          JSON.parse(
+            JSON.stringify({
+              name: ruleToEdit.name,
+              description: ruleToEdit.description ?? "",
+              rootGroup: ruleToEdit.conditionsTree,
+              action: ruleToEdit.action,
+            })
+          )
+        );
+      } else {
+        // MODO CRIAÇÃO
+        resetRuleForm({ name: "", description: "" });
+        setRootGroup(initialTreeState);
+        resetActionForm(initialActionState);
+        setInitialData({
+          name: "",
+          description: "",
+          rootGroup: initialTreeState,
+          action: initialActionState,
+        });
+      }
+    }
+  }, [isOpen]);
+
+  const handleSubmit = async () => {
+    // Validação
+    if (!validate()) return;
+
+    const currentData = { name, description, rootGroup, action };
+
+    // Se nada mudou, apenas fecha o popup
+    if (isEqual(initialData, currentData)) {
+      closePopup();
       return;
     }
 
-    const newRule: NewRule = {
-      name: formData?.name,
-      description: formData?.description,
-      isActive: true,
-      isSystem: false,
-      
-    };
-
     try {
-      const response = await addRule(newRule);
-      if (response.status) {
-        showMessage(response.message, "success");
-        onClose();
+      if (ruleToEdit) {
+        // --- LÓGICA DE ATUALIZAÇÃO ---
+        const editedRule = {
+          ...ruleToEdit,
+          name: currentData.name,
+          description: currentData.description,
+          conditionsTree: currentData.rootGroup,
+          action: currentData.action,
+        };
+        const response = await updateRule(editedRule);
+        if (response.status) showMessage("Regra atualizada com sucesso!", "success");
+        else showMessage("Ocorreu um erro ao atualizar a regra!", "error");
       } else {
-        throw new Error(response.message);
+        // --- LÓGICA DE CRIAÇÃO ---
+        const payload: NewFullRulePayload = {
+          rule: { name, description, isActive: true, isSystem: false },
+          conditionsTree: rootGroup,
+          action: action as NewAction,
+        };
+        const response = await addRule(payload);
+        if (response.status) {
+          showMessage("Regra criada com sucesso!", "success");
+        } else {
+          showMessage(response.message, "error");
+          return;
+        }
       }
+      onUpdateSuccess();
+      closePopup();
     } catch (error) {
-      const e = error as { message: string; code?: string };
+      const e = error as { message: string };
       showMessage(e.message, "error");
     }
-  }
+  };
 
-  useEffect(() => {
-    if (!ruleToEdit) {
-      setFormData({
-        name: "",
-        description: "",
-        conditions: [],
-        action: [],
-      });
-    } else {
-      setFormData({
-        name: ruleToEdit.name,
-        description: ruleToEdit.description,
-        conditions: [],
-        action: [],
-      });
+  function validate(): boolean {
+    if (!name.trim()) {
+      showMessage("O nome da regra é obrigatório.", "error");
+      formHelper.htmlInputFocus("ruleName", "red");
+      return false;
     }
-  }, [isOpen, ruleToEdit]);
+    if (rootGroup.children) {
+      const conditions = rootGroup.children as ICondition[];
+      const groups = rootGroup.children as IConditionGroup[];
+      const emptyGroups = groups?.some((x) => x?.children?.length === 0) || groups?.length === 0;
+      const anyConditionValueIsEmpty = conditions.some((x) => x?.value === "");
 
-  if (!isOpen) return;
+      const anyConditionValueInGroupIsEmpty = groups.some((x) =>
+        (x.children as ICondition[])?.some((x) => x.value === "")
+      );
+
+      if (anyConditionValueIsEmpty || anyConditionValueInGroupIsEmpty || emptyGroups) {
+        showMessage("O valor dar condições deve ser preenchido.", "error");
+        formHelper.htmlElementBorderChange("conditionsGroup");
+        return false;
+      }
+
+      if (action?.type !== "delete" && !action?.value) {
+        showMessage("O valor da ação deve ser preenchido.", "error");
+        formHelper.htmlInputFocus("folderSelector", "red");
+        return false;
+      }
+    }
+    return true;
+  }
+  if (!isOpen) return null;
 
   return (
-    <Modal
-      open={isOpen}
-      onClose={() => {
-        onClose();
-      }}
-    >
+    <Modal open={isOpen} onClose={closePopup}>
       <Box
         sx={{
           position: "absolute",
-          top: "10%",
+          top: "50%",
           left: "50%",
-          transform: "translate(-50%, -10%)",
-          maxHeight: "99vh",
-          width: "fit-content",
-          overflowY: "auto",
+          transform: "translate(-50%, -50%)",
+          maxHeight: "95vh",
+          width: "75vw",
+          maxWidth: "90vw",
+          overflow: "hidden", // A rolagem será interna
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: "background.paper",
+          borderRadius: 4,
         }}
       >
-        <ContentWrapper
-          title={ruleToEdit ? "Editar Regra" : "Criar Nova Regra"}
-          titleSize={22}
-          commonBtn={{
-            style: "outlined",
-            text: "X",
-            Action: () => onClose(),
-          }}
-          gap="1.5rem"
-          hr
-        >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <GenericInput
-              name="name"
-              label="Nome da Regra"
-              fontSize="1.5rem"
-              placeholder="Ex: Organizador de boletos"
-              value={formData?.name}
-              onChange={handleInputChange}
-              required
+        <Box sx={{ flex: 1, overflowY: "auto" }}>
+          <ContentWrapper
+            title={ruleToEdit ? "Editar Regra" : "Criar Nova Regra"}
+            titleSize={22}
+            commonBtn={{ style: "outlined", text: "X", Action: closePopup }}
+            gap="1.5rem"
+            hr
+          >
+            <Box>
+              <GenericInput
+                id="ruleName"
+                name="ruleName"
+                label="Nome da Regra"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                maxLength={65}
+              />
+              <GenericInput
+                id="ruleDescription"
+                name="ruleDescription"
+                label="Descrição"
+                multiline
+                maxLength={110}
+                rows={2}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </Box>
+            <ConditionGroupComponent
+              group={rootGroup}
+              parentId="root"
+              onAddNode={conditionTreeHandlers.addNode}
+              onRemoveNode={conditionTreeHandlers.removeNode}
+              onUpdateNode={conditionTreeHandlers.updateNode}
             />
-
-            <GenericInput
-              name="description"
-              label="Descrição"
-              fontSize="1.5rem"
-              multiline
-              rows={2}
-              maxLength={150}
-              placeholder="Descreva o que esta regra faz"
-              value={formData?.description}
-              onChange={handleInputChange}
-            />
-            <ConditionsGroup conditionsProps={[]} onAdd={() => setConditions} />
-            <ActionInput />
-            <hr />
-            <Stack spacing={2} direction={"row"} justifyContent={"end"}>
-              <Button
-                variant="outlined"
-                color="error"
-                sx={{
-                  fontSize: 12,
-                  borderRadius: theme.shape.borderRadius,
-                  ":hover": { backgroundColor: "brown", color: "white" },
-                }}
-                onClick={onClose}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant={ruleToEdit ? "outlined" : "contained"}
-                sx={{
-                  fontSize: 12,
-                  borderRadius: theme.shape.borderRadius,
-                  ":hover": { backgroundColor: ruleToEdit ? "green" : "", color: "white" },
-                }}
-                color={ruleToEdit ? "success" : "primary"}
-                onClick={handleAddOrUpdate}
-              >
-                {ruleToEdit ? "Salvar" : "Criar"}
-              </Button>
-            </Stack>
-          </Box>
-        </ContentWrapper>
+            <ActionInput action={action!} onChange={setAction} />
+          </ContentWrapper>
+          <Stack
+            direction="row"
+            justifyContent="end"
+            spacing={2}
+            p={2}
+            sx={{ borderTop: 1, borderColor: "divider", flexShrink: 0 }}
+          >
+            <Button
+              variant="outlined"
+              color="error"
+              sx={{ ":hover": { backgroundColor: "brown" } }}
+              onClick={closePopup}
+            >
+              Cancelar
+            </Button>
+            <Button variant="contained" onClick={handleSubmit}>
+              {ruleToEdit ? "Salvar Alterações" : "Criar Regra"}
+            </Button>
+          </Stack>
+        </Box>
       </Box>
     </Modal>
   );

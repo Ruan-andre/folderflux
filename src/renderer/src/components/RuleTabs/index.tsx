@@ -1,11 +1,20 @@
-import { Tabs, Tab, Box } from "@mui/material";
+import { Tabs, Tab, Box, Checkbox } from "@mui/material";
 import { useState } from "react";
-import { RuleProps } from "../../types/RulesProps";
 import Rule from "../Rule";
+import { FullRule } from "../../types/RuleWithDetails";
+import { RuleSchema } from "~/src/db/schema";
 
 const tabNames = ["Todas", "Ativas", "Sistema", "Personalizadas"];
 
-const RuleTabs = ({ tabContents }: { tabContents?: RuleProps[] }) => {
+type RuleTabsProps = {
+  tabContents?: FullRule[];
+  // ✅ Novas props para controlar o modo de seleção
+  mode: "page" | "selection";
+  selectedRules: RuleSchema[];
+  onSelectionChange: (rule: RuleSchema) => void;
+};
+
+const RuleTabs = ({ tabContents, mode, selectedRules, onSelectionChange }: RuleTabsProps) => {
   const [value, setValue] = useState(0);
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -21,7 +30,19 @@ const RuleTabs = ({ tabContents }: { tabContents?: RuleProps[] }) => {
     if (value === 2) filtered = filtered.filter((r) => r.isSystem);
     if (value === 3) filtered = filtered.filter((r) => !r.isSystem);
 
-    return filtered.map((rule) => <Rule key={rule.id} {...rule} />);
+    return filtered.map((rule) => (
+      <Box key={rule.id} display="flex" alignItems="center" gap={1} width="100%">
+        {mode === "selection" && (
+          <Checkbox
+            checked={selectedRules?.some((x) => x.id === rule.id)}
+            onChange={() => onSelectionChange(rule as RuleSchema)}
+          />
+        )}
+        <Box flex={1}>
+          <Rule {...rule} />
+        </Box>
+      </Box>
+    ));
   };
 
   if (!tabContents || tabContents.length === 0) return null;
