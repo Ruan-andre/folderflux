@@ -15,10 +15,20 @@ type ConfirmDialogOptions = {
   message?: string;
   confirmText?: string;
   cancelText?: string;
+  confirmBtnColor?: "inherit" | "error" | "primary" | "secondary" | "success" | "info" | "warning";
+  cancelBtnColor?: "inherit" | "error" | "primary" | "secondary" | "success" | "info" | "warning";
+  thirdButton?: {
+    text: ConfirmDialogOptions["confirmText"];
+    thirdButtonColor?: ConfirmDialogOptions["confirmBtnColor"];
+  };
 };
 
 type ConfirmDialogContextType = {
-  showConfirm: (options: ConfirmDialogOptions, onConfirm: () => void) => void;
+  showConfirm: (
+    options: ConfirmDialogOptions,
+    onConfirm: () => void,
+    onThirdButtonAction?: () => void
+  ) => void;
 };
 
 const ConfirmDialogContext = createContext<ConfirmDialogContextType | null>(null);
@@ -35,10 +45,17 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<ConfirmDialogOptions>({});
   const [onConfirm, setOnConfirm] = useState<() => void>(() => {});
+  const [onThirdButtonAction, setOnThirdButtonAction] = useState<() => void>(() => {});
 
-  const showConfirm = (opts: ConfirmDialogOptions, confirmCallback: () => void) => {
+  const showConfirm = (
+    opts: ConfirmDialogOptions,
+    confirmCallback: () => void,
+    thirdButtonAction?: () => void
+  ) => {
     setOptions(opts);
     setOnConfirm(() => confirmCallback);
+    if (thirdButtonAction) setOnThirdButtonAction(() => thirdButtonAction);
+
     setOpen(true);
   };
 
@@ -46,6 +63,11 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
     onConfirm();
     setOpen(false);
   }, [onConfirm]);
+
+  const handleThirdButtonAction = useCallback(() => {
+    if (onThirdButtonAction) onThirdButtonAction();
+    setOpen(false);
+  }, [onThirdButtonAction]);
 
   const handleClose = () => setOpen(false);
 
@@ -96,6 +118,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
               fontSize: "1.5rem",
               color: theme.palette.text.primary,
               marginBottom: 2,
+              whiteSpace: "pre-line",
             }}
           >
             {options.message ?? "Deseja continuar com essa operação?"}
@@ -105,6 +128,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
           <Button
             onClick={handleClose}
             variant="contained"
+            color={options.cancelBtnColor ?? "primary"}
             sx={{
               borderRadius: 3,
               fontWeight: "bold",
@@ -114,15 +138,32 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
           >
             {options.cancelText ?? "Cancelar"}
           </Button>
+          {options?.thirdButton && (
+            <Button
+              onClick={handleThirdButtonAction}
+              variant="contained"
+              color={options.thirdButton.thirdButtonColor ?? "warning"}
+              sx={{
+                borderRadius: 3,
+                fontWeight: "bold",
+                textTransform: "none",
+                fontSize: "1.5rem",
+                color: "#FFF",
+              }}
+            >
+              {options.thirdButton.text}
+            </Button>
+          )}
           <Button
             onClick={handleConfirm}
             variant="contained"
-            color="error"
+            color={options.confirmBtnColor ?? "error"}
             sx={{
               borderRadius: 3,
               fontWeight: "bold",
               textTransform: "none",
               fontSize: "1.5rem",
+              color: "#FFF",
             }}
           >
             {options.confirmText ?? "Confirmar"}
