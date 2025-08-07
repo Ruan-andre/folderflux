@@ -8,6 +8,8 @@ import { registerProfileHandlers } from "./handlers/domain/profiles";
 import { registerFolderHandlers } from "./handlers/domain/folders";
 import { registerSettingsHandlers } from "./handlers/domain/settings";
 import { seedDatabase } from "../db/seeds";
+import { registerFileHandlers } from "./handlers/system/file";
+import { registerOrganizationHandlers } from "./handlers/domain/organization";
 
 function createWindow(): void {
   // Create the browser window.
@@ -81,6 +83,8 @@ registerDialogHandlers();
 registerProfileHandlers();
 registerFolderHandlers();
 registerSettingsHandlers();
+registerOrganizationHandlers();
+registerFileHandlers();
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
