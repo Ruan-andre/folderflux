@@ -1,53 +1,100 @@
-import { useDropzone } from "react-dropzone";
-import { Box, Typography, Button, Stack } from "@mui/material";
+import React, { useState, DragEvent } from "react";
+import { Box, Typography, Stack } from "@mui/material";
 import Icon from "../../assets/icons/";
 
-const FolderDropZone = ({ onDrop }: { onDrop: (files: File[]) => void }) => {
-  const { getRootProps, getInputProps, open } = useDropzone({
-    noClick: true,
-    noKeyboard: true,
-    onDrop,
-  });
+interface FolderDropZoneProps {
+  onClick: () => void;
+  onItemsDropped: (paths: string[], callback?: () => void) => void;
+}
+
+const FolderDropZone: React.FC<FolderDropZoneProps> = ({ onClick, onItemsDropped }) => {
+  const [isDragActive, setIsDragActive] = useState(false);
+  const [isInvalid, setIsInvalid] = useState(false);
+
+  const preventDefaults = (e: DragEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e: DragEvent<HTMLElement>) => {
+    preventDefaults(e);
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLElement>) => {
+    preventDefaults(e);
+    setIsDragActive(false);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLElement>) => {
+    preventDefaults(e);
+    setIsDragActive(false);
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const fileArray = Array.from(files);
+      const paths = window.api.onFileDrop(fileArray);
+      onItemsDropped(paths, () => {
+        setIsInvalid(true);
+        setTimeout(() => {
+          setIsInvalid(false);
+        }, 3000);
+      });
+    }
+  };
+
+  const borderColor = isInvalid ? "error.main" : isDragActive ? "success.main" : "#4a5a75";
+  const backgroundColor = isInvalid
+    ? "rgba(175, 76, 76, 0.1)"
+    : isDragActive
+      ? "rgba(76, 175, 80, 0.1)"
+      : "#2d3646";
+  const fontColor = isInvalid ? "error.main" : isDragActive ? "success.main" : "var(--title-gray-dark)";
 
   return (
     <Box
-      {...getRootProps()}
+      onClick={onClick}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={preventDefaults}
+      onDrop={handleDrop}
       sx={{
-        border: "2px dashed #4a5a75",
+        border: "2px dashed",
+        borderColor,
+        backgroundColor,
         borderRadius: 2,
-        backgroundColor: "#2d3646",
         padding: 5,
         textAlign: "center",
         cursor: "pointer",
-        transition: "0.3s",
-        width: "100%",
-        height: "fit-content",
-        ":hover": {
-          backgroundColor: "#4361ee26",
-          borderColor: (theme) => theme.palette.primary.main,
+        transition: "border-color 0.3s, background-color 0.3s, transform 0.2s ease-out",
+        transform: isDragActive ? "scale(1.02)" : "scale(1)",
+        "&:hover": {
+          borderColor: "primary.main",
         },
       }}
     >
-      <input
-        {...getInputProps()}
-        ref={(el) => {
-          if (el) {
-            el.setAttribute("webkitdirectory", "true");
-            el.setAttribute("mozdirectory", "true");
-          }
+      <Stack
+        spacing={2}
+        alignItems="center"
+        sx={{
+          pointerEvents: "none",
         }}
-      />
-      <Stack spacing={2} alignItems="center">
-        <Icon icon="icon-park:folder-upload" width="45" height="45" />
+      >
+        <Icon
+          icon={isDragActive ? "mdi:folder-check-outline" : "icon-park:folder-upload"}
+          width="45"
+          height="45"
+          color={isDragActive ? "#4caf50" : "inherit"}
+        />
         <Typography fontWeight={600} color="white" fontSize="1.8rem">
-          Arraste pastas para organizar
+          Organizar Pastas
         </Typography>
-        <Typography color="var(--title-gray-dark)" fontSize="1.5rem">
-          Solte suas pastas aqui ou clique para selecionar
+        <Typography fontWeight={isDragActive ? 600 : 400} color={fontColor} fontSize="1.5rem">
+          {isInvalid
+            ? "Arraste somente pastas!!"
+            : isDragActive
+              ? "Pode soltar!"
+              : "Arraste as pastas aqui ou clique para selecionar"}
         </Typography>
-        <Button variant="contained" onClick={open} sx={{ fontSize: "1.5rem" }}>
-          Selecionar Pastas
-        </Button>
       </Stack>
     </Box>
   );
