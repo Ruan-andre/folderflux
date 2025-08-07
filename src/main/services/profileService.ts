@@ -1,7 +1,7 @@
 import { db } from "../../db";
 import { createResponse, handleError, toggleColumnStatus } from "../../db/functions";
-import { DbResponse } from "~/src/renderer/src/types/DbResponse";
-import { FullProfile } from "~/src/renderer/src/types/ProfileWithDetails";
+import { DbResponse } from "~/src/shared/types/DbResponse";
+import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
 import {
   FolderSchema,
   FolderTable,
@@ -14,6 +14,8 @@ import {
   RuleTable,
 } from "../../db/schema";
 import { and, count, eq, inArray, like } from "drizzle-orm";
+import { buildTreeFromDb } from "./ruleService";
+import { FullRule } from "~/src/shared/types/RuleWithDetails";
 
 export async function createFullProfile(data: FullProfile): Promise<DbResponse<FullProfile>> {
   const { folders, rules } = data;
@@ -98,28 +100,6 @@ export async function getAllProfiles(): Promise<DbResponse<FullProfile[]>> {
   }));
 
   return createResponse(true, "Sucesso ao buscar perfis", fullProfiles);
-}
-
-export async function getAssociatedRules(profileId: number): Promise<DbResponse<RuleSchema[]>> {
-  const profileWithRules = await db.query.ProfileTable.findFirst({
-    where: eq(ProfileTable.id, profileId),
-    with: {
-      profileRules: {
-        with: {
-          rule: true,
-        },
-      },
-    },
-  });
-
-  if (!profileWithRules || !profileWithRules.profileRules) {
-    return createResponse(true, "Perfil não encontrado ou sem regras associadas.", []);
-  }
-
-  // Extrai apenas os dados das regras do resultado
-  const rules = profileWithRules.profileRules.map((pr) => pr.rule);
-
-  return createResponse(true, "Sucesso ao buscar regras relacionadas", rules);
 }
 
 export async function deleteProfile(profileId: number): Promise<DbResponse> {
@@ -223,6 +203,47 @@ export async function updateProfile(data: FullProfile): Promise<DbResponse> {
   }
 }
 
+export async function getSystemProfile(): Promise<FullProfile | null> {
+  const defaultProfile = await db.query.ProfileTable.findFirst({
+    where: eq(ProfileTable.isSystem, true),
+    with: {
+      profileFolders: {
+        with: {
+          folder: true,
+        },
+      },
+      profileRules: {
+        with: {
+          rule: {
+            with: { conditionGroups: { with: { childGroups: true, childConditions: true } }, action: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (defaultProfile) {
+    const fullRules: FullRule[] = defaultProfile.profileRules.map((pr) => {
+      const ruleData = pr.rule;
+      const tree = buildTreeFromDb(
+        ruleData.conditionGroups,
+        ruleData.conditionGroups.flatMap((g) => g.childConditions)
+      );
+      return {
+        ...ruleData,
+        action: ruleData.action!,
+        conditionsTree: tree,
+      };
+    });
+    const fullProfile: FullProfile = {
+      ...defaultProfile,
+      folders: defaultProfile.profileFolders.map((f) => f.folder),
+      rules: fullRules,
+    };
+    return fullProfile;
+  }
+  return null;
+}
 export async function getSystemProfilesCount(): Promise<number> {
   return (await db.select({ count: count() }).from(ProfileTable).where(eq(ProfileTable.isSystem, true)))[0]
     .count;
