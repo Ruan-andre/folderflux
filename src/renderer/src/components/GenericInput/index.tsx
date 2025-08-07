@@ -7,7 +7,7 @@ type SelectOption = {
 
 type GenericInputProps = {
   name: string;
-  id: string;
+  id?: string;
   label?: string;
   labelSize?: string;
   textFieldType?: "outlined" | "standard" | "filled";
