@@ -1,12 +1,12 @@
 import { Box, Button } from "@mui/material";
 import GenericInput from "../GenericInput";
-import { ICondition } from "../../types/ConditionsType";
+import { ICondition } from "../../../../shared/types/ConditionsType";
 
 const fieldOptions = [
   { label: "Nome do arquivo", value: "fileName" as const },
   { label: "Extensão do arquivo", value: "fileExtension" as const },
   { label: "Data de modificação", value: "modifiedDate" as const },
-  { label: "Origem do arquivo", value: "fileDirectory" as const },
+  // { label: "Origem do arquivo", value: "fileDirectory" as const }, remoção temporária
   { label: "Tamanho do arquivo", value: "fileSize" as const },
 ];
 
@@ -17,16 +17,20 @@ type ConditionInputProps = {
 };
 
 const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) => {
-  const isRangeField = condition.field === "modifiedDate" || condition.field === "fileSize";
-
+  const isRangeField = condition.field === "modifiedDate";
+  // const isFileSize = condition.field === "fileSize"; implementar posteriomente, ao mudar a opção, filtrar os operadores
+  // lembrar de refatorar
   const operatorOptions = [
     { label: "contém", value: "contains" as const },
     { label: "não contém", value: "notContains" as const },
     { label: "começa com", value: "startsWith" as const },
     { label: "termina com", value: "endsWith" as const },
     { label: "é igual a", value: "equals" as const },
+    { label: "é maior que", value: "equals" as const },
+    { label: "é menor que", value: "equals" as const },
     ...(isRangeField ? [{ label: "está entre", value: "isBetween" as const }] : []),
   ];
+  // lembrar de refatorar
   const handleChange = (field: keyof ICondition, value: string) => {
     onChange({ ...condition, [field]: value });
   };
