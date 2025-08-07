@@ -1,13 +1,14 @@
 import { create } from "zustand";
-import { RuleProps } from "../types/RulesProps";
-import { DbResponse } from "../types/DbResponse";
-import { NewRule } from "~/src/db/schema";
+import { DbResponse } from "../../../shared/types/DbResponse";
+import { RuleSchema } from "~/src/db/schema";
+import { FullRule, NewFullRulePayload } from "../../../shared/types/RuleWithDetails";
 
 type RuleState = {
-  rules: RuleProps[];
-  fetchRules: () => Promise<void>;
-  addRule: (rule: NewRule) => Promise<DbResponse>;
-  updateRule: (rule: RuleProps) => void;
+  rules: FullRule[];
+  getRules: () => Promise<void>;
+  addRule: (data: NewFullRulePayload) => Promise<DbResponse<FullRule>>;
+  duplicateRule: (ruleId: number) => Promise<DbResponse>; // Não precisa retornar, getRules será chamado
+  updateRule: (ruleData: RuleSchema) => Promise<DbResponse>;
   deleteRule: (id: number) => Promise<void>;
   toggleActive: (id: number) => Promise<DbResponse>;
 };
@@ -15,26 +16,46 @@ type RuleState = {
 export const useRuleStore = create<RuleState>((set) => ({
   rules: [],
 
-  fetchRules: async () => {
+  getRules: async () => {
     const result = await window.api.rule.getAllRules();
-    set({ rules: result?.items as RuleProps[] });
+    if (result.status && result.items) {
+      set({ rules: result.items });
+    }
   },
 
-  addRule: async (rule): Promise<DbResponse> => {
-    const response = await window.api.rule.insertNewRule(rule);
+  addRule: async (data): Promise<DbResponse<FullRule>> => {
+    const response = await window.api.rule.createFullRule(data);
     if (response.status && response.items) {
-      const newRule = response?.items[0] as RuleProps;
+      const newFullRule = response.items;
       set((state) => ({
-        rules: [...state.rules, newRule],
+        rules: [...state.rules, newFullRule],
       }));
     }
     return response;
   },
 
-  updateRule: (rule) => {
-    set((state) => ({
-      rules: state.rules.map((r) => (r.id === rule.id ? rule : r)),
-    }));
+  duplicateRule: async (id): Promise<DbResponse> => {
+    const response = await window.api.rule.duplicateRule(id);
+    if (response.status && response.items) {
+      const newFullRule = response.items;
+      set((state) => ({
+        rules: [...state.rules, newFullRule],
+      }));
+    }
+    return response;
+    // Retornamos a resposta, mas o refresh será feito pela view que chamou
+    // return response; // Este retorno não é estritamente necessário se a UI recarregar
+  },
+
+  updateRule: async (ruleData): Promise<DbResponse> => {
+    const response = await window.api.rule.updateRule(ruleData);
+    if (response.status) {
+      // Atualiza apenas os dados básicos da regra, preservando a árvore
+      set((state) => ({
+        rules: state.rules.map((r) => (r.id === ruleData.id ? { ...r, ...ruleData } : r)),
+      }));
+    }
+    return response;
   },
 
   deleteRule: async (id) => {
