@@ -1,6 +1,6 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { RuleTable } from "./rules";
-import { ActionsType } from "~/src/renderer/src/types/ActionsType";
+import { ActionsType } from "~/src/shared/types/ActionsType";
 import { relations } from "drizzle-orm";
 
 export const ActionTable = sqliteTable("actions", {

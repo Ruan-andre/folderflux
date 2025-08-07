@@ -3,10 +3,10 @@ import ContentWrapper from "../ContentWrapper";
 import { useSnackbar } from "../../context/SnackBarContext";
 import { useRuleStore } from "../../store/ruleStore";
 import { useRulePopupStore } from "../../store/popupRuleStore";
-import { FullRule } from "../../types/RuleWithDetails";
+import { FullRule } from "../../../../shared/types/RuleWithDetails";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import CrudButtons from "../CrudButtons";
-import { IConditionGroup } from "../../types/ConditionsType";
+import { IConditionGroup } from "../../../../shared/types/ConditionsType";
 
 const Rule = ({ id, name, description, isSystem, isActive, conditionsTree, action }: FullRule) => {
   const theme = useTheme();

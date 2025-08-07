@@ -8,9 +8,9 @@ import {
   duplicateRule,
   getConditionTree,
 } from "../../services/ruleService";
-import { DbResponse } from "~/src/renderer/src/types/DbResponse";
+import { DbResponse } from "~/src/shared/types/DbResponse";
 import { handleError } from "../../../db/functions";
-import { FullRule } from "~/src/renderer/src/types/RuleWithDetails";
+import { FullRule } from "~/src/shared/types/RuleWithDetails";
 
 export function registerRuleHandlers() {
   ipcMain.handle("get-all-rules-with-details", async (): Promise<DbResponse<FullRule[]>> => {

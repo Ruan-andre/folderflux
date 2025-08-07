@@ -2,7 +2,7 @@ import { Box, Tooltip, Typography, useTheme } from "@mui/material";
 import GenericCard from "../GenericCard";
 import Icon from "../../assets/icons";
 import CrudButtons from "../CrudButtons";
-import { FullProfile } from "../../types/ProfileWithDetails";
+import { FullProfile } from "../../../../shared/types/ProfileWithDetails";
 import { useSnackbar } from "../../context/SnackBarContext";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { useProfileStore } from "../../store/profileStore";

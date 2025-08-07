@@ -1,12 +1,11 @@
 import { ipcMain } from "electron";
-import { DbResponse } from "~/src/renderer/src/types/DbResponse";
-import { FullProfile } from "~/src/renderer/src/types/ProfileWithDetails";
+import { DbResponse } from "~/src/shared/types/DbResponse";
+import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
 import {
   createFullProfile,
   deleteProfile,
   duplicateProfile,
   getAllProfiles,
-  getAssociatedRules,
   toggleProfileStatus,
   updateProfile,
 } from "../../services/profileService";
@@ -18,15 +17,6 @@ export function registerProfileHandlers() {
       return await getAllProfiles();
     } catch (e) {
       return handleError(e, "Erro ao buscar perfis");
-    }
-  });
-
-  // ✅ NOVO: Handler para buscar regras associadas a um perfil. Faz mais sentido estar aqui.
-  ipcMain.handle("get-associated-rules", async (_e, profileId) => {
-    try {
-      return await getAssociatedRules(profileId);
-    } catch (e) {
-      return handleError(e, "Erro ao buscar regras do perfil");
     }
   });
 

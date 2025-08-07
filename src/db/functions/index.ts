@@ -1,5 +1,5 @@
 import { eq, sql } from "drizzle-orm";
-import { DbResponse } from "~/src/renderer/src/types/DbResponse";
+import { DbResponse } from "~/src/shared/types/DbResponse";
 import { db } from "..";
 
 export function createResponse<T>(status: boolean, message: string, items?: T): DbResponse<T> {

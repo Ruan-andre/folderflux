@@ -1,4 +1,4 @@
-import { NewFullRulePayload } from "~/src/renderer/src/types/RuleWithDetails";
+import { NewFullRulePayload } from "~/src/shared/types/RuleWithDetails";
 
 // Helper para gerar IDs para condições e grupos (não para Rule/Action IDs do DB)
 const generateConditionId = (() => {
@@ -167,6 +167,13 @@ export const ruleSeed_codigo: NewFullRulePayload = {
         field: "fileExtension",
         operator: "equals",
         value: "kt",
+      },
+       {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        operator: "equals",
+        value: "tsx",
       },
     ],
   },

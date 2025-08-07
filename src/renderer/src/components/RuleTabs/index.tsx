@@ -1,7 +1,7 @@
 import { Tabs, Tab, Box, Checkbox } from "@mui/material";
 import { useState } from "react";
 import Rule from "../Rule";
-import { FullRule } from "../../types/RuleWithDetails";
+import { FullRule } from "../../../../shared/types/RuleWithDetails";
 import { RuleSchema } from "~/src/db/schema";
 
 const tabNames = ["Todas", "Ativas", "Sistema", "Personalizadas"];

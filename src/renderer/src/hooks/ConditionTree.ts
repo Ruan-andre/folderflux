@@ -1,5 +1,5 @@
 import { useImmer } from "use-immer";
-import { IConditionGroup, ICondition } from "../types/ConditionsType";
+import { IConditionGroup, ICondition } from "../../../shared/types/ConditionsType";
 
 // Função auxiliar recursiva que encontra um grupo pelo ID e o modifica
 const findAndMutateGroup = (
@@ -23,10 +23,6 @@ const findAndMutateGroup = (
 
 export const useConditionTree = (initialState: IConditionGroup) => {
   const [rootGroup, updateRootGroup] = useImmer<IConditionGroup>(initialState);
-
-  const groups = rootGroup.children.filter((x) => x.type === "group").length;
-  const conditions = rootGroup.children.filter((x) => x.type === "condition").length;
-  console.log(`Conditions: ${conditions} Groups: ${groups}`);
   const addNode = (parentId: string | number, type: "condition" | "group") => {
     updateRootGroup((draft) => {
       findAndMutateGroup(draft, parentId, (parentNode) => {

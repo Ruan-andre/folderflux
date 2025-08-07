@@ -1,4 +1,4 @@
-import { FullProfile } from "~/src/renderer/src/types/ProfileWithDetails";
+import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
 
 export const profileSeed_allRules: FullProfile = {
   name: "Perfil Padrão",

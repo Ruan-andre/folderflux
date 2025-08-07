@@ -14,10 +14,10 @@ import { useConditionTree } from "../../hooks/ConditionTree";
 import { useActionForm } from "../../hooks/actionHook";
 import { useRuleForm } from "../../hooks/ruleHook";
 
-import { ICondition, IConditionGroup } from "../../types/ConditionsType";
+import { ICondition, IConditionGroup } from "../../../../shared/types/ConditionsType";
 import { NewAction } from "~/src/db/schema";
-import { NewFullRulePayload } from "../../types/RuleWithDetails";
-import { formHelper } from "../../functions.ts/form";
+import { NewFullRulePayload } from "../../../../shared/types/RuleWithDetails";
+import { formHelper } from "../../functions/form";
 
 // Estado inicial para a árvore de condições de uma nova regra
 const initialTreeState: IConditionGroup = { id: "root", type: "group", operator: "AND", children: [] };
@@ -85,6 +85,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
 
     // Se nada mudou, apenas fecha o popup
     if (isEqual(initialData, currentData)) {
+      showMessage("Nenhum dado foi alterado", "info");
       closePopup();
       return;
     }

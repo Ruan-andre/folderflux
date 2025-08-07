@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import ConditionInput from "../ConditionInput";
-import { ICondition, IConditionGroup } from "../../types/ConditionsType";
+import { ICondition, IConditionGroup } from "../../../../shared/types/ConditionsType";
 
 type ConditionGroupProps = {
   group: IConditionGroup;
@@ -44,7 +44,7 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
     >
       <CardHeader
         title={
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" component={"div"} color="text.secondary">
             Se{" "}
             <Select
               size="small"

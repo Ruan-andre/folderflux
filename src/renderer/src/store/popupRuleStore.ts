@@ -1,19 +1,18 @@
 import { create } from "zustand";
-import { RuleProps } from "../types/RulesProps";
+import { FullRule } from "../../../shared/types/RuleWithDetails"; // ✅ Usa o tipo FullRule
 
 type PopupRuleState = {
-    isOpen: boolean;
-    mode: "create" | "edit";
-    ruleToEdit?: RuleProps | null;
-    openPopup: (mode: "create" | "edit", rule?: RuleProps) => void;
-    closePopup: () => void;
-}
+  isOpen: boolean;
+  mode: "create" | "edit";
+  ruleToEdit?: FullRule; // ✅ A regra para editar agora é uma FullRule
+  openPopup: (mode: "create" | "edit", rule?: FullRule) => void;
+  closePopup: () => void;
+};
 
 export const useRulePopupStore = create<PopupRuleState>((set) => ({
   isOpen: false,
   mode: "create",
-  ruleToEdit: null,
-  openPopup: (mode, rule) =>
-    set({ isOpen: true, mode, ruleToEdit: rule ?? null }),
-  closePopup: () => set({ isOpen: false, ruleToEdit: null }),
+  ruleToEdit: undefined,
+  openPopup: (mode, rule) => set({ isOpen: true, mode, ruleToEdit: rule }),
+  closePopup: () => set({ isOpen: false, ruleToEdit: undefined }),
 }));

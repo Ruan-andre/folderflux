@@ -1,4 +1,4 @@
-import { DbResponse } from "~/src/renderer/src/types/DbResponse";
+import { DbResponse } from "~/src/shared/types/DbResponse";
 import { db } from "../../db";
 import { FolderSchema, FolderTable, NewFolder } from "../../db/schema";
 import { createResponse } from "../../db/functions";

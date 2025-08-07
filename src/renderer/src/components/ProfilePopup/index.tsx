@@ -13,7 +13,7 @@ import isEqual from "fast-deep-equal";
 import RuleManagementView from "../../views/RuleManagementView";
 import { FolderSchema, RuleSchema } from "~/src/db/schema";
 import FolderManagementView from "../../views/FolderManagementView";
-import { FullProfile } from "../../types/ProfileWithDetails";
+import { FullProfile } from "../../../../shared/types/ProfileWithDetails";
 import CommonIcons from "../../types/CommonIconsType";
 
 const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
