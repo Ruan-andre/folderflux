@@ -51,6 +51,9 @@ const Sidebar = () => {
             <MenuButton text="Perfis" to="profiles">
               <Icon icon="fluent-color:person-add-24" width="30" height="30" />
             </MenuButton>
+            <MenuButton text="Pastas" to="folders">
+              <Icon icon="fluent-emoji:file-folder" width="30" height="30" />
+            </MenuButton>
           </div>
 
           <div className={isOpen ? "sidebar-section" : "closed"}>
