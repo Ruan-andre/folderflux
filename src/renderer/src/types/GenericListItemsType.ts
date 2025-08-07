@@ -1,8 +1,9 @@
 type GenericListItemsType = {
+  id: number;
   title: string;
   subtitle?: string;
-  icon?: React.ReactNode;
-  iconsAction?: React.ReactNode[];
+  icon?: string;
+  active?: boolean;
 };
 
 export default GenericListItemsType;
