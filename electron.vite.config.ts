@@ -17,6 +17,10 @@ export default defineConfig({
             src: "src/db/**/*",
             dest: "db/",
           },
+          {
+            src: "src/shared/**/*",
+            dest: "shared/",
+          },
         ],
       }),
     ],
