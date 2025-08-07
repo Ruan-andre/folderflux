@@ -11,10 +11,10 @@ import {
   RuleSchema,
 } from "../../db/schema";
 import { count, eq, like } from "drizzle-orm";
-import { DbResponse } from "../../renderer/src/types/DbResponse";
+import { DbResponse } from "../../shared/types/DbResponse";
 import { createResponse, toggleColumnStatus } from "../../db/functions";
-import { FullRule, NewFullRulePayload } from "~/src/renderer/src/types/RuleWithDetails";
-import { ICondition, IConditionGroup } from "../../renderer/src/types/ConditionsType";
+import { FullRule, NewFullRulePayload } from "~/src/shared/types/RuleWithDetails";
+import { ICondition, IConditionGroup } from "../../shared/types/ConditionsType";
 
 // --- FUNÇÕES DE LEITURA (READ) ---
 export async function getAllRules(): Promise<DbResponse<FullRule[]>> {
@@ -154,6 +154,36 @@ export async function getSystemRulesCount(): Promise<number> {
   return (await db.select({ count: count() }).from(RuleTable).where(eq(RuleTable.isSystem, true)))[0].count;
 }
 
+export function buildTreeFromDb(groups: any[], conditions: any[]): IConditionGroup {
+  if (groups.length === 0) {
+    return { id: "root", type: "group", operator: "AND", children: [] };
+  }
+
+  const groupMap = new Map(
+    groups.map((g) => [g.id, { ...g, type: "group", children: [] as (ICondition | IConditionGroup)[] }])
+  );
+  const root = groups.find((g) => g.parentGroupId === null);
+
+  if (!root) throw new Error("Grupo raiz não encontrado.");
+
+  for (const condition of conditions) {
+    groupMap.get(condition.groupId)?.children.push({
+      id: condition.id,
+      type: "condition",
+      field: condition.type,
+      operator: condition.typeAction,
+      value: condition.value ?? "",
+      value2: condition.value2 ?? "",
+    });
+  }
+
+  for (const group of groups) {
+    if (group.parentGroupId) {
+      groupMap.get(group.parentGroupId)?.children.push(groupMap.get(group.id)!);
+    }
+  }
+  return groupMap.get(root.id)!;
+}
 // --- HELPERS INTERNOS ---
 
 /**
@@ -192,36 +222,6 @@ async function insertConditionTree(
 /**
  * Constrói uma árvore de condições aninhada a partir de listas planas do banco.
  */
-function buildTreeFromDb(groups: any[], conditions: any[]): IConditionGroup {
-  if (groups.length === 0) {
-    return { id: "root", type: "group", operator: "AND", children: [] };
-  }
-
-  const groupMap = new Map(
-    groups.map((g) => [g.id, { ...g, type: "group", children: [] as (ICondition | IConditionGroup)[] }])
-  );
-  const root = groups.find((g) => g.parentGroupId === null);
-
-  if (!root) throw new Error("Grupo raiz não encontrado.");
-
-  for (const condition of conditions) {
-    groupMap.get(condition.groupId)?.children.push({
-      id: condition.id,
-      type: "condition",
-      field: condition.type,
-      operator: condition.typeAction,
-      value: condition.value ?? "",
-      value2: condition.value2 ?? "",
-    });
-  }
-
-  for (const group of groups) {
-    if (group.parentGroupId) {
-      groupMap.get(group.parentGroupId)?.children.push(groupMap.get(group.id)!);
-    }
-  }
-  return groupMap.get(root.id)!;
-}
 
 /**
  * Gera um novo nome único para uma regra duplicada (ex: "Nome (2)").
