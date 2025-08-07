@@ -1,10 +1,10 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 import { ElectronAPI, electronAPI } from "@electron-toolkit/preload";
 import { FolderSchema, NewFolder, RuleSchema, SettingsSchema } from "../db/schema";
-import { DbResponse } from "../renderer/src/types/DbResponse";
-import { FullRule, NewFullRulePayload } from "../renderer/src/types/RuleWithDetails";
-import { FullProfile } from "../renderer/src/types/ProfileWithDetails";
-import { IConditionGroup } from "../renderer/src/types/ConditionsType";
+import { IConditionGroup } from "../shared/types/ConditionsType";
+import { DbResponse } from "../shared/types/DbResponse";
+import { FullProfile } from "../shared/types/ProfileWithDetails";
+import { FullRule, NewFullRulePayload } from "../shared/types/RuleWithDetails";
 
 declare global {
   interface Window {
@@ -15,6 +15,12 @@ declare global {
 
 // Custom APIs for renderer
 const api = {
+  onFileDrop: (file: File[]) => {
+    return file.map((f) => webUtils.getPathForFile(f));
+  },
+  getStatsForPaths: (paths: string[]): Promise<{ path: string; isDirectory: boolean; name: string }[]> =>
+    ipcRenderer.invoke("fs:get-stats", paths),
+
   rule: {
     getAllRules: (): Promise<DbResponse<FullRule[]>> => ipcRenderer.invoke("get-all-rules-with-details"),
 
@@ -66,21 +72,22 @@ const api = {
       ipcRenderer.invoke("get-folder-by-id", folderId),
 
     addFolders: (folders: NewFolder[]): Promise<DbResponse> => ipcRenderer.invoke("add-folders", folders),
-
-    deleteFolder: (folderId: number): Promise<DbResponse> => ipcRenderer.invoke("delete-folder", folderId), // Corrigido para retornar DbResponse
-
-    updateFolder: (folder: FolderSchema): Promise<DbResponse> => ipcRenderer.invoke("update-folder", folder), // Corrigido para retornar DbResponse
+    deleteFolder: (folderId: number): Promise<DbResponse> => ipcRenderer.invoke("delete-folder", folderId),
+    updateFolder: (folder: FolderSchema): Promise<DbResponse> => ipcRenderer.invoke("update-folder", folder),
   },
   settings: {
-    getSettings: async (): Promise<SettingsSchema[]> => {
-      return ipcRenderer.invoke("get-settings");
-    },
+    getSettings: async (): Promise<SettingsSchema[]> => ipcRenderer.invoke("get-settings"),
+    toggleSettingActive: async (id: number): Promise<void> => ipcRenderer.invoke("toggle-setting-active", id),
   },
   dialog: {
     selectDirectory: (): Promise<string | null> => ipcRenderer.invoke("select-directory"),
-
     selectMultipleDirectories: (): Promise<string[] | null> =>
       ipcRenderer.invoke("select-multiple-directories"),
+  },
+  organization: {
+    defaultOrganization: async (paths: string[]) => ipcRenderer.invoke("default-organization", paths),
+    organizeWithSelectedRules: async (rules: RuleSchema[], paths: string[]) =>
+      ipcRenderer.invoke("organize-with-selected-rules", rules, paths),
   },
 };
 
