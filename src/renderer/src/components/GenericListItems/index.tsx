@@ -50,6 +50,7 @@ const GenericListItems = ({
   onClickDelete,
   onClickEdit,
   onSelectionChange,
+  onToggle,
 }: GenericListItemsProps) => {
   const theme = useTheme();
 
@@ -137,7 +138,14 @@ const GenericListItems = ({
               />
             </>
           )}
-          {btnSwitch && <CustomSwitch checked />}
+          {btnSwitch && onToggle && (
+            <CustomSwitch
+              onClick={() => {
+                onToggle(item.id);
+              }}
+              checked={item.active}
+            />
+          )}
         </ListItem>
       ))}
     </List>
