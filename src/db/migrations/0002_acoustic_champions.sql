@@ -1,1 +1,0 @@
-ALTER TABLE `settings` ADD `category` text;
