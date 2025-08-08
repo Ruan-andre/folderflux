@@ -2,6 +2,11 @@ import { FolderSchema, NewFolder, NewProfile, NewRule, ProfileSchema, RuleSchema
 import { FullRule } from "./RuleWithDetails";
 
 export type FullProfile = (ProfileSchema | NewProfile) & {
-  folders: (FolderSchema | NewFolder)[];
-  rules: (RuleSchema | NewRule | FullRule)[];
+  folders: FolderSchema[];
+  rules: (RuleSchema | FullRule)[];
+};
+
+export type NewFullProfile = NewProfile & {
+  folders: NewFolder[];
+  rules: NewRule[];
 };

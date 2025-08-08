@@ -1,13 +1,13 @@
-import { Action, NewAction, NewRule, RuleSchema } from "~/src/db/schema";
+import { ActionSchema, NewAction, NewRule, RuleSchema } from "@db/schema";
 import { IConditionGroup } from "./ConditionsType";
 
 /**
  * Representa uma Regra completa com todas as suas relações,
  * como usada no estado do frontend.
  */
-export type FullRule = RuleSchema & {
+export type FullRule = Omit<RuleSchema, "conditionsTree"> & {
   conditionsTree: IConditionGroup;
-  action: Action;
+  action: ActionSchema;
 };
 
 /**
