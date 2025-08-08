@@ -1,14 +1,48 @@
 import { Box, Button } from "@mui/material";
+import { useMemo } from "react";
 import GenericInput from "../GenericInput";
 import { ICondition } from "../../../../shared/types/ConditionsType";
+import { Operator } from "~/src/shared/types/Operator";
+import { Field } from "~/src/shared/types/Field";
 
-const fieldOptions = [
-  { label: "Nome do arquivo", value: "fileName" as const },
-  { label: "Extensão do arquivo", value: "fileExtension" as const },
-  { label: "Data de modificação", value: "modifiedDate" as const },
-  // { label: "Origem do arquivo", value: "fileDirectory" as const }, remoção temporária
-  { label: "Tamanho do arquivo", value: "fileSize" as const },
-];
+const allOperators: Record<Operator, { label: string }> = {
+  contains: { label: "contém" },
+  notContains: { label: "não contém" },
+  startsWith: { label: "começa com" },
+  endsWith: { label: "termina com" },
+  equals: { label: "é igual a" },
+  higherThan: { label: "é maior que" },
+  lessThan: { label: "é menor que" },
+  isBetween: { label: "está entre" },
+};
+
+const fieldConfig: Record<Field, { label: string; operators: Operator[] }> = {
+  fileName: {
+    label: "Nome do arquivo",
+    operators: ["contains", "notContains", "startsWith", "endsWith", "equals"],
+  },
+  fileExtension: {
+    label: "Extensão do arquivo",
+    operators: ["contains", "notContains", "equals"],
+  },
+  creationDate: {
+    label: "Data de Criação",
+    operators: ["equals", "isBetween", "higherThan", "lessThan"],
+  },
+  modifiedDate: {
+    label: "Data de modificação",
+    operators: ["higherThan", "lessThan", "isBetween"],
+  },
+  fileSize: {
+    label: "Tamanho do arquivo (em KB)",
+    operators: ["higherThan", "lessThan", "equals"],
+  },
+};
+
+const fieldOptions = Object.entries(fieldConfig).map(([value, { label }]) => ({
+  value: value as Field,
+  label,
+}));
 
 type ConditionInputProps = {
   condition: ICondition;
@@ -17,65 +51,89 @@ type ConditionInputProps = {
 };
 
 const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) => {
-  const isRangeField = condition.field === "modifiedDate";
-  // const isFileSize = condition.field === "fileSize"; implementar posteriomente, ao mudar a opção, filtrar os operadores
-  // lembrar de refatorar
-  const operatorOptions = [
-    { label: "contém", value: "contains" as const },
-    { label: "não contém", value: "notContains" as const },
-    { label: "começa com", value: "startsWith" as const },
-    { label: "termina com", value: "endsWith" as const },
-    { label: "é igual a", value: "equals" as const },
-    { label: "é maior que", value: "equals" as const },
-    { label: "é menor que", value: "equals" as const },
-    ...(isRangeField ? [{ label: "está entre", value: "isBetween" as const }] : []),
-  ];
-  // lembrar de refatorar
-  const handleChange = (field: keyof ICondition, value: string) => {
+  const handleChange = (field: keyof ICondition, value: string | undefined) => {
     onChange({ ...condition, [field]: value });
   };
+
+  const handleChangeField = (newField: Field) => {
+    const newFieldOperators = fieldConfig[newField].operators;
+    const currentOperatorIsValid = newFieldOperators.includes(condition.fieldOperator);
+
+    onChange({
+      ...condition,
+      field: newField,
+      fieldOperator: currentOperatorIsValid ? condition.fieldOperator : newFieldOperators[0],
+      value: "",
+      value2: undefined,
+    });
+  };
+
+  const operatorOptions = useMemo(() => {
+    if (!condition.field) return [];
+    return fieldConfig[condition.field].operators.map((opKey) => ({
+      value: opKey,
+      label: allOperators[opKey].label,
+    }));
+  }, [condition.field]);
+
+  const showSecondValue = condition.fieldOperator === "isBetween";
+
   return (
-    <Box display="flex" alignItems={"center"} gap={1} mb={2} flexWrap="wrap">
+    <Box display="flex" alignItems="center" gap={1} mb={2} flexWrap="wrap">
       <GenericInput
         name="field"
         select
         required
         value={condition.field}
         selectOptions={fieldOptions}
-        onChange={(e) => handleChange("field", e.target.value)}
+        onChange={(e) => handleChangeField(e.target.value as Field)}
       />
 
+      {/* Seletor de Operador */}
       <GenericInput
         name="operator"
         select
-        value={condition.operator}
+        required
+        value={condition.fieldOperator}
         selectOptions={operatorOptions}
-        onChange={(e) => handleChange("operator", e.target.value)}
+        onChange={(e) => handleChange("fieldOperator", e.target.value)}
       />
 
-      {!isRangeField || condition.operator !== "isBetween" ? (
-        <GenericInput
-          name="value"
-          value={condition.value}
-          onChange={(e) => handleChange("value", e.target.value)}
-          placeholder="Valor"
-        />
-      ) : (
+      {/* Inputs de Valor */}
+      {showSecondValue ? (
         <Box display="flex" gap={1} flex={1}>
           <GenericInput
             name="value"
             value={condition.value}
             onChange={(e) => handleChange("value", e.target.value)}
             placeholder="De"
+            type={condition.field === "modifiedDate" || condition.field === "creationDate" ? "date" : "text"}
           />
           <GenericInput
             name="value2"
             value={condition.value2 ?? ""}
             onChange={(e) => handleChange("value2", e.target.value)}
             placeholder="Até"
+            type={condition.field === "modifiedDate" || condition.field === "creationDate" ? "date" : "text"}
           />
         </Box>
+      ) : (
+        <GenericInput
+          name="value"
+          value={condition.value}
+          onChange={(e) => handleChange("value", e.target.value)}
+          placeholder="Valor"
+          type={
+            condition.field === "modifiedDate" || condition.field === "creationDate"
+              ? "date"
+              : condition.field === "fileSize"
+                ? "number"
+                : "text"
+          }
+        />
       )}
+
+      {/* Botão de Remover */}
       <Button
         sx={{
           ":hover": { backgroundColor: "brown" },
