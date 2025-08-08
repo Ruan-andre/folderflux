@@ -1,7 +1,6 @@
 import { useImmer } from "use-immer";
 import { IConditionGroup, ICondition } from "../../../shared/types/ConditionsType";
 
-// Função auxiliar recursiva que encontra um grupo pelo ID e o modifica
 const findAndMutateGroup = (
   group: IConditionGroup,
   targetId: string | number,
@@ -23,25 +22,28 @@ const findAndMutateGroup = (
 
 export const useConditionTree = (initialState: IConditionGroup) => {
   const [rootGroup, updateRootGroup] = useImmer<IConditionGroup>(initialState);
+
   const addNode = (parentId: string | number, type: "condition" | "group") => {
     updateRootGroup((draft) => {
       findAndMutateGroup(draft, parentId, (parentNode) => {
-        if (type === "condition") {
-          parentNode.children.push({
-            id: crypto.randomUUID(),
-            type: "condition",
-            field: "fileName",
-            operator: "contains",
-            value: "",
-          });
-        } else {
-          parentNode.children.push({
-            id: crypto.randomUUID(),
-            type: "group",
-            operator: "AND",
-            children: [],
-          });
-        }
+        parentNode.children.push(
+          type === "condition"
+            ? {
+                id: crypto.randomUUID(),
+                type: "condition",
+                field: "fileName",
+                fieldOperator: "contains",
+                value: "",
+                displayOrder: parentNode.children.length + 1,
+              }
+            : {
+                id: crypto.randomUUID(),
+                type: "group",
+                operator: "AND",
+                children: [],
+                displayOrder: parentNode.children.length + 1,
+              }
+        );
       });
     });
   };
@@ -54,29 +56,31 @@ export const useConditionTree = (initialState: IConditionGroup) => {
     });
   };
 
-  // ✅ CORRIGIDO: Agora trata a atualização do grupo raiz corretamente
   const updateNode = (
     nodeId: string | number,
     parentId: string | number,
-    updatedNodeData: Partial<ICondition | IConditionGroup> // Aceita atualização parcial
+    updatedNodeData: Partial<ICondition | IConditionGroup>
   ) => {
     updateRootGroup((draft) => {
-      // Caso especial: estamos atualizando o próprio grupo raiz
       if (nodeId === draft.id && (nodeId === parentId || parentId === "root")) {
         Object.assign(draft, updatedNodeData);
         return;
       }
 
-      // Lógica para atualizar um nó filho
       findAndMutateGroup(draft, parentId, (parentNode) => {
         const nodeIndex = parentNode.children.findIndex((c) => c.id === nodeId);
         if (nodeIndex > -1) {
-          // Mescla os dados antigos com os novos
           Object.assign(parentNode.children[nodeIndex], updatedNodeData);
         }
       });
     });
   };
 
-  return { rootGroup, addNode, removeNode, updateNode, setRootGroup: updateRootGroup };
+  return {
+    rootGroup,
+    addNode,
+    removeNode,
+    updateNode,
+    setRootGroup: updateRootGroup,
+  };
 };
