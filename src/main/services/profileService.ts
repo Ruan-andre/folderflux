@@ -1,23 +1,21 @@
 import { db } from "../../db";
 import { createResponse, handleError, toggleColumnStatus } from "../../db/functions";
 import { DbResponse } from "~/src/shared/types/DbResponse";
-import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
+import { FullProfile, NewFullProfile } from "~/src/shared/types/ProfileWithDetails";
 import {
-  FolderSchema,
   FolderTable,
   NewProfile,
   ProfileFoldersTable,
   ProfileRulesTable,
   ProfileSchema,
   ProfileTable,
-  RuleSchema,
   RuleTable,
 } from "../../db/schema";
 import { and, count, eq, inArray, like } from "drizzle-orm";
-import { buildTreeFromDb } from "./ruleService";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
+import { buildTreeFromDb } from "./ruleService";
 
-export async function createFullProfile(data: FullProfile): Promise<DbResponse<FullProfile>> {
+export async function createFullProfile(data: NewFullProfile): Promise<DbResponse<FullProfile>> {
   const { folders, rules } = data;
   const newProfileData: NewProfile = data;
   const exists = await db.query.ProfileTable.findFirst({
@@ -33,39 +31,50 @@ export async function createFullProfile(data: FullProfile): Promise<DbResponse<F
       const [insertedProfile] = await tx.insert(ProfileTable).values(newProfileData).returning();
 
       const rulesWithProfileId = rules.map((r) => ({ ruleId: r.id!, profileId: insertedProfile.id }));
-      const folderWithProfileId = folders.map((f) => ({ folderId: f.id!, profileId: insertedProfile.id }));
-
-      let associatedRules: RuleSchema[] = [];
-      let associatedFolders: FolderSchema[] = [];
+      const foldersWithProfileId = folders.map((f) => ({ folderId: f.id!, profileId: insertedProfile.id }));
 
       if (rulesWithProfileId.length > 0) {
         await tx.insert(ProfileRulesTable).values(rulesWithProfileId);
-        associatedRules = await tx
-          .select()
-          .from(RuleTable)
-          .where(
-            inArray(
-              RuleTable.id,
-              rulesWithProfileId.map((x) => x.ruleId)
-            )
-          );
       }
 
-      if (folderWithProfileId.length > 0) {
-        await tx.insert(ProfileFoldersTable).values(folderWithProfileId);
-        associatedFolders = await tx
-          .select()
-          .from(FolderTable)
-          .where(
-            inArray(
-              FolderTable.id,
-              folderWithProfileId.map((x) => x.folderId)
-            )
-          );
+      if (foldersWithProfileId.length > 0) {
+        await tx.insert(ProfileFoldersTable).values(foldersWithProfileId);
       }
+
+      const associatedFolders = await tx
+        .select()
+        .from(FolderTable)
+        .where(
+          inArray(
+            FolderTable.id,
+            folders.map((f) => f.id!)
+          )
+        );
+
+      const associatedRules: FullRule[] = await Promise.all(
+        rules.map(async (r) => {
+          const rule = await db.query.RuleTable.findFirst({
+            where: eq(RuleTable.id, r.id!),
+            with: { conditionsTree: true, action: true },
+          });
+
+          return {
+            ...rule!,
+            conditionsTree: buildTreeFromDb(rule!.conditionsTree),
+            action: rule!.action!,
+          };
+        })
+      );
+
+      const { id, name, description, iconId, isActive, isSystem } = insertedProfile;
 
       return {
-        ...insertedProfile,
+        id,
+        name,
+        description,
+        iconId,
+        isActive,
+        isSystem,
         folders: associatedFolders,
         rules: associatedRules,
       };
@@ -80,24 +89,29 @@ export async function createFullProfile(data: FullProfile): Promise<DbResponse<F
 export async function getAllProfiles(): Promise<DbResponse<FullProfile[]>> {
   const profilesWithRelations = await db.query.ProfileTable.findMany({
     with: {
-      profileFolders: {
-        with: {
-          folder: true,
-        },
-      },
-      profileRules: {
-        with: {
-          rule: true,
-        },
-      },
+      profileFolders: { with: { folder: true } },
+      profileRules: { with: { rule: { with: { conditionsTree: true, action: true } } } },
     },
   });
 
-  const fullProfiles = profilesWithRelations.map((p) => ({
-    ...p,
-    folders: p.profileFolders.map((pf) => pf.folder),
-    rules: p.profileRules.map((pr) => pr.rule),
-  }));
+  const fullProfiles: FullProfile[] = profilesWithRelations.map((p) => {
+    const fullRules: FullRule[] = p.profileRules.map((pr) => ({
+      ...pr.rule,
+      conditionsTree: buildTreeFromDb(pr.rule.conditionsTree),
+      action: pr.rule.action!,
+    }));
+
+    return {
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      iconId: p.iconId,
+      isActive: p.isActive,
+      isSystem: p.isSystem,
+      folders: p.profileFolders.map((pf) => pf.folder),
+      rules: fullRules,
+    };
+  });
 
   return createResponse(true, "Sucesso ao buscar perfis", fullProfiles);
 }
@@ -116,7 +130,7 @@ export async function deleteProfile(profileId: number): Promise<DbResponse> {
 }
 
 export async function duplicateProfile(profileToDuplicate: FullProfile): Promise<DbResponse<FullProfile>> {
-  const newProfile = {
+  const newProfile: FullProfile = {
     ...profileToDuplicate,
     id: undefined,
     name: await getNewProfileName(profileToDuplicate.name),
@@ -131,19 +145,12 @@ export async function toggleProfileStatus(profileId: number): Promise<DbResponse
 export async function updateProfile(data: FullProfile): Promise<DbResponse> {
   const { rules: updatedRules, folders: updatedFolders } = data;
   const { id, name, description, iconId } = data as ProfileSchema;
+
   const existentProfileData = await db.query.ProfileTable.findFirst({
-    where: eq(ProfileTable.id, data.id as number),
+    where: eq(ProfileTable.id, id as number),
     with: {
-      profileFolders: {
-        with: {
-          folder: true,
-        },
-      },
-      profileRules: {
-        with: {
-          rule: true,
-        },
-      },
+      profileFolders: { with: { folder: true } },
+      profileRules: { with: { rule: true } },
     },
   });
 
@@ -170,10 +177,7 @@ export async function updateProfile(data: FullProfile): Promise<DbResponse> {
         await tx
           .delete(ProfileRulesTable)
           .where(
-            and(
-              eq(ProfileRulesTable.profileId, existentProfileData.id),
-              inArray(ProfileRulesTable.ruleId, rulesIdsToDelete)
-            )
+            and(eq(ProfileRulesTable.profileId, id), inArray(ProfileRulesTable.ruleId, rulesIdsToDelete))
           );
       }
       if (foldersIdsToDelete.length > 0) {
@@ -181,7 +185,7 @@ export async function updateProfile(data: FullProfile): Promise<DbResponse> {
           .delete(ProfileFoldersTable)
           .where(
             and(
-              eq(ProfileFoldersTable.profileId, existentProfileData.id),
+              eq(ProfileFoldersTable.profileId, id),
               inArray(ProfileFoldersTable.folderId, foldersIdsToDelete)
             )
           );
@@ -194,9 +198,11 @@ export async function updateProfile(data: FullProfile): Promise<DbResponse> {
           .insert(ProfileFoldersTable)
           .values(foldersIdsToAdd.map((f) => ({ folderId: f, profileId: id })));
       }
+
       if (updatedProfile.changes > 0) return createResponse(true, "Perfil atualizado com sucesso!");
       else return createResponse(false, "Erro ao atualizar perfil");
     });
+
     return response;
   } catch (error) {
     return handleError(error, "Erro ao atualizar perfil");
@@ -207,54 +213,44 @@ export async function getSystemProfile(): Promise<FullProfile | null> {
   const defaultProfile = await db.query.ProfileTable.findFirst({
     where: eq(ProfileTable.isSystem, true),
     with: {
-      profileFolders: {
-        with: {
-          folder: true,
-        },
-      },
+      profileFolders: { with: { folder: true } },
       profileRules: {
         with: {
-          rule: {
-            with: { conditionGroups: { with: { childGroups: true, childConditions: true } }, action: true },
-          },
+          rule: { with: { conditionsTree: true, action: true } },
         },
       },
     },
   });
 
-  if (defaultProfile) {
-    const fullRules: FullRule[] = defaultProfile.profileRules.map((pr) => {
-      const ruleData = pr.rule;
-      const tree = buildTreeFromDb(
-        ruleData.conditionGroups,
-        ruleData.conditionGroups.flatMap((g) => g.childConditions)
-      );
-      return {
-        ...ruleData,
-        action: ruleData.action!,
-        conditionsTree: tree,
-      };
-    });
-    const fullProfile: FullProfile = {
-      ...defaultProfile,
-      folders: defaultProfile.profileFolders.map((f) => f.folder),
-      rules: fullRules,
-    };
-    return fullProfile;
-  }
-  return null;
+  if (!defaultProfile) return null;
+
+  const fullRules: FullRule[] = defaultProfile.profileRules.map((pr) => ({
+    ...pr.rule,
+    conditionsTree: buildTreeFromDb(pr.rule.conditionsTree),
+    action: pr.rule.action!,
+  }));
+
+  const fullProfile: FullProfile = {
+    ...defaultProfile,
+    folders: defaultProfile.profileFolders.map((f) => f.folder),
+    rules: fullRules,
+  };
+
+  return fullProfile;
 }
+
 export async function getSystemProfilesCount(): Promise<number> {
   return (await db.select({ count: count() }).from(ProfileTable).where(eq(ProfileTable.isSystem, true)))[0]
     .count;
 }
 
-// Internal functions
+// Internal helper
 async function getNewProfileName(existentProfileName: string): Promise<string> {
   const existentProfile = await db
     .select()
     .from(ProfileTable)
     .where(like(ProfileTable.name, `%${existentProfileName}%`));
-  const newName = `${existentProfile[0].name} (${existentProfile.length > 1 ? existentProfile.length + 1 : 2})`;
+
+  const newName = `${existentProfileName} (${existentProfile.length > 1 ? existentProfile.length + 1 : 2})`;
   return newName;
 }
