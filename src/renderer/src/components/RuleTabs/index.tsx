@@ -2,63 +2,78 @@ import { Tabs, Tab, Box, Checkbox } from "@mui/material";
 import { useState } from "react";
 import Rule from "../Rule";
 import { FullRule } from "../../../../shared/types/RuleWithDetails";
-import { RuleSchema } from "~/src/db/schema";
+import { RuleSchema } from "@db/schema";
 
-const tabNames = ["Todas", "Ativas", "Sistema", "Personalizadas"];
+const tabNames = ["Todas", "Ativas", "Sistema", "Personalizadas"] as const;
 
 type RuleTabsProps = {
-  tabContents?: FullRule[];
-  // ✅ Novas props para controlar o modo de seleção
+  tabContents: FullRule[];
   mode: "page" | "selection";
   selectedRules: RuleSchema[];
   onSelectionChange: (rule: RuleSchema) => void;
 };
 
 const RuleTabs = ({ tabContents, mode, selectedRules, onSelectionChange }: RuleTabsProps) => {
-  const [value, setValue] = useState(0);
+  const [tabIndex, setTabIndex] = useState(0);
 
-  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    setTabIndex(newValue);
   };
 
-  const filterContent = (value: number) => {
-    if (!tabContents) return null;
+  const isSelected = (id: number) => selectedRules.some((rule) => rule.id === id);
 
-    let filtered = tabContents;
-
-    if (value === 1) filtered = filtered.filter((r) => r.isActive);
-    if (value === 2) filtered = filtered.filter((r) => r.isSystem);
-    if (value === 3) filtered = filtered.filter((r) => !r.isSystem);
-
-    return filtered.map((rule) => (
-      <Box key={rule.id} display="flex" alignItems="center" gap={1} width="100%">
-        {mode === "selection" && (
-          <Checkbox
-            checked={selectedRules?.some((x) => x.id === rule.id)}
-            onChange={() => onSelectionChange(rule as RuleSchema)}
-          />
-        )}
-        <Box flex={1}>
-          <Rule {...rule} />
-        </Box>
+  const renderRuleItem = (rule: FullRule) => (
+    <Box key={rule.id} display="flex" alignItems="center" gap={1} width="100%">
+      {mode === "selection" && (
+        <Checkbox
+          checked={isSelected(rule.id)}
+          onChange={() =>
+            onSelectionChange({
+              id: rule.id,
+              name: rule.name,
+              description: rule.description,
+              isActive: rule.isActive,
+              isSystem: rule.isSystem,
+              action: rule.action,
+              conditionsTree: [],
+            })
+          }
+        />
+      )}
+      <Box flex={1}>
+        <Rule {...rule} />
       </Box>
-    ));
+    </Box>
+  );
+
+  const getFilteredRules = () => {
+    switch (tabIndex) {
+      case 1:
+        return tabContents.filter((r) => r.isActive);
+      case 2:
+        return tabContents.filter((r) => r.isSystem);
+      case 3:
+        return tabContents.filter((r) => !r.isSystem);
+      default:
+        return tabContents;
+    }
   };
 
-  if (!tabContents || tabContents.length === 0) return null;
+  if (tabContents.length === 0) return null;
 
   return (
     <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
-      <Tabs value={value} onChange={handleChange}>
-        {tabNames.map((item, index) => (
+      <Tabs value={tabIndex} onChange={handleTabChange}>
+        {tabNames.map((label, index) => (
           <Tab
             key={index}
-            label={item}
+            label={label}
             sx={{ fontSize: (theme) => theme.typography.subtitle1, textTransform: "none" }}
           />
         ))}
       </Tabs>
-      {filterContent(value)}
+
+      {getFilteredRules().map(renderRuleItem)}
     </Box>
   );
 };
