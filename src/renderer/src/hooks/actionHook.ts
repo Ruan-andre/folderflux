@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Action, NewAction } from "../../../db/schema/";
+import { ActionSchema, NewAction } from "../../../db/schema/";
 
 export function useActionForm() {
-  const [action, setAction] = useState<Action | NewAction>();
+  const [action, setAction] = useState<ActionSchema | NewAction>();
 
-  const reset = (initial?: Action | NewAction) => {
+  const reset = (initial?: ActionSchema | NewAction) => {
     setAction(initial);
   };
 

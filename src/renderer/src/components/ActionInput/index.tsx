@@ -1,11 +1,11 @@
 import { Box } from "@mui/material";
 import GenericInput from "../GenericInput";
 import GenericFolderSelector from "../GenericFolderSelector";
-import { Action, NewAction } from "~/src/db/schema";
+import { ActionSchema, NewAction } from "~/src/db/schema";
 
 type ActionInputProps = {
-  action: Action | NewAction;
-  onChange: (updated: Action | NewAction) => void;
+  action: ActionSchema | NewAction;
+  onChange: (updated: ActionSchema | NewAction) => void;
 };
 
 type optionsType = {

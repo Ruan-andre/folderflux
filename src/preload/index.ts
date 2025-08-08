@@ -38,7 +38,7 @@ const api = {
 
     deleteRule: (idRule: number): Promise<DbResponse> => ipcRenderer.invoke("delete-rule", idRule),
 
-    updateRule: (rule: RuleSchema): Promise<DbResponse> => ipcRenderer.invoke("update-rule", rule),
+    updateRule: (rule: FullRule): Promise<DbResponse> => ipcRenderer.invoke("update-rule", rule),
 
     toggleActive: (idRule: number): Promise<DbResponse> => ipcRenderer.invoke("toggle-active", idRule),
   },
