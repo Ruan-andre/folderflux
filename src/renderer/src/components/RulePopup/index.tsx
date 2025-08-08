@@ -5,37 +5,41 @@ import ConditionGroupComponent from "../ConditionGroup";
 import ActionInput from "../ActionInput";
 import { useEffect, useState } from "react";
 import isEqual from "fast-deep-equal";
+import cloneDeep from "lodash.clonedeep";
 
 import { useSnackbar } from "../../context/SnackBarContext";
 import { useRuleStore } from "../../store/ruleStore";
 import { useRulePopupStore } from "../../store/popupRuleStore";
 
-import { useConditionTree } from "../../hooks/ConditionTree";
+import { useConditionTree } from "../../hooks/conditionTreeHook";
 import { useActionForm } from "../../hooks/actionHook";
 import { useRuleForm } from "../../hooks/ruleHook";
 
-import { ICondition, IConditionGroup } from "../../../../shared/types/ConditionsType";
-import { NewAction } from "~/src/db/schema";
-import { NewFullRulePayload } from "../../../../shared/types/RuleWithDetails";
+import { ActionSchema, NewAction } from "~/src/db/schema";
 import { formHelper } from "../../functions/form";
+import { FullRule, NewFullRulePayload } from "~/src/shared/types/RuleWithDetails";
+import { ICondition, IConditionGroup } from "~/src/shared/types/ConditionsType";
 
 // Estado inicial para a árvore de condições de uma nova regra
-const initialTreeState: IConditionGroup = { id: "root", type: "group", operator: "AND", children: [] };
+const initialTreeState: IConditionGroup = {
+  id: "root",
+  type: "group",
+  operator: "AND",
+  displayOrder: 1,
+  children: [],
+};
 const initialActionState: NewAction = { type: "move", value: "", ruleId: 0 };
 
 const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const { showMessage } = useSnackbar();
 
-  // Stores globais
   const { addRule, updateRule } = useRuleStore();
   const { isOpen, ruleToEdit, closePopup } = useRulePopupStore();
 
-  // Hooks de formulário para gerenciar o estado
   const { name, setName, description, setDescription, reset: resetRuleForm } = useRuleForm();
   const { rootGroup, setRootGroup, ...conditionTreeHandlers } = useConditionTree(initialTreeState);
   const { action, setAction, reset: resetActionForm } = useActionForm();
 
-  // Estado para comparar se houve mudanças antes de salvar
   const [initialData, setInitialData] = useState<{
     name: string;
     description: string;
@@ -43,7 +47,6 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     action: NewAction;
   } | null>(null);
 
-  // Efeito para carregar ou resetar os dados do formulário quando o popup abre/fecha
   useEffect(() => {
     if (isOpen) {
       if (ruleToEdit) {
@@ -52,15 +55,14 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
         setRootGroup(ruleToEdit.conditionsTree);
         setAction(ruleToEdit.action);
         // Guarda o estado inicial para comparação
+        const actionClone: NewAction = { ...ruleToEdit.action, value: ruleToEdit.action.value ?? "" };
         setInitialData(
-          JSON.parse(
-            JSON.stringify({
-              name: ruleToEdit.name,
-              description: ruleToEdit.description ?? "",
-              rootGroup: ruleToEdit.conditionsTree,
-              action: ruleToEdit.action,
-            })
-          )
+          cloneDeep({
+            name: ruleToEdit.name,
+            description: ruleToEdit.description ?? "",
+            rootGroup: ruleToEdit.conditionsTree,
+            action: actionClone,
+          })
         );
       } else {
         // MODO CRIAÇÃO
@@ -75,6 +77,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
         });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const handleSubmit = async () => {
@@ -93,12 +96,12 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     try {
       if (ruleToEdit) {
         // --- LÓGICA DE ATUALIZAÇÃO ---
-        const editedRule = {
+        const editedRule: FullRule = {
           ...ruleToEdit,
           name: currentData.name,
           description: currentData.description,
+          action: currentData.action as ActionSchema,
           conditionsTree: currentData.rootGroup,
-          action: currentData.action,
         };
         const response = await updateRule(editedRule);
         if (response.status) showMessage("Regra atualizada com sucesso!", "success");
@@ -169,7 +172,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           maxHeight: "95vh",
           width: "75vw",
           maxWidth: "90vw",
-          overflow: "hidden", // A rolagem será interna
+          overflow: "hidden",
           display: "flex",
           flexDirection: "column",
           bgcolor: "background.paper",
@@ -189,6 +192,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 id="ruleName"
                 name="ruleName"
                 label="Nome da Regra"
+                placeholder="Ex: Organizador de boletos"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -198,6 +202,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 id="ruleDescription"
                 name="ruleDescription"
                 label="Descrição"
+                placeholder="Descreva o que esta regra faz"
                 multiline
                 maxLength={110}
                 rows={2}
