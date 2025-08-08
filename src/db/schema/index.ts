@@ -3,7 +3,6 @@ export * from "./profileFolders";
 export * from "./profileRules";
 export * from "./rules";
 export * from "./folders";
-export * from "./conditions";
+export * from "./conditionsTree";
 export * from "./actions";
-export * from "./conditionGroups";
 export * from "./settings";
