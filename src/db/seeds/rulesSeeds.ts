@@ -9,6 +9,7 @@ const generateConditionId = (() => {
 // --- SEEDS DE REGRAS PADRÃO ---
 
 // 1. Regra para Código
+let displayOrderCount = 1;
 export const ruleSeed_codigo: NewFullRulePayload = {
   rule: {
     name: "Organizar Arquivos de Código",
@@ -16,167 +17,213 @@ export const ruleSeed_codigo: NewFullRulePayload = {
     isSystem: true,
     isActive: true,
   },
+
   conditionsTree: {
     id: generateConditionId(),
     type: "group",
     operator: "OR",
+    displayOrder: displayOrderCount,
     children: [
       {
         id: generateConditionId(),
         type: "condition",
-        field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "py",
+        field: "fileExtension",
+        displayOrder: displayOrderCount,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "js",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "html",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "css",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "java",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "c",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "cpp",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "cs",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "php",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "json",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "xml",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "sh",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "bat",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "ps1",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "md",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "ts",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "go",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "rb",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "rs",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "swift",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "kt",
+        displayOrder: displayOrderCount++,
       },
-       {
+
+      {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "tsx",
+        displayOrder: displayOrderCount++,
       },
     ],
   },
+
   action: {
     type: "move",
     value: "CÓDIGO", // O nome da pasta a ser criada dentro da pasta monitorada
@@ -184,6 +231,7 @@ export const ruleSeed_codigo: NewFullRulePayload = {
   },
 };
 
+displayOrderCount = 1;
 // 2. Regra para Compactados
 export const ruleSeed_compactados: NewFullRulePayload = {
   rule: {
@@ -196,58 +244,73 @@ export const ruleSeed_compactados: NewFullRulePayload = {
     id: generateConditionId(),
     type: "group",
     operator: "OR",
+    displayOrder: displayOrderCount,
     children: [
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "zip",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "rar",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "7z",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "tar",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "gz",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "bz2",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "xz",
+        displayOrder: displayOrderCount++,
       },
     ],
   },
+
   action: {
     type: "move",
     value: "COMPACTADOS",
@@ -255,6 +318,7 @@ export const ruleSeed_compactados: NewFullRulePayload = {
   },
 };
 
+displayOrderCount = 1;
 // 3. Regra para PDFs
 export const ruleSeed_pdf: NewFullRulePayload = {
   rule: {
@@ -263,6 +327,7 @@ export const ruleSeed_pdf: NewFullRulePayload = {
     isSystem: true,
     isActive: true,
   },
+
   conditionsTree: {
     id: generateConditionId(),
     type: "group",
@@ -272,11 +337,14 @@ export const ruleSeed_pdf: NewFullRulePayload = {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "pdf",
+        displayOrder: displayOrderCount++,
       },
     ],
+    displayOrder: displayOrderCount++,
   },
+
   action: {
     type: "move",
     value: "PDFs",
@@ -284,6 +352,7 @@ export const ruleSeed_pdf: NewFullRulePayload = {
   },
 };
 
+displayOrderCount = 1;
 // 4. Regra para Áudio
 export const ruleSeed_audio: NewFullRulePayload = {
   rule: {
@@ -292,62 +361,78 @@ export const ruleSeed_audio: NewFullRulePayload = {
     isSystem: true,
     isActive: true,
   },
+
   conditionsTree: {
     id: generateConditionId(),
     type: "group",
     operator: "OR",
+    displayOrder: displayOrderCount,
     children: [
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "mp3",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "wav",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "flac",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "aac",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "ogg",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "wma",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "m4a",
+        displayOrder: displayOrderCount++,
       },
     ],
   },
+
   action: {
     type: "move",
     value: "ÁUDIO",
@@ -355,6 +440,7 @@ export const ruleSeed_audio: NewFullRulePayload = {
   },
 };
 
+displayOrderCount = 1;
 // 5. Regra para Imagem
 export const ruleSeed_imagem: NewFullRulePayload = {
   rule: {
@@ -363,82 +449,103 @@ export const ruleSeed_imagem: NewFullRulePayload = {
     isSystem: true,
     isActive: true,
   },
+
   conditionsTree: {
     id: generateConditionId(),
     type: "group",
     operator: "OR",
+    displayOrder: displayOrderCount,
     children: [
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "jpg",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "jpeg",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "png",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "gif",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "bmp",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "tiff",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "webp",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "svg",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "heic",
+        displayOrder: displayOrderCount++,
       },
     ],
   },
+
   action: {
     type: "move",
     value: "IMAGENS",
     ruleId: 0,
   },
 };
+displayOrderCount = 1;
 
 // 6. Regra para Vídeo
 export const ruleSeed_video: NewFullRulePayload = {
@@ -448,82 +555,103 @@ export const ruleSeed_video: NewFullRulePayload = {
     isSystem: true,
     isActive: true,
   },
+
   conditionsTree: {
     id: generateConditionId(),
     type: "group",
     operator: "OR",
+    displayOrder: displayOrderCount,
     children: [
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "mp4",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "mov",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "avi",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "mkv",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "wmv",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "flv",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "webm",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "m4v",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "3gp",
+        displayOrder: displayOrderCount++,
       },
     ],
   },
+
   action: {
     type: "move",
     value: "VÍDEOS",
     ruleId: 0,
   },
 };
+displayOrderCount = 1;
 
 // 7. Regra para Documentos (Geral)
 export const ruleSeed_documento: NewFullRulePayload = {
@@ -533,61 +661,76 @@ export const ruleSeed_documento: NewFullRulePayload = {
     isSystem: true,
     isActive: true,
   },
+
   conditionsTree: {
     id: generateConditionId(),
     type: "group",
     operator: "OR",
+    displayOrder: displayOrderCount,
     children: [
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "doc",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "docx",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "odt",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "txt",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "rtf",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "pages",
+        displayOrder: displayOrderCount++,
       },
     ],
   },
+
   action: {
     type: "move",
     value: "DOCUMENTOS",
     ruleId: 0,
   },
 };
+displayOrderCount = 1;
 
 // 8. Regra para Planilhas
 export const ruleSeed_planilha: NewFullRulePayload = {
@@ -597,47 +740,58 @@ export const ruleSeed_planilha: NewFullRulePayload = {
     isSystem: true,
     isActive: true,
   },
+
   conditionsTree: {
     id: generateConditionId(),
     type: "group",
     operator: "OR",
+    displayOrder: displayOrderCount,
     children: [
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "xls",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "xlsx",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "ods",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "csv",
+        displayOrder: displayOrderCount++,
       },
     ],
   },
+
   action: {
     type: "move",
     value: "PLANILHAS",
     ruleId: 0,
   },
 };
+displayOrderCount = 1;
 
 // 9. Regra para Apresentações
 export const ruleSeed_apresentacao: NewFullRulePayload = {
@@ -647,41 +801,51 @@ export const ruleSeed_apresentacao: NewFullRulePayload = {
     isSystem: true,
     isActive: true,
   },
+
   conditionsTree: {
     id: generateConditionId(),
     type: "group",
     operator: "OR",
+    displayOrder: displayOrderCount,
     children: [
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "ppt",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "pptx",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "odp",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "key",
+        displayOrder: displayOrderCount++,
       },
     ],
   },
+
   action: {
     type: "move",
     value: "APRESENTAÇÕES",
@@ -689,6 +853,7 @@ export const ruleSeed_apresentacao: NewFullRulePayload = {
   },
 };
 
+displayOrderCount = 1;
 // 10. Regra para Executáveis
 export const ruleSeed_executaveis: NewFullRulePayload = {
   rule: {
@@ -701,51 +866,65 @@ export const ruleSeed_executaveis: NewFullRulePayload = {
     id: generateConditionId(),
     type: "group",
     operator: "OR",
+    displayOrder: displayOrderCount,
     children: [
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "exe",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "msi",
+        displayOrder: displayOrderCount++,
       },
+
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "dmg",
-      }, // macOS
+        displayOrder: displayOrderCount++,
+      },
+      // macOS
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "app",
-      }, // macOS (bundles)
+        displayOrder: displayOrderCount++,
+      },
+      // macOS (bundles)
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "deb",
-      }, // Linux
+        displayOrder: displayOrderCount++,
+      },
+      // Linux
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
-        operator: "equals",
+        fieldOperator: "equals",
         value: "rpm",
-      }, // Linux
+        displayOrder: displayOrderCount++,
+      },
+      // Linux
     ],
   },
+
   action: {
     type: "move",
     value: "EXECUTÁVEIS",
