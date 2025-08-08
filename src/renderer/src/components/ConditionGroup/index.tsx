@@ -27,7 +27,7 @@ type ConditionGroupProps = {
 
 const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode }: ConditionGroupProps) => {
   const handleOperatorChange = (event: SelectChangeEvent<"AND" | "OR">) => {
-    const effectiveParentId = parentId || group.id;
+    const effectiveParentId = parentId ?? "root";
     onUpdateNode(group.id, effectiveParentId, { operator: event.target.value as "AND" | "OR" });
   };
 
@@ -37,6 +37,7 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
       variant="outlined"
       sx={{
         mt: 2,
+        mb: 2,
         backgroundColor: "rgba(0,0,0,0.2)",
         border: "1px solid rgba(255, 255, 255, 0.1)",
         boxShadow: 1,
