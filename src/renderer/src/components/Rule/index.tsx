@@ -8,21 +8,13 @@ import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import CrudButtons from "../CrudButtons";
 import { IConditionGroup } from "../../../../shared/types/ConditionsType";
 
-const Rule = ({ id, name, description, isSystem, isActive, conditionsTree, action }: FullRule) => {
+const Rule = (rule: FullRule) => {
   const theme = useTheme();
   const { showMessage } = useSnackbar();
   const { deleteRule, toggleActive, duplicateRule } = useRuleStore();
   const { openPopup } = useRulePopupStore();
   const { showConfirm } = useConfirmDialog();
-  const ruleToEdit: FullRule = {
-    id,
-    name,
-    description,
-    isActive,
-    isSystem,
-    conditionsTree,
-    action,
-  };
+  const { id, name, description, isActive, isSystem, conditionsTree } = rule;
 
   const handleDuplicate = async (ruleId: number) => {
     const response = await duplicateRule(ruleId);
@@ -99,7 +91,7 @@ const Rule = ({ id, name, description, isSystem, isActive, conditionsTree, actio
         {!isSystem && (
           <CrudButtons
             id={id}
-            onEdit={() => openPopup("edit", ruleToEdit)}
+            onEdit={() => openPopup("edit", rule)}
             onDelete={() => handleDelete(id)}
             onDuplicate={() => handleDuplicate(id)}
           />
