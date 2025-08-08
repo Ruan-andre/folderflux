@@ -1,14 +1,13 @@
 import { create } from "zustand";
 import { DbResponse } from "../../../shared/types/DbResponse";
-import { RuleSchema } from "~/src/db/schema";
 import { FullRule, NewFullRulePayload } from "../../../shared/types/RuleWithDetails";
 
 type RuleState = {
   rules: FullRule[];
   getRules: () => Promise<void>;
   addRule: (data: NewFullRulePayload) => Promise<DbResponse<FullRule>>;
-  duplicateRule: (ruleId: number) => Promise<DbResponse>; // Não precisa retornar, getRules será chamado
-  updateRule: (ruleData: RuleSchema) => Promise<DbResponse>;
+  duplicateRule: (ruleId: number) => Promise<DbResponse>; 
+  updateRule: (ruleData: FullRule) => Promise<DbResponse>;
   deleteRule: (id: number) => Promise<void>;
   toggleActive: (id: number) => Promise<DbResponse>;
 };

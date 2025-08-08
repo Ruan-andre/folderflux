@@ -28,7 +28,6 @@ export function registerProfileHandlers() {
     }
   });
 
-  // ✅ CORRIGIDO: Adicionado try...catch para segurança
   ipcMain.handle("delete-profile", async (_e, profileId): Promise<DbResponse> => {
     try {
       return await deleteProfile(profileId);
@@ -37,7 +36,6 @@ export function registerProfileHandlers() {
     }
   });
 
-  // ✅ CORRIGIDO: Adicionado try...catch para segurança
   ipcMain.handle("duplicate-profile", async (_e, profile): Promise<DbResponse<FullProfile>> => {
     try {
       return await duplicateProfile(profile);
@@ -46,7 +44,6 @@ export function registerProfileHandlers() {
     }
   });
 
-  // ✅ CORRIGIDO: Adicionado try...catch para segurança
   ipcMain.handle("toggle-profile-status", async (_e, profileId): Promise<DbResponse> => {
     try {
       return await toggleProfileStatus(profileId);
@@ -55,7 +52,6 @@ export function registerProfileHandlers() {
     }
   });
 
-  // ✅ CORRIGIDO: Adicionado try...catch para segurança
   ipcMain.handle("update-profile", async (_e, data): Promise<DbResponse> => {
     try {
       return await updateProfile(data);

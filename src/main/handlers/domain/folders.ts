@@ -28,7 +28,6 @@ export function registerFolderHandlers() {
     }
   });
 
-  // ✅ CORRIGIDO: Agora retorna a DbResponse para feedback no frontend
   ipcMain.handle("delete-folder", async (_e, folderId): Promise<DbResponse> => {
     try {
       await deleteFolder(folderId);
@@ -38,7 +37,6 @@ export function registerFolderHandlers() {
     }
   });
 
-  // ✅ CORRIGIDO: Agora retorna a DbResponse para feedback no frontend
   ipcMain.handle("update-folder", async (_e, folder): Promise<DbResponse> => {
     try {
       await updateFolder(folder);

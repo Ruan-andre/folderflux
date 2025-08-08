@@ -6,7 +6,6 @@ import {
   updateRule,
   toggleRuleActive,
   duplicateRule,
-  getConditionTree,
 } from "../../services/ruleService";
 import { DbResponse } from "~/src/shared/types/DbResponse";
 import { handleError } from "../../../db/functions";
@@ -18,15 +17,6 @@ export function registerRuleHandlers() {
       return await getAllRules();
     } catch (e) {
       return handleError(e, "Erro ao buscar regras");
-    }
-  });
-
-  // ✅ NOVO: Handler para buscar a árvore de condições de uma regra específica
-  ipcMain.handle("get-condition-tree", async (_e, ruleId) => {
-    try {
-      return await getConditionTree(ruleId);
-    } catch (e) {
-      return handleError(e, "Erro ao buscar árvore de condições");
     }
   });
 

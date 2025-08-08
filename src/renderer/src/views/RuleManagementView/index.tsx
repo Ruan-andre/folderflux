@@ -1,5 +1,3 @@
-// Crie um novo arquivo: src/renderer/src/views/RuleManagementView/index.tsx
-
 import { useEffect, useState } from "react";
 import { useRuleStore } from "../../store/ruleStore";
 import RuleTabs from "../../components/RuleTabs";
@@ -7,7 +5,7 @@ import ContentWrapper from "../../components/ContentWrapper";
 import RulePopup from "../../components/RulePopup";
 import { useRulePopupStore } from "../../store/popupRuleStore";
 import { Box, Button, Stack } from "@mui/material";
-import { RuleSchema } from "~/src/db/schema";
+import { RuleSchema } from "@/db/schema";
 
 type RuleManagementViewProps = {
   mode: "page" | "selection";
