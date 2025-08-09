@@ -226,7 +226,10 @@ export async function getSystemProfile(): Promise<FullProfile | null> {
 
   const fullRules: FullRule[] = defaultProfile.profileRules.map((pr) => ({
     ...pr.rule,
-    conditionsTree: buildTreeFromDb(pr.rule.conditionsTree),
+    conditionsTree: buildTreeFromDb(
+      pr.rule.conditionsTree,
+      pr.rule.conditionsTree.find((c) => c.parentGroupId === null)?.id
+    ),
     action: pr.rule.action!,
   }));
 
