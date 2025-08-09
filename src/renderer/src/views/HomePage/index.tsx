@@ -7,7 +7,8 @@ import GenericListItems from "../../components/GenericListItems";
 import Icon from "../../assets/icons/index";
 import RuleManagementView from "../RuleManagementView";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
-import { RuleSchema } from "~/src/db/schema";
+import { FullRule } from "~/src/shared/types/RuleWithDetails";
+import { PathStats } from "~/src/shared/types/pathStatsType";
 
 const HomePage = () => {
   const { showConfirm } = useConfirmDialog();
@@ -24,14 +25,10 @@ const HomePage = () => {
       if (callback) callback();
       return;
     }
-
     const folderPaths = folders.map((f) => f.path);
-    const folderNames = folders.map((f, index) => `\n${++index} ${f.name}`).join("");
-
     showConfirm(
       {
-        title: "Organização padrão?",
-        message: `Organizar ${folders.length} pasta(s): ${folderNames}`,
+        message: await montaMensagemPastas(folders),
         confirmText: "Perfil Padrão",
         thirdButton: { text: "Selecionar Regras" },
         confirmBtnColor: "success",
@@ -51,8 +48,7 @@ const HomePage = () => {
     if (response && response.length > 0) {
       showConfirm(
         {
-          title: "Organização padrão?",
-          message: "Selecione uma opção abaixo",
+          message: await montaMensagemPastas(response),
           confirmText: "Perfil Padrão",
           thirdButton: { text: "Selecionar Regras" },
           confirmBtnColor: "success",
@@ -68,13 +64,22 @@ const HomePage = () => {
     }
   };
 
-  const handleRuleSelectionSave = async (selectedRules: RuleSchema[]) => {
+  const handleRuleSelectionSave = async (selectedRules: FullRule[]) => {
     if (selectedFolders && selectedRules.length > 0) {
       await window.api.organization.organizeWithSelectedRules(selectedRules, selectedFolders);
     }
+
     setIsRuleSelectorOpen(false);
   };
 
+  async function montaMensagemPastas(folders: PathStats[] | string[]) {
+    let folderNames = "";
+    let stats: PathStats[] = [];
+    if (typeof folders[0] === "string") stats = await window.api.getStatsForPaths(folders as string[]);
+    folderNames = stats.map((f, index) => `\n${++index} ${f.name}`).join("");
+
+    return `Organizar ${folders.length} pasta(s):\n${folderNames}`;
+  }
   return (
     <ContentWrapper minHeightStyle="95vh" justifyContent="flex-start">
       <div className="flex-center">
