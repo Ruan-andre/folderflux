@@ -20,7 +20,7 @@
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
     "migrate:generate": "drizzle-kit generate --config drizzle.config.ts",
-    "migrate:run": "electron ."
+    "migrate:run": "ts-node src/db/runMigrations.ts"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
