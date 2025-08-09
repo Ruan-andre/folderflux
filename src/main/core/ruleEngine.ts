@@ -2,7 +2,7 @@ import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import FileInfo from "~/src/shared/types/FileInfo";
 import { ICondition, IConditionGroup } from "~/src/shared/types/ConditionsType";
 import path from "path";
-import { getFilesInfo, moveFile } from "../services/fileService";
+import { copyFile, deleteFile, getFilesInfo, moveFile } from "../services/fileService";
 
 type FileValue = string | number | Date;
 type EvaluatorFunc = (fileValue: FileValue, conditionValue: string) => boolean;
@@ -54,17 +54,17 @@ const actionHandlers: Record<string, ActionFunc> = {
     const newPath = path.join(file.parentDirectory, destinationFolder, file.nameWithExtension);
     await moveFile(file.fullPath, newPath);
   },
-  // copy: async (file, destinationFolder) => {
-  //   const newPath = path.join(file.parentDirectory, destinationFolder, file.nameWithExtension);
-  //   // await copyFile(file.fullPath, newPath);
-  // },
-  // delete: async (file) => {
-  //   // await deleteFile(file.fullPath);
-  // },
-  // rename: async (file, newName) => {
-  //   const newPath = path.join(file.parentDirectory, `${newName}${file.extension}`);
-  //   // await renameFile(file.fullPath, newPath);
-  // },
+  copy: async (file, destinationFolder) => {
+    const newPath = path.join(file.parentDirectory, destinationFolder, file.nameWithExtension);
+    await copyFile(file.fullPath, newPath);
+  },
+  delete: async (file) => {
+    await deleteFile(file.fullPath);
+  },
+  rename: async (file, newName) => {
+    const newPath = path.join(file.parentDirectory, `${newName}${file.extension}`);
+    await moveFile(file.fullPath, newPath);
+  },
 };
 
 async function evaluateAndAct(file: FileInfo, rules: FullRule[]) {
@@ -76,12 +76,6 @@ async function evaluateAndAct(file: FileInfo, rules: FullRule[]) {
       if (handler) {
         try {
           await handler(file, actionValue);
-          // BUG CRÍTICO CORRIGIDO:
-          // Se uma regra moveu/renomeou/deletou o arquivo, paramos de processar
-          // mais regras para este arquivo para evitar erros de "arquivo não encontrado".
-          console.log(
-            `Ação '${rule.action.type}' aplicada ao arquivo '${file.nameWithExtension}' pela regra '${rule.name}'.`
-          );
           return;
         } catch (error) {
           console.error(`Erro ao aplicar a ação '${rule.action.type}' no arquivo '${file.fullPath}'`, error);
@@ -107,24 +101,35 @@ function getFileValue(file: FileInfo, field: ICondition["field"]): FileValue | n
       return null;
   }
 }
+const evaluateCondition = (condition: ICondition, file: FileInfo): boolean => {
+  const evaluator = conditionEvaluators[condition.field]?.[condition.fieldOperator];
+  const fileValue = getFileValue(file, condition.field);
+
+  if (evaluator && fileValue !== null) {
+    return evaluator(fileValue, condition.value);
+  }
+  return false;
+};
 
 function handleConditions(file: FileInfo, conditionGroup: IConditionGroup): boolean {
-  const conditions = conditionGroup.children as ICondition[];
-
-  const evaluateCondition = (condition: ICondition): boolean => {
-    const evaluator = conditionEvaluators[condition.field]?.[condition.operator];
-    const fileValue = getFileValue(file, condition.field);
-
-    if (evaluator && fileValue !== null) {
-      return evaluator(fileValue, condition.value);
+  if (conditionGroup.operator === "OR") {
+    for (const child of conditionGroup.children) {
+      if (child.type === "condition") {
+        if (evaluateCondition(child, file)) return true;
+      } else {
+        if (handleConditions(file, child)) return true;
+      }
     }
     return false;
-  };
-
-  if (conditionGroup.operator === "OR") {
-    return conditions.some(evaluateCondition);
   } else {
-    return conditions.every(evaluateCondition);
+    for (const child of conditionGroup.children) {
+      if (child.type === "condition") {
+        if (!evaluateCondition(child, file)) return false;
+      } else {
+        if (!handleConditions(file, child)) return false;
+      }
+    }
+    return true;
   }
 }
 
