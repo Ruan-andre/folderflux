@@ -21,6 +21,7 @@ export async function getFilesInfo(directoryPath: string): Promise<FileInfo[]> {
       };
     }
   });
+
   const allResults = await Promise.all(statsPromises);
 
   return allResults.filter((result) => result !== undefined);
@@ -38,6 +39,27 @@ export async function moveFile(filePath: string, newPath: string) {
   }
 }
 
+export async function copyFile(srcPath: string, destPath: string) {
+  const destinationFolder = path.dirname(destPath);
+  try {
+    await fs.promises.mkdir(destinationFolder, { recursive: true });
+  } catch (error) {
+    throw new Error(`Não foi possível criar o diretório: ${destinationFolder}. Erro: ${error}`);
+  }
+  if (!fs.existsSync(destPath)) {
+    fs.promises.copyFile(srcPath, destPath);
+  }
+}
+
+export async function deleteFile(filePath: string) {
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.promises.rm(filePath);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
 export async function isDirectory(path: string) {
   try {
     return fs.statSync(path).isDirectory();
