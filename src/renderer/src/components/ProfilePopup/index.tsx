@@ -15,6 +15,7 @@ import { FolderSchema, RuleSchema } from "~/src/db/schema";
 import FolderManagementView from "../../views/FolderManagementView";
 import { FullProfile } from "../../../../shared/types/ProfileWithDetails";
 import CommonIcons from "../../types/CommonIconsType";
+import { FullRule } from "~/src/shared/types/RuleWithDetails";
 
 const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const theme = useTheme();
@@ -110,7 +111,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     return true;
   }, [name, showMessage]);
 
-  const handleRuleSelectionSave = (selectedRules: RuleSchema[]) => {
+  const handleRuleSelectionSave = (selectedRules: FullRule[]) => {
     setAssociatedRules(selectedRules);
     const rulesGenericList = selectedRules.map((r) => ({
       id: r.id,

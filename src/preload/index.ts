@@ -5,6 +5,7 @@ import { IConditionGroup } from "../shared/types/ConditionsType";
 import { DbResponse } from "../shared/types/DbResponse";
 import { FullProfile } from "../shared/types/ProfileWithDetails";
 import { FullRule, NewFullRulePayload } from "../shared/types/RuleWithDetails";
+import { PathStats } from "../shared/types/pathStatsType";
 
 declare global {
   interface Window {
@@ -18,8 +19,7 @@ const api = {
   onFileDrop: (file: File[]) => {
     return file.map((f) => webUtils.getPathForFile(f));
   },
-  getStatsForPaths: (paths: string[]): Promise<{ path: string; isDirectory: boolean; name: string }[]> =>
-    ipcRenderer.invoke("fs:get-stats", paths),
+  getStatsForPaths: (paths: string[]): Promise<PathStats[]> => ipcRenderer.invoke("fs:get-stats", paths),
 
   rule: {
     getAllRules: (): Promise<DbResponse<FullRule[]>> => ipcRenderer.invoke("get-all-rules-with-details"),
@@ -86,7 +86,7 @@ const api = {
   },
   organization: {
     defaultOrganization: async (paths: string[]) => ipcRenderer.invoke("default-organization", paths),
-    organizeWithSelectedRules: async (rules: RuleSchema[], paths: string[]) =>
+    organizeWithSelectedRules: async (rules: FullRule[], paths: string[]) =>
       ipcRenderer.invoke("organize-with-selected-rules", rules, paths),
   },
 };

@@ -2,15 +2,14 @@ import { Tabs, Tab, Box, Checkbox } from "@mui/material";
 import { useState } from "react";
 import Rule from "../Rule";
 import { FullRule } from "../../../../shared/types/RuleWithDetails";
-import { RuleSchema } from "@db/schema";
 
 const tabNames = ["Todas", "Ativas", "Sistema", "Personalizadas"] as const;
 
 type RuleTabsProps = {
   tabContents: FullRule[];
   mode: "page" | "selection";
-  selectedRules: RuleSchema[];
-  onSelectionChange: (rule: RuleSchema) => void;
+  selectedRules: FullRule[];
+  onSelectionChange: (rule: FullRule) => void;
 };
 
 const RuleTabs = ({ tabContents, mode, selectedRules, onSelectionChange }: RuleTabsProps) => {
@@ -35,7 +34,7 @@ const RuleTabs = ({ tabContents, mode, selectedRules, onSelectionChange }: RuleT
               isActive: rule.isActive,
               isSystem: rule.isSystem,
               action: rule.action,
-              conditionsTree: [],
+              conditionsTree: rule.conditionsTree,
             })
           }
         />

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { FolderSchema, RuleSchema } from "~/src/db/schema";
+import { FolderSchema } from "~/src/db/schema";
+import { FullRule } from "~/src/shared/types/RuleWithDetails";
 
 export interface ProfileFormData {
   id: number;
@@ -7,7 +8,7 @@ export interface ProfileFormData {
   description: string;
   icon: string;
   associatedFolders: FolderSchema[];
-  associatedRules: RuleSchema[];
+  associatedRules: FullRule[];
 }
 
 export const useProfileForm = () => {
@@ -16,7 +17,7 @@ export const useProfileForm = () => {
   const [description, setDescription] = useState("fluent-color:home-32");
   const [icon, setIcon] = useState("");
   const [associatedFolders, setAssociatedFolders] = useState<FolderSchema[]>([]);
-  const [associatedRules, setAssociatedRules] = useState<RuleSchema[]>([]);
+  const [associatedRules, setAssociatedRules] = useState<FullRule[]>([]);
 
   const reset = (data: Partial<ProfileFormData> = {}) => {
     setId(data.id || undefined);
