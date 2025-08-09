@@ -5,12 +5,12 @@ import ContentWrapper from "../../components/ContentWrapper";
 import RulePopup from "../../components/RulePopup";
 import { useRulePopupStore } from "../../store/popupRuleStore";
 import { Box, Button, Stack } from "@mui/material";
-import { RuleSchema } from "@/db/schema";
+import { FullRule } from "~/src/shared/types/RuleWithDetails";
 
 type RuleManagementViewProps = {
   mode: "page" | "selection";
-  initialSelectedRules?: RuleSchema[];
-  onSelectionSave?: (selecteds: RuleSchema[]) => void;
+  initialSelectedRules?: FullRule[];
+  onSelectionSave?: (selecteds: FullRule[]) => void;
   onCancel?: () => void;
 };
 
@@ -23,7 +23,7 @@ const RuleManagementView = ({
   const { rules, getRules } = useRuleStore();
   const { openPopup } = useRulePopupStore();
 
-  const [selectedRules, setSelectedRule] = useState<RuleSchema[]>(initialSelectedRules);
+  const [selectedRules, setSelectedRule] = useState<FullRule[]>(initialSelectedRules);
 
   const handleUpdateSuccess = async () => {
     await getRules();
@@ -38,7 +38,7 @@ const RuleManagementView = ({
   }, []);
 
   // Handler para quando um checkbox é marcado/desmarcado
-  const handleSelectionChange = (rule: RuleSchema) => {
+  const handleSelectionChange = (rule: FullRule) => {
     setSelectedRule((prevSelected) =>
       prevSelected.includes(rule) ? prevSelected.filter((r) => r.id !== rule.id) : [...prevSelected, rule]
     );
