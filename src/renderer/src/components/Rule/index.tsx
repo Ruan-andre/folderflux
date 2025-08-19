@@ -51,7 +51,7 @@ const Rule = (rule: FullRule) => {
         extensions = extensions.concat(getExtensionsFromTree(child));
       }
     }
-    return extensions;
+    return [...new Set(extensions)];
   };
   const extensions = getExtensionsFromTree(conditionsTree).join(", ");
   return (
@@ -68,7 +68,7 @@ const Rule = (rule: FullRule) => {
       </Typography>
 
       {extensions.length > 0 && (
-        <div style={{ display: "flex", gap: "1rem" }}>
+        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
           {extensions.split(",").map((item, index) => (
             <span
               key={index}
