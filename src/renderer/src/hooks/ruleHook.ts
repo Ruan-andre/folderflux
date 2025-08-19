@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export function useRuleForm() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  const reset = (initial?: { name: string; description: string }) => {
+  const reset = useCallback((initial?: { name: string; description: string }) => {
     setName(initial?.name || "");
     setDescription(initial?.description || "");
-  };
+  }, []);
 
   return {
     name,
