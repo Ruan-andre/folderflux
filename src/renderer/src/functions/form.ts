@@ -1,4 +1,4 @@
-let originalColor: string | null = "";
+let borderStyle: string | null = "";
 let tempElement: HTMLElement | undefined;
 
 export const formHelper = {
@@ -13,8 +13,8 @@ export const formHelper = {
   htmlElementBorderChange: (id: string, color: string = "red") => {
     const element = document.getElementById(id!) as HTMLElement;
     if (element) {
-      originalColor = element.style.borderColor;
-      element.style.borderColor = color;
+      borderStyle = element.style.border;
+      element.style.border = `1px solid ${color}`;
 
       if (tempElement) tempElement.parentElement?.addEventListener("mouseenter", restoreBorderColor);
       else element.addEventListener("mouseenter", restoreBorderColor);
@@ -24,13 +24,13 @@ export const formHelper = {
 
 const restoreBorderColor = (event: MouseEvent) => {
   if (tempElement) {
-    tempElement.style.borderColor = originalColor ?? "";
+    tempElement.style.border = borderStyle ?? "";
     tempElement.removeEventListener("mouseenter", restoreBorderColor);
     tempElement = undefined;
-    originalColor = null;
+    borderStyle = null;
   } else {
     const element = event.currentTarget as HTMLElement;
-    element.style.borderColor = originalColor ?? "";
+    element.style.border = borderStyle ?? "";
     element.removeEventListener("mouseenter", restoreBorderColor);
   }
 };
