@@ -34,13 +34,14 @@ const RuleManagementView = ({
       await getRules();
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getRules]);
 
   // Handler para quando um checkbox é marcado/desmarcado
   const handleSelectionChange = (rule: FullRule) => {
     setSelectedRule((prevSelected) =>
-      prevSelected.includes(rule) ? prevSelected.filter((r) => r.id !== rule.id) : [...prevSelected, rule]
+      prevSelected.some((pr) => pr.id === rule.id)
+        ? prevSelected.filter((r) => r.id !== rule.id)
+        : [...prevSelected, rule]
     );
   };
 
@@ -51,8 +52,8 @@ const RuleManagementView = ({
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-      <Box sx={{ flex: 1, overflowY: "auto" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "100%", overflow: "hidden" }}>
+      <Box sx={{ overflowY: "auto" }}>
         <ContentWrapper
           title="Regras de Organização"
           commonBtn={{
