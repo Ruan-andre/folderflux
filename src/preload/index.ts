@@ -6,6 +6,8 @@ import { DbResponse } from "../shared/types/DbResponse";
 import { FullProfile } from "../shared/types/ProfileWithDetails";
 import { FullRule, NewFullRulePayload } from "../shared/types/RuleWithDetails";
 import { PathStats } from "../shared/types/pathStatsType";
+import { LogMetadata } from "../shared/types/LogMetaDataType";
+import { FullFolder } from "../shared/types/FolderWithDetails";
 
 declare global {
   interface Window {
@@ -68,7 +70,7 @@ const api = {
   folder: {
     getAllFolders: (): Promise<DbResponse<FolderSchema[]>> => ipcRenderer.invoke("get-all-folders"),
 
-    getFolderById: (folderId: number): Promise<DbResponse<FolderSchema>> =>
+    getFolderById: (folderId: number): Promise<DbResponse<FullFolder>> =>
       ipcRenderer.invoke("get-folder-by-id", folderId),
 
     addFolders: (folders: NewFolder[]): Promise<DbResponse> => ipcRenderer.invoke("add-folders", folders),
@@ -85,9 +87,15 @@ const api = {
       ipcRenderer.invoke("select-multiple-directories"),
   },
   organization: {
-    defaultOrganization: async (paths: string[]) => ipcRenderer.invoke("default-organization", paths),
-    organizeWithSelectedRules: async (rules: FullRule[], paths: string[]) =>
+    defaultOrganization: async (paths: string[]): Promise<DbResponse<number>> =>
+      ipcRenderer.invoke("default-organization", paths),
+    organizeWithSelectedRules: async (rules: FullRule[], paths: string[]): Promise<DbResponse<number>> =>
       ipcRenderer.invoke("organize-with-selected-rules", rules, paths),
+    getLogs: async (lastId?: number): Promise<DbResponse<LogMetadata[]>> =>
+      ipcRenderer.invoke("get-logs", lastId),
+    deleteLogById: async (logId: number): Promise<DbResponse<void>> =>
+      ipcRenderer.invoke("delete-log-by-id", logId),
+    deleteAllLogs: async (): Promise<DbResponse<void>> => ipcRenderer.invoke("delete-all-logs"),
   },
 };
 
