@@ -3,7 +3,7 @@ import { useState } from "react";
 import Rule from "../Rule";
 import { FullRule } from "../../../../shared/types/RuleWithDetails";
 
-const tabNames = ["Todas", "Ativas", "Sistema", "Personalizadas"] as const;
+const tabNames = ["Ativas", "Desativadas", "Personalizadas", "Sistema", "Todas"] as const;
 
 type RuleTabsProps = {
   tabContents: FullRule[];
@@ -47,12 +47,18 @@ const RuleTabs = ({ tabContents, mode, selectedRules, onSelectionChange }: RuleT
 
   const getFilteredRules = () => {
     switch (tabIndex) {
-      case 1:
+      // ATIVAS
+      case 0:
         return tabContents.filter((r) => r.isActive);
+      // DESATIVADAS
+      case 1:
+        return tabContents.filter((r) => !r.isActive);
+      // PERSONALIZADAS
       case 2:
-        return tabContents.filter((r) => r.isSystem);
-      case 3:
         return tabContents.filter((r) => !r.isSystem);
+      // SISTEMA
+      case 3:
+        return tabContents.filter((r) => r.isSystem);
       default:
         return tabContents;
     }
