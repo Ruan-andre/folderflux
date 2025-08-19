@@ -45,6 +45,7 @@ const ProfilePage = () => {
                 folders={p.folders}
                 iconId={p.iconId}
                 isActive={p.isActive}
+                isSystem={p.isSystem}
               />
             </div>
           );
