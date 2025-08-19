@@ -1,4 +1,4 @@
-import { count } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { db } from "../../db";
 import { NewSettings, SettingsSchema, SettingsTable } from "../../db/schema";
 import { DbResponse } from "../../shared/types/DbResponse";
@@ -9,6 +9,10 @@ export async function getSystemSettingsCount(): Promise<number> {
 }
 export async function getSettings(): Promise<SettingsSchema[]> {
   return await db.select().from(SettingsTable);
+}
+
+export async function getSettingByType(type: SettingsSchema["type"]) {
+  return await db.query.SettingsTable.findFirst({ where: eq(SettingsTable.type, type) });
 }
 export async function createSettings(settings: NewSettings[]) {
   await db.insert(SettingsTable).values(settings);
