@@ -3,7 +3,7 @@ import ContentWrapper from "../ContentWrapper";
 import GenericInput from "../GenericInput";
 import ConditionGroupComponent from "../ConditionGroup";
 import ActionInput from "../ActionInput";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import isEqual from "fast-deep-equal";
 import cloneDeep from "lodash.clonedeep";
 
@@ -33,11 +33,15 @@ const initialActionState: NewAction = { type: "move", value: "", ruleId: 0 };
 const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const { showMessage } = useSnackbar();
 
-  const { addRule, updateRule } = useRuleStore();
-  const { isOpen, ruleToEdit, closePopup } = useRulePopupStore();
+  const addRule = useRuleStore((state) => state.addRule);
+  const updateRule = useRuleStore((state) => state.updateRule);
+
+  const isOpen = useRulePopupStore((state) => state.isOpen);
+  const ruleToEdit = useRulePopupStore((state) => state.ruleToEdit);
+  const closePopup = useRulePopupStore((state) => state.closePopup);
 
   const { name, setName, description, setDescription, reset: resetRuleForm } = useRuleForm();
-  const { rootGroup, setRootGroup, ...conditionTreeHandlers } = useConditionTree(initialTreeState);
+  const { rootGroup, setRootGroup, conditionTreeHandlers } = useConditionTree(initialTreeState);
   const { action, setAction, reset: resetActionForm } = useActionForm();
 
   const [initialData, setInitialData] = useState<{
@@ -77,8 +81,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
         });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, resetActionForm, resetRuleForm, ruleToEdit, setAction, setRootGroup]);
 
   const handleSubmit = async () => {
     // Validação
@@ -129,7 +132,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     }
   };
 
-  function validate(): boolean {
+  const validate = useCallback((): boolean => {
     if (!name.trim()) {
       showMessage("O nome da regra é obrigatório.", "error");
       formHelper.htmlInputFocus("ruleName", "red");
@@ -158,7 +161,8 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       }
     }
     return true;
-  }
+  }, [action?.type, action?.value, name, rootGroup.children, showMessage]);
+
   if (!isOpen) return null;
 
   return (
