@@ -6,4 +6,5 @@ export type Operator =
   | "higherThan"
   | "lessThan"
   | "isBetween"
-  | "equals";
+  | "equals"
+  | "notEquals";
