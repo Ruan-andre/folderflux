@@ -16,6 +16,7 @@ import FolderManagementView from "../../views/FolderManagementView";
 import { FullProfile } from "../../../../shared/types/ProfileWithDetails";
 import CommonIcons from "../../types/CommonIconsType";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
+import { formHelper } from "../../functions/form";
 
 const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const theme = useTheme();
@@ -29,6 +30,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     icon,
     associatedRules,
     associatedFolders,
+    isSystem,
     setName,
     setDescription,
     setIcon,
@@ -41,6 +43,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     name: string;
     description: string;
     icon: string;
+    isSystem: boolean;
     associatedFolders: FolderSchema[];
     associatedRules: RuleSchema[];
   }>();
@@ -62,6 +65,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           icon: profileToEdit.iconId,
           associatedFolders: profileToEdit.folders,
           associatedRules: profileToEdit.rules,
+          isSystem: profileToEdit.isSystem,
         };
 
         const foldersForGenericList: GenericListItemsType[] = folders.map((f) => ({
@@ -87,6 +91,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           name: "",
           description: "",
           icon: "",
+          isSystem: false,
           associatedFolders: [],
           associatedRules: [],
         };
@@ -108,8 +113,13 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       showMessage("O nome do perfil é obrigatório.", "error");
       return false;
     }
+    if (rulesForGenericList.length === 0) {
+      showMessage("O perfil precisa ter pelo menos uma regra.", "error");
+      formHelper.htmlElementBorderChange("rulesList", "red");
+      return false;
+    }
     return true;
-  }, [name, showMessage]);
+  }, [name, rulesForGenericList.length, showMessage]);
 
   const handleRuleSelectionSave = (selectedRules: FullRule[]) => {
     setAssociatedRules(selectedRules);
@@ -286,9 +296,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 mode="page"
                 btnDelete
                 isButton={false}
-                onClickDelete={(e) => {
-                  handleRemoveFolder(e);
-                }}
+                onClickDelete={handleRemoveFolder}
                 list={foldersForGenericList}
                 titleSize="1.5rem"
                 listItemPadding="0px"
@@ -297,8 +305,12 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
             </ContentWrapper>
 
             <ContentWrapper
+              id="rulesList"
               title="Regras"
-              commonBtn={{ text: "Gerenciar Regras", Action: () => setIsRuleSelectorOpen(true) }}
+              commonBtn={{
+                text: "Gerenciar Regras",
+                Action: isSystem ? undefined : () => setIsRuleSelectorOpen(true),
+              }}
               gap="0.5rem"
               titleSize={18}
               hr
@@ -306,12 +318,10 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
               <GenericListItems
                 btnDelete
                 isButton={false}
-                onClickDelete={(e) => {
-                  handleRuleListRemove(e);
-                }}
+                onClickDelete={isSystem ? undefined : handleRuleListRemove}
                 list={rulesForGenericList}
                 titleSize="1.5rem"
-                listItemPadding="0px"
+                listItemPadding="2px 0px"
                 maxListHeight="15rem"
               />
             </ContentWrapper>
