@@ -8,13 +8,18 @@ import {
   useTheme,
   Box,
   Checkbox,
+  Typography,
 } from "@mui/material";
 import GenericListItemsType from "../../types/GenericListItemsType";
 import Icon from "../../assets/icons";
 import CustomSwitch from "../CustomSwitch";
+import { formatSmartTime } from "../../functions/formatDate";
+import { RefObject } from "react";
+import LabelTextWithTooltip from "../LabelTextWithTooltip";
 
 interface GenericListItemsProps {
   list: GenericListItemsType[] | undefined;
+  id?: string;
   mode?: "page" | "selection";
   btnEdit?: boolean;
   btnDelete?: boolean;
@@ -27,14 +32,17 @@ interface GenericListItemsProps {
   maxListHeight?: string;
   borderBottom?: string;
   selectedIds?: number[];
+  lastItemRef?: RefObject<HTMLLIElement>;
   onClickEdit?: (id: number) => void;
   onClickDelete?: (id: number) => void;
+  onClickListItem?: (id: number) => void;
   onToggle?: (id: number) => void;
   onSelectionChange?: (id: number) => void;
 }
 
 const GenericListItems = ({
   list,
+  id,
   mode = "page",
   isButton = true,
   titleSize,
@@ -47,6 +55,8 @@ const GenericListItems = ({
   btnDelete,
   btnSwitch,
   selectedIds,
+  lastItemRef,
+  onClickListItem,
   onClickDelete,
   onClickEdit,
   onSelectionChange,
@@ -56,8 +66,26 @@ const GenericListItems = ({
 
   if (!list || list.length === 0) return null;
 
+  function secondaryTextWithDate(item: GenericListItemsType) {
+    return (
+      <Box>
+        <Typography variant="subtitle1">{item.subtitle}</Typography>
+        <Typography variant="body1">{formatSmartTime(item.dateItem!)}</Typography>
+      </Box>
+    );
+  }
+
+  function textWithBreakLine(text: string | undefined) {
+    if (!text) {
+      return "";
+    }
+    return (
+      <LabelTextWithTooltip text={text} typographySX={{ fontSize: "1.5rem", maxWidth: "40rem" }} breakLine />
+    );
+  }
   return (
     <List
+      id={id}
       sx={{
         width: "100%",
         overflowY: "auto",
@@ -68,6 +96,7 @@ const GenericListItems = ({
       {list.map((item, index) => (
         <ListItem
           key={index}
+          ref={index === list.length - 1 ? lastItemRef : null}
           sx={{
             padding: listItemPadding ?? 0,
             borderBottom: borderBottom ?? "none",
@@ -96,8 +125,11 @@ const GenericListItems = ({
               onChange={() => onSelectionChange(item.id)}
             />
           )}
-          {isButton ? (
-            <ListItemButton sx={{ borderRadius: theme.shape.borderRadius }}>
+          {isButton && onClickListItem ? (
+            <ListItemButton
+              onClick={() => onClickListItem(item.id)}
+              sx={{ borderRadius: theme.shape.borderRadius }}
+            >
               {item.icon && (
                 <ListItemIcon>
                   <Icon icon={item.icon} width="30" height="30" />
@@ -106,6 +138,7 @@ const GenericListItems = ({
 
               <ListItemText
                 sx={{
+                  alignItems: "flex-start",
                   "& .MuiListItemText-primary": {
                     fontSize: titleSize ?? theme.typography.caption,
                   },
@@ -114,7 +147,11 @@ const GenericListItems = ({
                   },
                 }}
                 primary={item.title}
-                secondary={item.subtitle || ""}
+                slotProps={{
+                  primary: { component: "div" },
+                  secondary: { component: "div" },
+                }}
+                secondary={item.dateItem ? secondaryTextWithDate(item) : textWithBreakLine(item.subtitle)}
               />
             </ListItemButton>
           ) : (
@@ -134,7 +171,8 @@ const GenericListItems = ({
                   },
                 }}
                 primary={item.title}
-                secondary={item.subtitle || ""}
+                slotProps={{ secondary: { component: "div" } }}
+                secondary={item.dateItem ? secondaryTextWithDate(item) : textWithBreakLine(item.subtitle)}
               />
             </>
           )}
