@@ -7,13 +7,13 @@ import {
   NewRule,
   NewAction,
   ActionSchema,
-  RuleSchema,
 } from "../../db/schema";
 import { count, eq, like } from "drizzle-orm";
 import { DbResponse } from "~/src/shared/types/DbResponse";
 import { FullRule, NewFullRulePayload } from "@/shared/types/RuleWithDetails";
 import { IConditionGroup, ICondition } from "@/shared/types/ConditionsType";
 import { createResponse, toggleColumnStatus } from "@/db/functions";
+
 // --- LEITURA ---
 
 export async function getAllRules(): Promise<DbResponse<FullRule[]>> {
@@ -24,18 +24,20 @@ export async function getAllRules(): Promise<DbResponse<FullRule[]>> {
     },
   });
 
-  const fullRules: FullRule[] = rulesList.map((rule) => ({
-    id: rule.id,
-    name: rule.name,
-    description: rule.description,
-    isActive: rule.isActive,
-    isSystem: rule.isSystem,
-    conditionsTree: buildTreeFromDb(
-      rule.conditionsTree,
-      rule.conditionsTree.find((r) => r.parentGroupId === null)?.id ?? undefined
-    ),
-    action: rule.action!,
-  }));
+  const fullRules: FullRule[] = rulesList
+    .map((rule) => ({
+      id: rule.id,
+      name: rule.name,
+      description: rule.description,
+      isActive: rule.isActive,
+      isSystem: rule.isSystem,
+      conditionsTree: buildTreeFromDb(
+        rule.conditionsTree,
+        rule.conditionsTree.find((r) => r.parentGroupId === null)?.id ?? undefined
+      ),
+      action: rule.action!,
+    }))
+    .sort((a, b) => b.id - a.id);
 
   return createResponse(true, "Regras carregadas com sucesso", fullRules);
 }
@@ -139,13 +141,28 @@ export async function toggleRuleActive(id: number): Promise<DbResponse> {
   return toggleColumnStatus(RuleTable, id);
 }
 
-export async function getSystemRules(): Promise<RuleSchema[]> {
+export async function getSystemRules(): Promise<FullRule[]> {
   const rules = await db.query.RuleTable.findMany({
     where: eq(RuleTable.isSystem, true),
     with: { action: true, conditionsTree: true },
   });
 
-  return rules;
+  const fullRules: FullRule[] = rules
+    .map((rule) => ({
+      id: rule.id,
+      name: rule.name,
+      description: rule.description,
+      isActive: rule.isActive,
+      isSystem: rule.isSystem,
+      conditionsTree: buildTreeFromDb(
+        rule.conditionsTree,
+        rule.conditionsTree.find((r) => r.parentGroupId === null)?.id ?? undefined
+      ),
+      action: rule.action!,
+    }))
+    .sort((a, b) => b.id - a.id);
+
+  return fullRules;
 }
 
 export async function getSystemRulesCount(): Promise<number> {
@@ -164,7 +181,7 @@ export function buildTreeFromDb(nodes: ConditionTreeSchema[], explicitRootId?: n
   const findDefaultRoot = (): ConditionTreeSchema | undefined => {
     const rootGroup = nodes.filter((n) => n.parentGroupId === null && n.type === "group");
     if (rootGroup.length === 0) {
-      return nodes.find((n) => n.type === "group");
+      throw "Grupo raiz de condições, não encontrado!";
     }
     return rootGroup.sort((a, b) => {
       const da = a.displayOrder ?? 0;
