@@ -1,5 +1,6 @@
 import { useImmer } from "use-immer";
 import { IConditionGroup, ICondition } from "../../../shared/types/ConditionsType";
+import { useCallback, useMemo } from "react";
 
 const findAndMutateGroup = (
   group: IConditionGroup,
@@ -23,64 +24,80 @@ const findAndMutateGroup = (
 export const useConditionTree = (initialState: IConditionGroup) => {
   const [rootGroup, updateRootGroup] = useImmer<IConditionGroup>(initialState);
 
-  const addNode = (parentId: string | number, type: "condition" | "group") => {
-    updateRootGroup((draft) => {
-      findAndMutateGroup(draft, parentId, (parentNode) => {
-        parentNode.children.push(
-          type === "condition"
-            ? {
-                id: crypto.randomUUID(),
-                type: "condition",
-                field: "fileName",
-                fieldOperator: "contains",
-                value: "",
-                displayOrder: parentNode.children.length + 1,
-              }
-            : {
-                id: crypto.randomUUID(),
-                type: "group",
-                operator: "AND",
-                children: [],
-                displayOrder: parentNode.children.length + 1,
-              }
-        );
+  const addNode = useCallback(
+    (parentId: string | number, type: "condition" | "group") => {
+      updateRootGroup((draft) => {
+        findAndMutateGroup(draft, parentId, (parentNode) => {
+          parentNode.children.push(
+            type === "condition"
+              ? {
+                  id: crypto.randomUUID(),
+                  type: "condition",
+                  field: "fileName",
+                  fieldOperator: "contains",
+                  value: "",
+                  displayOrder: parentNode.children.length + 1,
+                }
+              : {
+                  id: crypto.randomUUID(),
+                  type: "group",
+                  operator: "AND",
+                  children: [],
+                  displayOrder: parentNode.children.length + 1,
+                }
+          );
+        });
       });
-    });
-  };
+    },
+    [updateRootGroup]
+  );
 
-  const removeNode = (nodeId: string | number, parentId: string | number) => {
-    updateRootGroup((draft) => {
-      findAndMutateGroup(draft, parentId, (parentNode) => {
-        parentNode.children = parentNode.children.filter((c) => c.id !== nodeId);
+  const removeNode = useCallback(
+    (nodeId: string | number, parentId: string | number) => {
+      updateRootGroup((draft) => {
+        findAndMutateGroup(draft, parentId, (parentNode) => {
+          parentNode.children = parentNode.children.filter((c) => c.id !== nodeId);
+        });
       });
-    });
-  };
+    },
+    [updateRootGroup]
+  );
 
-  const updateNode = (
-    nodeId: string | number,
-    parentId: string | number,
-    updatedNodeData: Partial<ICondition | IConditionGroup>
-  ) => {
-    updateRootGroup((draft) => {
-      if (nodeId === draft.id && (nodeId === parentId || parentId === "root")) {
-        Object.assign(draft, updatedNodeData);
-        return;
-      }
-
-      findAndMutateGroup(draft, parentId, (parentNode) => {
-        const nodeIndex = parentNode.children.findIndex((c) => c.id === nodeId);
-        if (nodeIndex > -1) {
-          Object.assign(parentNode.children[nodeIndex], updatedNodeData);
+  const updateNode = useCallback(
+    (
+      nodeId: string | number,
+      parentId: string | number,
+      updatedNodeData: Partial<ICondition | IConditionGroup>
+    ) => {
+      updateRootGroup((draft) => {
+        if (nodeId === draft.id && (nodeId === parentId || parentId === "root")) {
+          Object.assign(draft, updatedNodeData);
+          return;
         }
+
+        findAndMutateGroup(draft, parentId, (parentNode) => {
+          const nodeIndex = parentNode.children.findIndex((c) => c.id === nodeId);
+          if (nodeIndex > -1) {
+            Object.assign(parentNode.children[nodeIndex], updatedNodeData);
+          }
+        });
       });
-    });
-  };
+    },
+    [updateRootGroup]
+  );
+
+  const conditionTreeHandlers = useMemo(
+    () => ({
+      addNode,
+      removeNode,
+      updateNode,
+    }),
+    [addNode, removeNode, updateNode]
+  );
 
   return {
     rootGroup,
-    addNode,
-    removeNode,
-    updateNode,
+    conditionTreeHandlers,
     setRootGroup: updateRootGroup,
   };
 };
