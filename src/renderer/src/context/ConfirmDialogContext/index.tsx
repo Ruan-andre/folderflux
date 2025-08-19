@@ -29,6 +29,7 @@ type ConfirmDialogContextType = {
     onConfirm: () => void,
     onThirdButtonAction?: () => void
   ) => void;
+  isOpen: boolean;
 };
 
 const ConfirmDialogContext = createContext<ConfirmDialogContextType | null>(null);
@@ -87,7 +88,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
   }, [open, handleConfirm]);
 
   return (
-    <ConfirmDialogContext.Provider value={{ showConfirm }}>
+    <ConfirmDialogContext.Provider value={{ showConfirm, isOpen: open }}>
       {children}
       <Dialog
         open={open}
