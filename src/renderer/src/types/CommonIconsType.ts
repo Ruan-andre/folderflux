@@ -1,5 +1,5 @@
 type IconOption = {
-  value: string;
+  value: "home" | "briefcase" | "smartphone" | "music" | "camera" | "folder" | "folder-error" | "clean";
   icon: string;
 };
 
@@ -11,6 +11,8 @@ const CommonIcons: IconOption[] = [
   { value: "music", icon: "emojione-v1:music-descend" },
   { value: "camera", icon: "noto:camera" },
   { value: "folder", icon: "fluent-emoji:file-folder" },
+  { value: "folder-error", icon: "material-icon-theme:folder-error-open" },
+  { value: "clean", icon: "streamline-plump-color:clean-broom-wipe-flat" },
 ];
 
 export default CommonIcons;
