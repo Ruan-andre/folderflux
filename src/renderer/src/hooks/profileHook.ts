@@ -7,6 +7,7 @@ export interface ProfileFormData {
   name: string;
   description: string;
   icon: string;
+  isSystem: boolean;
   associatedFolders: FolderSchema[];
   associatedRules: FullRule[];
 }
@@ -16,6 +17,7 @@ export const useProfileForm = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("fluent-color:home-32");
   const [icon, setIcon] = useState("");
+  const [isSystem, setIsSystem] = useState(false);
   const [associatedFolders, setAssociatedFolders] = useState<FolderSchema[]>([]);
   const [associatedRules, setAssociatedRules] = useState<FullRule[]>([]);
 
@@ -23,6 +25,7 @@ export const useProfileForm = () => {
     setId(data.id || undefined);
     setName(data.name || "");
     setDescription(data.description || "");
+    setIsSystem(data.isSystem || false);
     setIcon(data.icon || "fluent-color:home-32");
     setAssociatedFolders(data.associatedFolders || []);
     setAssociatedRules(data.associatedRules || []);
@@ -39,6 +42,7 @@ export const useProfileForm = () => {
     associatedFolders,
     setAssociatedFolders,
     associatedRules,
+    isSystem,
     setAssociatedRules,
     reset,
   };
