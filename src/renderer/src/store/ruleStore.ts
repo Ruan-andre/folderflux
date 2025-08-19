@@ -6,7 +6,7 @@ type RuleState = {
   rules: FullRule[];
   getRules: () => Promise<void>;
   addRule: (data: NewFullRulePayload) => Promise<DbResponse<FullRule>>;
-  duplicateRule: (ruleId: number) => Promise<DbResponse>; 
+  duplicateRule: (ruleId: number) => Promise<DbResponse>;
   updateRule: (ruleData: FullRule) => Promise<DbResponse>;
   deleteRule: (id: number) => Promise<void>;
   toggleActive: (id: number) => Promise<DbResponse>;
@@ -42,14 +42,11 @@ export const useRuleStore = create<RuleState>((set) => ({
       }));
     }
     return response;
-    // Retornamos a resposta, mas o refresh será feito pela view que chamou
-    // return response; // Este retorno não é estritamente necessário se a UI recarregar
   },
 
   updateRule: async (ruleData): Promise<DbResponse> => {
     const response = await window.api.rule.updateRule(ruleData);
     if (response.status) {
-      // Atualiza apenas os dados básicos da regra, preservando a árvore
       set((state) => ({
         rules: state.rules.map((r) => (r.id === ruleData.id ? { ...r, ...ruleData } : r)),
       }));
