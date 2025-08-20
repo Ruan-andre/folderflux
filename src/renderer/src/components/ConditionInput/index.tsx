@@ -11,6 +11,7 @@ const allOperators: Record<Operator, { label: string }> = {
   startsWith: { label: "começa com" },
   endsWith: { label: "termina com" },
   equals: { label: "é igual a" },
+  notEquals: { label: "não é igual a" },
   higherThan: { label: "é maior que" },
   lessThan: { label: "é menor que" },
   isBetween: { label: "está entre" },
@@ -23,7 +24,7 @@ const fieldConfig: Record<Field, { label: string; operators: Operator[] }> = {
   },
   fileExtension: {
     label: "Extensão do arquivo",
-    operators: ["contains", "notContains", "equals"],
+    operators: ["equals", "notEquals"],
   },
   creationDate: {
     label: "Data de Criação",
@@ -79,11 +80,14 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
   const showSecondValue = condition.fieldOperator === "isBetween";
 
   return (
-    <Box display="flex" alignItems="center" gap={1} mb={2} flexWrap="wrap">
+    <Box display="inline-flex" alignItems="center" gap={1} mb={2} width={"100%"} flexWrap="wrap">
       <GenericInput
         name="field"
         select
+        bgColor="default"
         required
+        fullWidth={false}
+        inputWidth={"23rem"}
         value={condition.field}
         selectOptions={fieldOptions}
         onChange={(e) => handleChangeField(e.target.value as Field)}
@@ -93,7 +97,10 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
       <GenericInput
         name="operator"
         select
+        bgColor={"default"}
         required
+        fullWidth={false}
+        inputWidth={"13rem"}
         value={condition.fieldOperator}
         selectOptions={operatorOptions}
         onChange={(e) => handleChange("fieldOperator", e.target.value)}
@@ -104,6 +111,8 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
         <Box display="flex" gap={1} flex={1}>
           <GenericInput
             name="value"
+            fullWidth={false}
+            inputWidth={"50%"}
             value={condition.value}
             onChange={(e) => handleChange("value", e.target.value)}
             placeholder="De"
@@ -111,6 +120,8 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
           />
           <GenericInput
             name="value2"
+            inputWidth={"50%"}
+            fullWidth={false}
             value={condition.value2 ?? ""}
             onChange={(e) => handleChange("value2", e.target.value)}
             placeholder="Até"
@@ -118,19 +129,21 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
           />
         </Box>
       ) : (
-        <GenericInput
-          name="value"
-          value={condition.value}
-          onChange={(e) => handleChange("value", e.target.value)}
-          placeholder="Valor"
-          type={
-            condition.field === "modifiedDate" || condition.field === "creationDate"
-              ? "date"
-              : condition.field === "fileSize"
-                ? "number"
-                : "text"
-          }
-        />
+        <Box component={"span"}>
+          <GenericInput
+            name="value"
+            value={condition.value}
+            onChange={(e) => handleChange("value", e.target.value)}
+            placeholder="Valor"
+            type={
+              condition.field === "modifiedDate" || condition.field === "creationDate"
+                ? "date"
+                : condition.field === "fileSize"
+                  ? "number"
+                  : "text"
+            }
+          />
+        </Box>
       )}
 
       {/* Botão de Remover */}
