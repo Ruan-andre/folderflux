@@ -1,4 +1,4 @@
-import React, { useState, DragEvent } from "react";
+import { useState, DragEvent } from "react";
 import { Box, Typography, Stack } from "@mui/material";
 import Icon from "../../assets/icons/";
 
@@ -7,7 +7,7 @@ interface FolderDropZoneProps {
   onItemsDropped: (paths: string[], callback?: () => void) => void;
 }
 
-const FolderDropZone: React.FC<FolderDropZoneProps> = ({ onClick, onItemsDropped }) => {
+const FolderDropZone = ({ onClick, onItemsDropped }: FolderDropZoneProps) => {
   const [isDragActive, setIsDragActive] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
 
@@ -28,6 +28,7 @@ const FolderDropZone: React.FC<FolderDropZoneProps> = ({ onClick, onItemsDropped
 
   const handleDrop = (e: DragEvent<HTMLElement>) => {
     preventDefaults(e);
+
     setIsDragActive(false);
     const files = e.dataTransfer?.files;
     if (files && files.length > 0) {
