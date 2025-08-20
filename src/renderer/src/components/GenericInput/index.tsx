@@ -16,6 +16,7 @@ type GenericInputProps = {
   inputSize?: "small" | "medium";
   required?: boolean;
   borderRadius?: number | string;
+  inputWidth?: number | string;
   fullWidth?: boolean;
   multiline?: boolean;
   rows?: number;
@@ -23,13 +24,14 @@ type GenericInputProps = {
   error?: boolean;
   fontSize?: string;
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
+  type?: React.HTMLInputTypeAttribute | undefined;
   select?: boolean;
   selectOptions?: SelectOption[];
   maxLength?: number;
-  bgColor?: string;
+  bgColor?: "default" | string;
   borderColor?: string;
+  margin?: string | number;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 const GenericInput = ({
@@ -43,7 +45,7 @@ const GenericInput = ({
   inputSize,
   required,
   borderRadius,
-  fullWidth,
+  inputWidth,
   multiline,
   rows,
   helperText,
@@ -57,12 +59,23 @@ const GenericInput = ({
   maxLength,
   bgColor,
   borderColor,
+  fullWidth,
+  margin,
 }: GenericInputProps) => {
   const theme = useTheme();
   const remaining = maxLength ? maxLength - value.length : undefined;
-
+  const inputBgColor =
+    select && !bgColor ? "transparent" : !bgColor || bgColor === "default" ? "#2d3646" : bgColor;
   return (
-    <Box display="flex" flexDirection="column" gap={1}>
+    <Box
+      display="flex"
+      component={!fullWidth ? "span" : "div"}
+      flexDirection="column"
+      gap={1}
+      width={inputWidth ?? "100%"}
+      maxWidth={"100%"}
+      margin={margin}
+    >
       {/* Label personalizada */}
       {label && (
         <Typography fontSize={labelSize ?? "1.8rem"}>
@@ -83,9 +96,9 @@ const GenericInput = ({
         placeholder={!label && required ? `${placeholder} *` : placeholder}
         label={inputLabel}
         required={required}
-        fullWidth={fullWidth ?? true}
         multiline={multiline}
         rows={rows}
+        fullWidth={fullWidth ?? true}
         helperText={helperText}
         error={error}
         value={value}
@@ -98,7 +111,7 @@ const GenericInput = ({
           },
         }}
         sx={{
-          backgroundColor: bgColor ?? "#2d3646", // Melhor fallback no tema
+          backgroundColor: inputBgColor,
           "& .MuiOutlinedInput-root": {
             borderRadius: borderRadius ?? theme.shape.borderRadius,
             fontSize: fontSize ?? "1.4rem",
