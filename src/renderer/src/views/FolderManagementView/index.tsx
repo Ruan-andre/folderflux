@@ -8,6 +8,7 @@ import { useSnackbar } from "../../context/SnackBarContext";
 import { Box, Button, Stack } from "@mui/material";
 import { useFolderPopupStore } from "../../store/popupFolderStore";
 import FolderPopup from "../../components/FolderPopup";
+import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 
 type FolderManagementViewProps = {
   mode: "page" | "selection";
@@ -26,18 +27,11 @@ const FolderManagementView = ({
   const { openPopup } = useFolderPopupStore();
   const [folders, setFolders] = useState<GenericListItemsType[]>();
   const [selectedFolders, setSelectedFolders] = useState<FolderSchema[]>(initialSelectedFolders);
+  const { showConfirm } = useConfirmDialog();
 
   useEffect(() => {
-    async function fetchData() {
-      await refreshFolders();
-    }
-    fetchData();
-  }, []);
-
-  const handleDeleteFolder = async (folderId: number) => {
-    await window.api.folder.deleteFolder(folderId);
     refreshFolders();
-  };
+  }, []);
 
   const refreshFolders = async () => {
     const response = await window.api.folder.getAllFolders();
@@ -65,6 +59,28 @@ const FolderManagementView = ({
     }
   };
 
+  const handleDeleteFolder = async (folderId: number) => {
+    const response = await window.api.folder.getFolderById(folderId);
+    const profileCount = response.items?.profiles?.length;
+    if (profileCount && response.items) {
+      const folderPath = response.items.fullPath;
+      showConfirm(
+        {
+          title: "Atenção!",
+          message: `Esta pasta está vinculada a ${profileCount} perfil(is), deseja prosseguir com a remoção?`,
+        },
+        async () => {
+          await window.api.folder.deleteFolder(folderId);
+          window.api.monitoring.stopMonitoring(folderPath);
+          refreshFolders();
+        }
+      );
+    } else {
+      await window.api.folder.deleteFolder(folderId);
+      refreshFolders();
+    }
+  };
+
   const handleEditFolder = (folderId: number) => {
     const folderToEdit = folders?.find((f) => f.id === folderId);
     if (folderToEdit) {
@@ -79,9 +95,9 @@ const FolderManagementView = ({
   };
 
   const handleSelectionChange = async (id: number) => {
-    const a = selectedFolders.find((x) => x.id === id);
-    if (a) {
-      setSelectedFolders((prev) => prev.filter((p) => p.id !== a.id));
+    const folder = selectedFolders.find((x) => x.id === id);
+    if (folder) {
+      setSelectedFolders((prev) => prev.filter((p) => p.id !== folder.id));
     } else {
       const response = await window.api.folder.getFolderById(id);
       if (response.status && response.items) {
