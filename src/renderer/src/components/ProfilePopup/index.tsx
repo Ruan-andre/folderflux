@@ -13,10 +13,11 @@ import isEqual from "fast-deep-equal";
 import RuleManagementView from "../../views/RuleManagementView";
 import { FolderSchema, RuleSchema } from "~/src/db/schema";
 import FolderManagementView from "../../views/FolderManagementView";
-import { FullProfile } from "../../../../shared/types/ProfileWithDetails";
+import { NewFullProfile } from "../../../../shared/types/ProfileWithDetails";
 import CommonIcons from "../../types/CommonIconsType";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import { formHelper } from "../../functions/form";
+import normalizeSafe from "../../functions/normalizeSafe";
 
 const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const theme = useTheme();
@@ -52,6 +53,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const [foldersForGenericList, setFoldersForGenericList] = useState<GenericListItemsType[]>([]);
   const [isRuleSelectorOpen, setIsRuleSelectorOpen] = useState(false);
   const [isFolderSelectorOpen, setIsFolderSelectorOpen] = useState(false);
+  const [foldersIdToUnwatch, setFolderIdToUnwatch] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     async function fetchData() {
@@ -72,6 +74,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           id: f.id!,
           title: f.name,
           subtitle: f.fullPath,
+          icon: "fluent-emoji:file-folder",
         }));
 
         const rulesForGenericList: GenericListItemsType[] = rules.map((r) => ({
@@ -105,8 +108,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     if (isOpen) {
       fetchData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, profileToEdit]);
+  }, [isOpen, profileToEdit, reset]);
 
   const validateForm = useCallback(() => {
     if (!name.trim()) {
@@ -140,6 +142,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const handleRemoveFolder = (folderId: number) => {
     setAssociatedFolders((prev) => prev.filter((x) => x.id !== folderId));
     setFoldersForGenericList((prev) => prev.filter((x) => x.id !== folderId));
+    setFolderIdToUnwatch((state) => state.add(folderId));
   };
 
   const handleFolderSelectionSave = (selectedFolders: FolderSchema[]) => {
@@ -163,10 +166,11 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       icon,
       associatedFolders,
       associatedRules,
+      isSystem,
     };
 
     // Não faz nada se os dados não mudaram
-    if (isEqual(initialData, currentData)) {
+    if (isEqual(normalizeSafe(initialData), normalizeSafe(currentData))) {
       showMessage("Nenhuma alteração efetuada.", "info");
       closePopup();
       return;
@@ -183,20 +187,38 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           folders: associatedFolders,
           rules: associatedRules,
         };
-        const response = await updateProfile(updatedProfile);
-        if (response.status) {
+        const responseProfile = await updateProfile(updatedProfile);
+        if (responseProfile.status) {
+          if (foldersIdToUnwatch.size > 0) {
+            const pathsToUnwatch = new Set<string>();
+            for (const id of foldersIdToUnwatch) {
+              const count = await window.api.profile.getCountProfilesWithFolder(id);
+              if (count > 1) continue;
+
+              const responseFolder = await window.api.folder.getFolderById(id);
+
+              if (responseProfile.status && responseFolder.items)
+                pathsToUnwatch.add(responseFolder.items.fullPath);
+            }
+            if (pathsToUnwatch.size > 0) {
+              window.api.monitoring.stopMonitoring(Array.from(pathsToUnwatch));
+              pathsToUnwatch.clear();
+              foldersIdToUnwatch.clear();
+            }
+          }
+          window.api.monitoring.startMonitoringProfileFolders(updatedProfile.id);
           showMessage("Perfil atualizado com sucesso!", "success");
           closePopup();
         } else showMessage("Erro ao atualizar o perfil!", "error");
       } else {
         // Lógica de CRIAÇÃO
-        const newProfile: FullProfile = {
+        const newProfile: NewFullProfile = {
           name: currentData.name,
           description: currentData.description,
           folders: currentData.associatedFolders,
           rules: currentData.associatedRules,
           isActive: true,
-          iconId: CommonIcons.find((x) => x.value === currentData.icon)?.icon,
+          iconId: CommonIcons.find((x) => x.value === currentData.icon)?.icon ?? "",
         };
         const response = await addProfile(newProfile);
         showMessage(response.message, response.status ? "success" : "error");
@@ -215,12 +237,14 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     icon,
     associatedFolders,
     associatedRules,
+    isSystem,
     initialData,
     showMessage,
     closePopup,
     profileToEdit,
     onUpdateSuccess,
     updateProfile,
+    foldersIdToUnwatch,
     addProfile,
   ]);
 
