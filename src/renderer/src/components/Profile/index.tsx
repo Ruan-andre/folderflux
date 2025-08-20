@@ -41,7 +41,8 @@ const Profile = ({
     return showConfirm(
       { title: "Confirmar Exclusão", message: "Esta ação não poderá ser desfeita, deseja continuar?" },
       async () => {
-        const response = await deleteProfile(id!);
+        window.api.monitoring.stopMonitoringProfileFolders(id);
+        const response = await deleteProfile(id);
         if (response.status) {
           showMessage(response.message, "success");
         } else {
@@ -59,6 +60,8 @@ const Profile = ({
 
   const handleToggleStatus = (id: number) => {
     toggleActive(id);
+    if (isActive) window.api.monitoring.stopMonitoringProfileFolders(id);
+    else window.api.monitoring.startMonitoringProfileFolders(id);
   };
 
   if (!id) return;
