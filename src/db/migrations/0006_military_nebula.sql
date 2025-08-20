@@ -1,0 +1,1 @@
+ALTER TABLE `affected_files` ADD `metadata` text;
