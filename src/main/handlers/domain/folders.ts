@@ -9,6 +9,7 @@ import {
 import { DbResponse } from "~/src/shared/types/DbResponse";
 import { FolderSchema } from "../../../db/schema";
 import { createResponse, handleError } from "../../../db/functions";
+import { FullFolder } from "~/src/shared/types/FolderWithDetails";
 
 export function registerFolderHandlers() {
   ipcMain.handle("get-all-folders", async (): Promise<DbResponse<FolderSchema[]>> => {
@@ -46,7 +47,7 @@ export function registerFolderHandlers() {
     }
   });
 
-  ipcMain.handle("get-folder-by-id", async (_e, folderId): Promise<DbResponse<FolderSchema>> => {
+  ipcMain.handle("get-folder-by-id", async (_e, folderId): Promise<DbResponse<FullFolder>> => {
     try {
       return await getFolderById(folderId);
     } catch (e) {

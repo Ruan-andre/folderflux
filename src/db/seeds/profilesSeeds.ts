@@ -1,6 +1,6 @@
-import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
+import { NewFullProfile } from "~/src/shared/types/ProfileWithDetails";
 
-export const profileSeed_allRules: FullProfile = {
+export const profileSeed_allRules: NewFullProfile = {
   name: "Perfil Padrão",
   folders: [],
   description: "Perfil contendo todas as regras padrões do sistema",

@@ -1,12 +1,11 @@
 import { create } from "zustand";
 import { DbResponse } from "../../../shared/types/DbResponse";
-// import { ProfileSchema } from "~/src/db/schema";
-import { FullProfile } from "../../../shared/types/ProfileWithDetails";
+import { FullProfile, NewFullProfile } from "../../../shared/types/ProfileWithDetails";
 
 type ProfileState = {
   profiles: FullProfile[];
   getProfiles: () => Promise<void>;
-  addProfile: (data: FullProfile) => Promise<DbResponse<FullProfile>>;
+  addProfile: (data: NewFullProfile) => Promise<DbResponse<FullProfile>>;
   duplicateProfile: (profile: FullProfile) => Promise<DbResponse<FullProfile>>;
   updateProfile: (profile: FullProfile) => Promise<DbResponse>;
   deleteProfile: (id: number) => Promise<DbResponse>;
