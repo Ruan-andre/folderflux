@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { FolderSchema } from "~/src/db/schema";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
 
@@ -21,7 +21,7 @@ export const useProfileForm = () => {
   const [associatedFolders, setAssociatedFolders] = useState<FolderSchema[]>([]);
   const [associatedRules, setAssociatedRules] = useState<FullRule[]>([]);
 
-  const reset = (data: Partial<ProfileFormData> = {}) => {
+  const reset = useCallback((data: Partial<ProfileFormData> = {}) => {
     setId(data.id || undefined);
     setName(data.name || "");
     setDescription(data.description || "");
@@ -29,7 +29,7 @@ export const useProfileForm = () => {
     setIcon(data.icon || "fluent-color:home-32");
     setAssociatedFolders(data.associatedFolders || []);
     setAssociatedRules(data.associatedRules || []);
-  };
+  }, []);
 
   return {
     id,
