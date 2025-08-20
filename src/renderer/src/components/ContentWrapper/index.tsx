@@ -1,8 +1,9 @@
-import { Box, Button, useTheme, Typography, Stack } from "@mui/material";
+import { Box, Button, useTheme, Typography, Stack, AlertColor } from "@mui/material";
 import CustomSwitch from "../CustomSwitch";
 
 type ContentWrapperProps = {
   children: React.ReactNode;
+  id?: string;
   title?: string;
   titleTagType?: "h1" | "h2" | "h3" | "h4";
   titleSize?: number;
@@ -14,9 +15,11 @@ type ContentWrapperProps = {
     Action?: () => void;
     style?: "outlined" | "contained" | "text";
     text?: string;
+    color?: AlertColor;
   };
   bgColor?: string;
-  minHeightStyle?: string;
+  maxHeightStyle?: string | number;
+  minHeightStyle?: string | number;
   wrapStyle?: string;
   gap?: string;
   padding?: string;
@@ -27,12 +30,14 @@ type ContentWrapperProps = {
 };
 const ContentWrapper = ({
   children,
+  id,
   title,
   titleTagType,
   titleSize,
   switchBtn,
   commonBtn,
   bgColor,
+  maxHeightStyle,
   minHeightStyle,
   wrapStyle,
   gap,
@@ -44,13 +49,20 @@ const ContentWrapper = ({
 }: ContentWrapperProps) => {
   const theme = useTheme();
   let btnField;
-  if (commonBtn) {
+  if (commonBtn?.Action) {
     btnField = (
       <>
         <Button
           variant={commonBtn.style || "contained"}
-          sx={{ fontSize: "1rem", borderRadius: "1rem" }}
+          sx={{
+            fontSize: "1rem",
+            borderRadius: "1rem",
+            ":hover": {
+              backgroundColor: commonBtn.color === "error" ? "brown" : "inherit",
+            },
+          }}
           onClick={commonBtn.Action}
+          color={commonBtn.color ?? "primary"}
         >
           {commonBtn.text || "Ver tudo"}
         </Button>
@@ -64,10 +76,14 @@ const ContentWrapper = ({
         checked={switchBtn.value}
       />
     );
+  } else {
+    btnField = undefined;
   }
 
   return (
     <Box
+      id={id}
+      onDragEnter={() => console.log("minha picona")}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -83,6 +99,7 @@ const ContentWrapper = ({
         overflow: "auto",
         scrollBehavior: "smooth",
         width: "100%",
+        maxHeight: maxHeightStyle ?? "100%",
         minHeight: minHeightStyle ? minHeightStyle : "",
       }}
     >
