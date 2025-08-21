@@ -1,4 +1,5 @@
 import { Paper, Typography, Box, Tooltip } from "@mui/material";
+import LabelTextWithTooltip from "../LabelTextWithTooltip";
 
 type GenericCardType = {
   title: string;
@@ -99,22 +100,15 @@ const GenericCard = ({
             </Typography>
           </Tooltip>
           {subtitle && (
-            <Tooltip
-              title={subtitle}
-              slotProps={{ tooltip: { sx: { fontSize: "1.5rem" } } }}
-              placement="bottom-start"
-            >
-              <Typography
-                whiteSpace={"nowrap"}
-                overflow={"hidden"}
-                textOverflow={"ellipsis"}
-                variant="body2"
-                fontSize="1.5rem"
-                color="var(--title-gray-dark)"
-              >
-                {subtitle}
-              </Typography>
-            </Tooltip>
+            <LabelTextWithTooltip
+              text={subtitle}
+              breakLine
+              typographySX={{
+                textOverflow: "ellipsis",
+                fontSize: "1.5rem",
+                color: "var(--title-gray-dark)",
+              }}
+            />
           )}
         </Box>
       </Box>
