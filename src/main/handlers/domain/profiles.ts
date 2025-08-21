@@ -6,6 +6,8 @@ import {
   deleteProfile,
   duplicateProfile,
   getAllProfiles,
+  getCountProfilesWithFolder,
+  getProfileById,
   toggleProfileStatus,
   updateProfile,
 } from "../../services/profileService";
@@ -17,6 +19,22 @@ export function registerProfileHandlers() {
       return await getAllProfiles();
     } catch (e) {
       return handleError(e, "Erro ao buscar perfis");
+    }
+  });
+
+  ipcMain.handle("get-profile-by-id", async (_e, profileId): Promise<DbResponse<FullProfile>> => {
+    try {
+      return await getProfileById(profileId);
+    } catch (e) {
+      return handleError(e, "Erro ao buscar perfil");
+    }
+  });
+
+  ipcMain.handle("get-count-profiles-with-folder", async (_e, folderId): Promise<number> => {
+    try {
+      return await getCountProfilesWithFolder(folderId);
+    } catch (e) {
+      throw handleError(e, "Erro ao buscar perfil");
     }
   });
 
