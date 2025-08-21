@@ -26,6 +26,7 @@ export const ConditionsTreeTable = sqliteTable("conditions_tree", {
       "startsWith",
       "endsWith",
       "equals",
+      "notEquals",
       "lessThan",
       "higherThan",
     ],
