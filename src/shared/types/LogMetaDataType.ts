@@ -24,5 +24,7 @@ interface ErrorMetadata extends BaseLogMetadata {
   type: "error";
 }
 
+type LogTypes = "organization" | "cleanup" | "error";
+
 export type LogMetadata = OrganizationMetadata | CleanupMetadata | ErrorMetadata;
-export type { OrganizationMetadata, CleanupMetadata, ErrorMetadata };
+export type { OrganizationMetadata, CleanupMetadata, ErrorMetadata, LogTypes };
