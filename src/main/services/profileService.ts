@@ -60,7 +60,10 @@ export async function createFullProfile(data: NewFullProfile): Promise<DbRespons
 
           return {
             ...rule!,
-            conditionsTree: buildTreeFromDb(rule!.conditionsTree),
+            conditionsTree: buildTreeFromDb(
+              rule!.conditionsTree,
+              rule!.conditionsTree.find((c) => c.parentGroupId === null)?.id
+            ),
             action: rule!.action!,
           };
         })
@@ -97,7 +100,10 @@ export async function getAllProfiles(): Promise<DbResponse<FullProfile[]>> {
   const fullProfiles: FullProfile[] = profilesWithRelations.map((p) => {
     const fullRules: FullRule[] = p.profileRules.map((pr) => ({
       ...pr.rule,
-      conditionsTree: buildTreeFromDb(pr.rule.conditionsTree),
+      conditionsTree: buildTreeFromDb(
+        pr.rule.conditionsTree,
+        pr.rule.conditionsTree.find((c) => c.parentGroupId === null)?.id
+      ),
       action: pr.rule.action!,
     }));
 
@@ -116,6 +122,73 @@ export async function getAllProfiles(): Promise<DbResponse<FullProfile[]>> {
   return createResponse(true, "Sucesso ao buscar perfis", fullProfiles);
 }
 
+export async function getProfileById(profileId: number): Promise<DbResponse<FullProfile>> {
+  const profile = await db.query.ProfileTable.findFirst({
+    where: eq(ProfileTable.id, profileId),
+    with: {
+      profileRules: { with: { rule: { with: { conditionsTree: true, action: true } } } },
+      profileFolders: { with: { folder: true } },
+    },
+  });
+  if (profile) {
+    const { id, name, description, iconId, isActive, isSystem, profileFolders, profileRules } = profile;
+    const fullRules: FullRule[] = profileRules.map((pr) => ({
+      ...pr.rule,
+      conditionsTree: buildTreeFromDb(
+        pr.rule.conditionsTree,
+        pr.rule.conditionsTree.find((c) => c.parentGroupId === null)?.id
+      ),
+      action: pr.rule.action!,
+    }));
+    const fullProfile = {
+      id,
+      name,
+      description,
+      iconId,
+      isActive,
+      isSystem,
+      folders: profileFolders.map((pf) => pf.folder),
+      rules: fullRules,
+    };
+    return createResponse(true, "Sucesso ao buscar o perfil.", fullProfile);
+  } else {
+    return createResponse(false, "Perfil não encontrado");
+  }
+}
+
+export async function getSystemProfile(): Promise<FullProfile | null> {
+  const defaultProfile = await db.query.ProfileTable.findFirst({
+    where: eq(ProfileTable.isSystem, true),
+    with: {
+      profileFolders: { with: { folder: true } },
+      profileRules: {
+        with: {
+          rule: { with: { conditionsTree: true, action: true } },
+        },
+      },
+    },
+  });
+
+  if (!defaultProfile) return null;
+
+  const fullRules: FullRule[] = defaultProfile.profileRules.map((pr) => ({
+    ...pr.rule,
+    conditionsTree: buildTreeFromDb(
+      pr.rule.conditionsTree,
+      pr.rule.conditionsTree.find((c) => c.parentGroupId === null)?.id
+    ),
+    action: pr.rule.action!,
+  }));
+
+  const fullProfile: FullProfile = {
+    ...defaultProfile,
+    folders: defaultProfile.profileFolders.map((f) => f.folder),
+    rules: fullRules,
+  };
+
+  return fullProfile;
+}
+
 export async function deleteProfile(profileId: number): Promise<DbResponse> {
   try {
     const deleted = await db.delete(ProfileTable).where(eq(ProfileTable.id, profileId)).returning();
@@ -130,7 +203,7 @@ export async function deleteProfile(profileId: number): Promise<DbResponse> {
 }
 
 export async function duplicateProfile(profileToDuplicate: FullProfile): Promise<DbResponse<FullProfile>> {
-  const newProfile: FullProfile = {
+  const newProfile: NewFullProfile = {
     ...profileToDuplicate,
     id: undefined,
     name: await getNewProfileName(profileToDuplicate.name),
@@ -209,42 +282,19 @@ export async function updateProfile(data: FullProfile): Promise<DbResponse> {
   }
 }
 
-export async function getSystemProfile(): Promise<FullProfile | null> {
-  const defaultProfile = await db.query.ProfileTable.findFirst({
-    where: eq(ProfileTable.isSystem, true),
-    with: {
-      profileFolders: { with: { folder: true } },
-      profileRules: {
-        with: {
-          rule: { with: { conditionsTree: true, action: true } },
-        },
-      },
-    },
-  });
-
-  if (!defaultProfile) return null;
-
-  const fullRules: FullRule[] = defaultProfile.profileRules.map((pr) => ({
-    ...pr.rule,
-    conditionsTree: buildTreeFromDb(
-      pr.rule.conditionsTree,
-      pr.rule.conditionsTree.find((c) => c.parentGroupId === null)?.id
-    ),
-    action: pr.rule.action!,
-  }));
-
-  const fullProfile: FullProfile = {
-    ...defaultProfile,
-    folders: defaultProfile.profileFolders.map((f) => f.folder),
-    rules: fullRules,
-  };
-
-  return fullProfile;
-}
-
 export async function getSystemProfilesCount(): Promise<number> {
   return (await db.select({ count: count() }).from(ProfileTable).where(eq(ProfileTable.isSystem, true)))[0]
     .count;
+}
+
+export async function getCountProfilesWithFolder(folderId: number) {
+  return (
+    await db
+      .select({ count: count() })
+      .from(ProfileFoldersTable)
+      .innerJoin(ProfileTable, eq(ProfileTable.id, ProfileFoldersTable.profileId))
+      .where(and(eq(ProfileFoldersTable.folderId, folderId), eq(ProfileTable.isActive, true)))
+  )[0].count;
 }
 
 // Internal helper
