@@ -1,9 +1,9 @@
-import { contextBridge, ipcRenderer, webUtils } from "electron";
+import { contextBridge, ipcRenderer, IpcRendererEvent, webUtils } from "electron";
 import { ElectronAPI, electronAPI } from "@electron-toolkit/preload";
-import { FolderSchema, NewFolder, RuleSchema, SettingsSchema } from "../db/schema";
+import { FolderSchema, NewFolder, SettingsSchema } from "../db/schema";
 import { IConditionGroup } from "../shared/types/ConditionsType";
 import { DbResponse } from "../shared/types/DbResponse";
-import { FullProfile } from "../shared/types/ProfileWithDetails";
+import { FullProfile, NewFullProfile } from "../shared/types/ProfileWithDetails";
 import { FullRule, NewFullRulePayload } from "../shared/types/RuleWithDetails";
 import { PathStats } from "../shared/types/pathStatsType";
 import { LogMetadata } from "../shared/types/LogMetaDataType";
@@ -22,6 +22,14 @@ const api = {
     return file.map((f) => webUtils.getPathForFile(f));
   },
   getStatsForPaths: (paths: string[]): Promise<PathStats[]> => ipcRenderer.invoke("fs:get-stats", paths),
+  onLogAdded: (callback: (log: LogMetadata | LogMetadata[]) => void) => {
+    const listener = (event: IpcRendererEvent, log: LogMetadata | LogMetadata[]) => callback(log);
+    ipcRenderer.on("log-added", listener);
+
+    return () => {
+      ipcRenderer.removeListener("log-added", listener);
+    };
+  },
 
   rule: {
     getAllRules: (): Promise<DbResponse<FullRule[]>> => ipcRenderer.invoke("get-all-rules-with-details"),
@@ -48,14 +56,14 @@ const api = {
     getAllProfiles: (): Promise<DbResponse<FullProfile[]>> =>
       ipcRenderer.invoke("get-all-profiles-with-details"),
 
-    createFullProfile: (data: FullProfile): Promise<DbResponse<FullProfile>> =>
+    createFullProfile: (data: NewFullProfile): Promise<DbResponse<FullProfile>> =>
       ipcRenderer.invoke("create-full-profile", data),
 
-    getAssociatedRules: (profileId: number): Promise<DbResponse<RuleSchema[]>> =>
-      ipcRenderer.invoke("get-associated-rules", profileId),
+    getProfileById: (profileId: number): Promise<DbResponse<FullProfile>> =>
+      ipcRenderer.invoke("get-profile-by-id", profileId),
 
-    getMonitoredFolders: (profileId: number): Promise<DbResponse<FolderSchema[]>> =>
-      ipcRenderer.invoke("get-associated-folders", profileId),
+    getCountProfilesWithFolder: (folderId: number): Promise<number> =>
+      ipcRenderer.invoke("get-count-profiles-with-folder", folderId),
 
     deleteProfile: (profileId: number): Promise<DbResponse> =>
       ipcRenderer.invoke("delete-profile", profileId),
@@ -87,6 +95,7 @@ const api = {
       ipcRenderer.invoke("select-multiple-directories"),
   },
   organization: {
+    organizeAll: async (): Promise<DbResponse<number>> => await ipcRenderer.invoke("organize-all"),
     defaultOrganization: async (paths: string[]): Promise<DbResponse<number>> =>
       ipcRenderer.invoke("default-organization", paths),
     organizeWithSelectedRules: async (rules: FullRule[], paths: string[]): Promise<DbResponse<number>> =>
@@ -96,6 +105,17 @@ const api = {
     deleteLogById: async (logId: number): Promise<DbResponse<void>> =>
       ipcRenderer.invoke("delete-log-by-id", logId),
     deleteAllLogs: async (): Promise<DbResponse<void>> => ipcRenderer.invoke("delete-all-logs"),
+  },
+  monitoring: {
+    startMonitoring: (folders: string[] | string) => ipcRenderer.invoke("watch", folders),
+
+    startMonitoringProfileFolders: (profileId: number) =>
+      ipcRenderer.invoke("watch-profile-folders", profileId),
+
+    stopMonitoring: (folders: string[] | string) => ipcRenderer.invoke("unwatch", folders),
+
+    stopMonitoringProfileFolders: (profileId: number) =>
+      ipcRenderer.invoke("unwatch-profile-folders", profileId),
   },
 };
 
