@@ -7,6 +7,7 @@ type LogState = {
   getLogs: (lastId?: number) => Promise<number | undefined>;
   deleteLog: (id: number) => Promise<DbResponse<void>>;
   deleteAllLogs: () => Promise<DbResponse<void>>;
+  addSavedLogFromBD: (log: LogMetadata | LogMetadata[]) => void;
 };
 
 export const useLogStore = create<LogState>((set) => ({
@@ -37,5 +38,12 @@ export const useLogStore = create<LogState>((set) => ({
       set({ logs: [] });
     }
     return response;
+  },
+  addSavedLogFromBD: (log: LogMetadata | LogMetadata[]) => {
+    if (Array.isArray(log)) {
+      set((state) => ({ logs: [...log, ...state.logs] }));
+    } else {
+      set((state) => ({ logs: [log, ...state.logs] }));
+    }
   },
 }));
