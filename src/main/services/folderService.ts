@@ -3,6 +3,7 @@ import { db } from "../../db";
 import { FolderSchema, FolderTable, NewFolder } from "../../db/schema";
 import { createResponse } from "../../db/functions";
 import { eq } from "drizzle-orm";
+import { FullFolder } from "~/src/shared/types/FolderWithDetails";
 
 export async function getAllFolders(): Promise<FolderSchema[]> {
   return await db.query.FolderTable.findMany();
@@ -32,11 +33,21 @@ export async function updateFolder(folder: FolderSchema) {
     .where(eq(FolderTable.id, folder.id));
 }
 
-export async function getFolderById(folderId: number): Promise<DbResponse<FolderSchema>> {
-  const folder = await db.query.FolderTable.findFirst({ where: eq(FolderTable.id, folderId) });
+export async function getFolderById(folderId: number): Promise<DbResponse<FullFolder>> {
+  const folder = await db.query.FolderTable.findFirst({
+    where: eq(FolderTable.id, folderId),
+    with: { profileFolders: { with: { profile: true } } },
+  });
 
   if (folder) {
-    return createResponse(true, "Pasta encontrada com sucesso!", folder);
+    const { id, fullPath, name, profileFolders } = folder;
+    const fullFolder: FullFolder = {
+      id,
+      fullPath,
+      name,
+      profiles: profileFolders.map((p) => p.profile),
+    };
+    return createResponse(true, "Pasta encontrada com sucesso!", fullFolder);
   } else {
     return createResponse(false, "Pasta não encontrada");
   }
