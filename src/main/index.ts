@@ -11,13 +11,22 @@ import { seedDatabase } from "../db/seeds";
 import { registerFileHandlers } from "./handlers/system/file";
 import { registerOrganizationHandlers } from "./handlers/domain/organization";
 
+import { registerChokidarHandlers } from "./handlers/system/chokidar";
+import { folderMonitorService } from "./core/folderMonitorService";
+import { mainProcessEmitter } from "./emitter/mainProcessEmitter";
+import { LogMetadata } from "../shared/types/LogMetaDataType";
+import { createTray } from "./tray";
+
+let mainWindow: BrowserWindow | null = null;
+
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 880,
     show: false,
     icon: join(__dirname, "resources", "favicon.ico"),
+
     autoHideMenuBar: true,
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -29,8 +38,10 @@ function createWindow(): void {
   });
 
   mainWindow.on("ready-to-show", () => {
-    mainWindow.show();
+    mainWindow?.show();
   });
+
+  createTray(mainWindow);
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
@@ -76,15 +87,21 @@ app.whenReady().then(async () => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+  registerRuleHandlers();
+  registerDialogHandlers();
+  registerProfileHandlers();
+  registerFolderHandlers();
+  registerSettingsHandlers();
+  registerOrganizationHandlers();
+  registerFileHandlers();
+  registerChokidarHandlers();
+  mainProcessEmitter.on("log-added", (log: LogMetadata) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("log-added", log);
+    }
+  });
+  await folderMonitorService.start();
 });
-
-registerRuleHandlers();
-registerDialogHandlers();
-registerProfileHandlers();
-registerFolderHandlers();
-registerSettingsHandlers();
-registerOrganizationHandlers();
-registerFileHandlers();
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
