@@ -1,11 +1,12 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { RuleTable } from "./rules";
-import { ActionsType } from "~/src/shared/types/ActionsType";
+
 import { relations } from "drizzle-orm";
+import { ActionsType, ActionsTypeValues } from "../../shared/types/ActionsType";
 
 export const ActionTable = sqliteTable("actions", {
   id: integer("id").primaryKey(),
-  type: text("type", { enum: ["move", "copy", "rename", "delete"] }).notNull(),
+  type: text("type", { enum: ActionsTypeValues }).notNull(),
   value: text("value"),
   ruleId: integer("rule_id")
     .references(() => RuleTable.id, { onDelete: "cascade" })
