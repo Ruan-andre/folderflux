@@ -1,17 +1,8 @@
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardActions,
-  Select,
-  MenuItem,
-  Button,
-  SelectChangeEvent,
-  Box,
-  Typography,
-} from "@mui/material";
+import { Card, CardHeader, CardContent, CardActions, Button, Box, Typography } from "@mui/material";
 import ConditionInput from "../ConditionInput";
 import { ICondition, IConditionGroup } from "../../../../shared/types/ConditionsType";
+import GenericInput from "../GenericInput";
+import { memo, useCallback } from "react";
 
 type ConditionGroupProps = {
   group: IConditionGroup;
@@ -26,10 +17,13 @@ type ConditionGroupProps = {
 };
 
 const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode }: ConditionGroupProps) => {
-  const handleOperatorChange = (event: SelectChangeEvent<"AND" | "OR">) => {
-    const effectiveParentId = parentId ?? "root";
-    onUpdateNode(group.id, effectiveParentId, { operator: event.target.value as "AND" | "OR" });
-  };
+  const handleOperatorChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const effectiveParentId = parentId ?? "root";
+      onUpdateNode(group.id, effectiveParentId, { operator: event.target.value as "AND" | "OR" });
+    },
+    [group.id, onUpdateNode, parentId]
+  );
 
   return (
     <Card
@@ -40,26 +34,34 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
         mb: 2,
         backgroundColor: "rgba(0,0,0,0.2)",
         border: "1px solid rgba(255, 255, 255, 0.1)",
-        boxShadow: 1,
+        backdropFilter: "none",
+        boxShadow: 4,
       }}
     >
       <CardHeader
         title={
-          <Typography variant="body1" component={"div"} color="text.secondary">
-            Se{" "}
-            <Select
-              size="small"
+          <Typography
+            variant="body1"
+            component={"div"}
+            sx={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}
+            color="text.secondary"
+          >
+            Se
+            <GenericInput
+              name="andOr"
+              select
               value={group.operator}
+              fullWidth={false}
+              inputWidth={"17rem"}
+              margin={"0 0.5rem"}
+              selectOptions={[
+                { label: "TODAS", value: "AND" },
+                { label: "QUALQUER UMA", value: "OR" },
+              ]}
+              inputSize="small"
+              textFieldType="outlined"
               onChange={handleOperatorChange}
-              sx={{ mx: 1, fontSize: "inherit" }}
-            >
-              <MenuItem sx={{ fontSize: "1.5rem" }} value="AND">
-                TODAS
-              </MenuItem>
-              <MenuItem sx={{ fontSize: "1.5rem" }} value="OR">
-                QUALQUER UMA
-              </MenuItem>
-            </Select>
+            />
             das condições a seguir forem verdadeiras:
           </Typography>
         }
@@ -116,4 +118,4 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
   );
 };
 
-export default ConditionGroup;
+export default memo(ConditionGroup);
