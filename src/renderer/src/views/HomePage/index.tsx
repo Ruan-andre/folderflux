@@ -31,7 +31,11 @@ const HomePage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogMetadata | null>(null);
-  const { logs, deleteAllLogs, getLogs, deleteLog } = useLogStore();
+  const logs = useLogStore((state) => state.logs);
+  const deleteAllLogs = useLogStore((state) => state.deleteAllLogs);
+  const getLogs = useLogStore((state) => state.getLogs);
+  const deleteLog = useLogStore((state) => state.deleteLog);
+  const addSavedLogFromBD = useLogStore((state) => state.addSavedLogFromBD);
 
   useEffect(() => {
     async function fetchData() {
@@ -50,9 +54,14 @@ const HomePage = () => {
     }
 
     fetchData();
-    console.count("vezes");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getLogs, lastLogId]);
+
+  useEffect(() => {
+    console.count("vezes");
+    const removeListener = window.api.onLogAdded((log) => addSavedLogFromBD(log));
+    return () => removeListener();
+  }, [addSavedLogFromBD]);
 
   const recentActivityList: GenericListItemsType[] = logs.map((item) => {
     const icon =
@@ -190,6 +199,11 @@ const HomePage = () => {
     showMessage(response.message, messageType);
   };
 
+  async function handleClickForceVerification() {
+    const response = await window.api.organization.organizeAll();
+    handleMessage(response);
+  }
+
   return (
     <ContentWrapper minHeightStyle="95vh" justifyContent="flex-start">
       <div className="flex-center">
@@ -200,6 +214,7 @@ const HomePage = () => {
           bgColorIcon="none"
           widthCard="35rem"
           heightCard="11rem"
+          onClick={handleClickForceVerification}
         />
 
         <GenericCard
