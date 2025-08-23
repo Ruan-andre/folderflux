@@ -62,6 +62,9 @@ const api = {
     getProfileById: (profileId: number): Promise<DbResponse<FullProfile>> =>
       ipcRenderer.invoke("get-profile-by-id", profileId),
 
+    getProfilesActiveInactiveCount: (): Promise<string> =>
+      ipcRenderer.invoke("get-profiles-active-inactive-count"),
+
     getCountProfilesWithFolder: (folderId: number): Promise<number> =>
       ipcRenderer.invoke("get-count-profiles-with-folder", folderId),
 
@@ -87,7 +90,8 @@ const api = {
   },
   settings: {
     getSettings: async (): Promise<SettingsSchema[]> => ipcRenderer.invoke("get-settings"),
-    toggleSettingActive: async (id: number): Promise<void> => ipcRenderer.invoke("toggle-setting-active", id),
+    toggleSettingActive: async (id: number, type?: SettingsSchema["type"]): Promise<void> =>
+      ipcRenderer.invoke("toggle-setting-active", id, type),
   },
   dialog: {
     selectDirectory: (): Promise<string | null> => ipcRenderer.invoke("select-directory"),
