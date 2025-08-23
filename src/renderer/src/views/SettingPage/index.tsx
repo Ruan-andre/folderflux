@@ -49,7 +49,9 @@ const SettingPage = () => {
     );
 
     try {
-      await window.api.settings.toggleSettingActive(id);
+      const selectedSetting = originalSettings.find((s) => s.id === id);
+      const settingType = selectedSetting?.type === "startWithOS" ? "startWithOS" : undefined;
+      await window.api.settings.toggleSettingActive(id, settingType);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showMessage("Erro ao atualizar a configuração.", "error");
@@ -71,7 +73,6 @@ const SettingPage = () => {
           listItemPadding="1.5rem"
         />
       </ContentWrapper>
-
       <ContentWrapper title="Aparência" hr boxShadow="none" titleSize={20} gap="1rem" padding="1rem">
         <GenericListItems
           list={appearanceSettingsList}
