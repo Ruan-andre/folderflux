@@ -10,6 +10,7 @@ import {
   getProfileById,
   toggleProfileStatus,
   updateProfile,
+  getProfilesActiveInactiveCount,
 } from "../../services/profileService";
 import { handleError } from "../../../db/functions";
 
@@ -27,6 +28,14 @@ export function registerProfileHandlers() {
       return await getProfileById(profileId);
     } catch (e) {
       return handleError(e, "Erro ao buscar perfil");
+    }
+  });
+
+  ipcMain.handle("get-profiles-active-inactive-count", async (): Promise<string> => {
+    try {
+      return await getProfilesActiveInactiveCount();
+    } catch (e) {
+      throw handleError(e, "Erro ao buscar informações");
     }
   });
 
