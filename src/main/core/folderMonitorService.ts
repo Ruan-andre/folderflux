@@ -12,7 +12,7 @@ class FolderMonitorService {
   private debounceTimer: NodeJS.Timeout | null = null;
   private changedFiles: Set<string> = new Set();
   private watchedFolders: Set<string> = new Set();
-  private debounceSeconds: number = 3 * 1000; // 3000ms = 3 segundos
+  private debounceSeconds: number = 2 * 1000; // 2000ms = 2 segundos
   private processingRequest: Set<string> = new Set();
 
   constructor() {
