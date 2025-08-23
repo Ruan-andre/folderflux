@@ -1,85 +1,70 @@
-import { Paper, Typography, Box, Tooltip } from "@mui/material";
+import { Paper, Typography, Box, Tooltip, styled, PaperProps, Palette, SxProps, Theme } from "@mui/material";
 import LabelTextWithTooltip from "../LabelTextWithTooltip";
 
-type GenericCardType = {
+type PaletteColorKey = keyof Pick<
+  Palette,
+  "primary" | "secondary" | "error" | "warning" | "info" | "success"
+>;
+
+type GenericCardProps = {
   title: string;
   subtitle?: string;
-  bgColor?: string;
-  border?: string;
-  displayCardStyle?: string;
-  flexDirectionCard?: "column" | "row";
-  gapCard?: string;
-  widthCard?: string;
-  minWidthCard?: string;
-  heightCard?: string;
-  minHeightCard?: string;
-  paddingCard?: number;
   icon?: React.ReactNode;
-  bgColorIcon?: string;
+  iconColor?: PaletteColorKey;
+  iconSx?: SxProps<Theme>;
   children?: React.ReactNode;
   onClick?: () => void;
+  sx?: PaperProps["sx"]; // Permite passar o sx para o Paper
+  className?: string;
 };
+
+const CardPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.background.paper, // Cor do tema!
+  transition: theme.transitions.create(["box-shadow", "transform"], {
+    duration: theme.transitions.duration.short,
+  }),
+  cursor: "pointer",
+  display: "flex",
+  flexDirection: "column",
+  "&:hover": {
+    boxShadow: theme.shadows[6],
+    transform: "translateY(-5px)",
+  },
+}));
+
+const IconWrapper = styled(Box, { shouldForwardProp: (prop) => prop !== "iconColor" })<{
+  iconColor?: PaletteColorKey;
+}>(({ theme, iconColor = "primary" }) => ({
+  backgroundColor: theme.palette[iconColor].main,
+  width: 50,
+  height: 50,
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+}));
 
 const GenericCard = ({
   title,
   subtitle,
-  bgColor,
-  border,
-  widthCard,
-  minWidthCard,
-  heightCard,
-  minHeightCard,
-  paddingCard,
-  displayCardStyle,
-  flexDirectionCard,
-  gapCard,
   icon,
-  bgColorIcon,
   children,
   onClick,
-}: GenericCardType) => {
+  sx,
+  className,
+  iconColor,
+  iconSx,
+}: GenericCardProps) => {
   return (
-    <Paper
-      onClick={onClick}
-      elevation={3}
-      sx={{
-        p: paddingCard ?? 3,
-        display: displayCardStyle ?? "block",
-        flexDirection: flexDirectionCard ?? "",
-        justifyContent: "space-between",
-        gap: gapCard ?? "0",
-        borderRadius: 2,
-        backgroundColor: bgColor || "#1e2533",
-        border: border ?? "none",
-        width: widthCard ?? "33rem",
-        height: heightCard ?? "auto",
-        minWidth: minWidthCard ?? widthCard ?? "20rem",
-        minHeight: minHeightCard ?? heightCard ?? "20rem",
-        transition: "0.3s",
-        cursor: "pointer",
-        backgroundImage: "none",
-        "&:hover": {
-          boxShadow: 6,
-          transform: "translateY(-5px)",
-        },
-      }}
-    >
+    <CardPaper className={className} onClick={onClick} elevation={3} sx={sx}>
       <Box display="flex" alignItems="center" gap={2}>
         {icon && (
-          <Box
-            sx={{
-              bgcolor: bgColorIcon ?? "#2aaefc",
-              width: 50,
-              height: 50,
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
+          <IconWrapper iconColor={iconColor} sx={iconSx}>
             {icon}
-          </Box>
+          </IconWrapper>
         )}
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -88,14 +73,7 @@ const GenericCard = ({
             slotProps={{ tooltip: { sx: { fontSize: "1.5rem" } } }}
             placement="bottom-start"
           >
-            <Typography
-              whiteSpace={"nowrap"}
-              overflow={"hidden"}
-              textOverflow={"ellipsis"}
-              fontWeight={700}
-              color="white"
-              fontSize="2rem"
-            >
+            <Typography variant="h5" component="h2" color="text.primary" noWrap>
               {title}
             </Typography>
           </Tooltip>
@@ -104,16 +82,15 @@ const GenericCard = ({
               text={subtitle}
               breakLine
               typographySX={{
-                textOverflow: "ellipsis",
                 fontSize: "1.5rem",
-                color: "var(--title-gray-dark)",
+                color: "text.secondary",
               }}
             />
           )}
         </Box>
       </Box>
       <Box>{children}</Box>
-    </Paper>
+    </CardPaper>
   );
 };
 

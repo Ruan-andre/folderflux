@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, RefObject } from "react";
-import { Modal, Typography } from "@mui/material";
+import { Box, Modal, styled, Typography } from "@mui/material";
 import ContentWrapper from "../../components/ContentWrapper";
 import FolderDropZone from "../../components/FolderDropZone";
 import GenericListItems from "../../components/GenericListItems";
@@ -18,10 +18,13 @@ import { LogMetadata } from "~/src/shared/types/LogMetaDataType";
 import { useIntersectionObserver } from "../../hooks/intersectionObserverHook"; // ✅ IMPORTADO
 import { PathStats } from "~/src/shared/types/pathStatsType";
 import { useLogStore } from "../../store/logStore";
+import { useNavigate } from "react-router-dom";
+import DonationPopup from "../../components/DonationPopup";
 
 const HomePage = () => {
   const { showConfirm } = useConfirmDialog();
   const { showMessage } = useSnackbar();
+  const navigate = useNavigate();
 
   const [isRuleSelectorOpen, setIsRuleSelectorOpen] = useState<boolean>(false);
   const [foldersForQuickClean, setFoldersForQuickClean] = useState<string[]>([]);
@@ -31,11 +34,13 @@ const HomePage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogMetadata | null>(null);
+  const [profilesLegend, setProfilesLegend] = useState("");
   const logs = useLogStore((state) => state.logs);
   const deleteAllLogs = useLogStore((state) => state.deleteAllLogs);
   const getLogs = useLogStore((state) => state.getLogs);
   const deleteLog = useLogStore((state) => state.deleteLog);
   const addSavedLogFromBD = useLogStore((state) => state.addSavedLogFromBD);
+  const [isDonationPopupOpen, setIsDonationPopupOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -58,7 +63,7 @@ const HomePage = () => {
   }, [getLogs, lastLogId]);
 
   useEffect(() => {
-    console.count("vezes");
+    handleSubTitleProfiles();
     const removeListener = window.api.onLogAdded((log) => addSavedLogFromBD(log));
     return () => removeListener();
   }, [addSavedLogFromBD]);
@@ -204,37 +209,56 @@ const HomePage = () => {
     handleMessage(response);
   }
 
+  const handleSubTitleProfiles = async () => {
+    const result = await window.api.profile.getProfilesActiveInactiveCount();
+    setProfilesLegend(result);
+  };
+
+  const HomePageCard = styled(GenericCard)(() => ({
+    width: "35rem",
+    height: "11rem",
+    backgroundColor: "#1e2533",
+    borderRadius: 8,
+  }));
   return (
     <ContentWrapper minHeightStyle="95vh" justifyContent="flex-start">
-      <div className="flex-center">
-        <GenericCard
+      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
+        <HomePageCard
           title="Forçar Verificação"
           subtitle="Verifica todas as pastas monitoradas imediatamente"
           icon={<Icon icon="vscode-icons:file-type-syncpack" width="45" height="45" />}
-          bgColorIcon="none"
-          widthCard="35rem"
-          heightCard="11rem"
           onClick={handleClickForceVerification}
+          iconSx={{ backgroundColor: "transparent" }}
         />
-
-        <GenericCard
+        <HomePageCard
           title="Status dos Perfis"
-          subtitle="3 perfis Ativos, 1 Inativo"
+          subtitle={profilesLegend}
           icon={<Icon icon="fluent-color:person-16" width="45" height="45" />}
-          bgColorIcon="none"
-          widthCard="35rem"
-          heightCard="11rem"
+          onClick={() => navigate("/profiles")}
+          iconSx={{ backgroundColor: "transparent" }}
         />
 
-        <GenericCard
+        <HomePageCard
           title="Como usar?"
           subtitle="Guia rápido de início"
           icon={<Icon icon="noto-v1:graduation-cap" width="45" height="45" />}
-          bgColorIcon="none"
-          widthCard="35rem"
-          heightCard="11rem"
+          iconSx={{ backgroundColor: "transparent" }}
         />
-      </div>
+
+        <HomePageCard
+          title="Ajudar o projeto"
+          subtitle="Doe qualquer quantia para ajudar o avanço do projeto"
+          icon={<Icon icon="streamline-ultimate-color:cash-payment-coin-dollar" width="45" height="45" />}
+          onClick={() => setIsDonationPopupOpen(true)}
+          iconSx={{ backgroundColor: "transparent" }}
+        />
+        <DonationPopup
+          open={isDonationPopupOpen}
+          onClose={() => {
+            setIsDonationPopupOpen(false);
+          }}
+        />
+      </Box>
       <FolderDropZone onClick={handleClickSelectFolder} onItemsDropped={handleItemsDropped} />
       <ContentWrapper
         title="Atividade Recente"

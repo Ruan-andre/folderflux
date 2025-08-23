@@ -1,24 +1,26 @@
 import { SxProps, Theme, Tooltip, Typography } from "@mui/material";
 
-const sxBreakLine = {
-  display: "-webkit-box",
-  WebkitBoxOrient: "vertical",
-  WebkitLineClamp: 2, // Define o máximo de 2 linhas
+// Estilo para quebra de linha com ellipsis após 2 linhas
+const sxLineClamp = {
   overflow: "hidden",
   textOverflow: "ellipsis",
+  display: "-webkit-box",
+  WebkitBoxOrient: "vertical",
+  WebkitLineClamp: 2,
 };
+
 const LabelTextWithTooltip = ({
   text,
   tooltipText,
   typographySX,
-  breakLine = false,
+  breakLine,
 }: {
   text: string;
   tooltipText?: string;
   typographySX?: SxProps<Theme>;
   breakLine?: boolean;
 }) => {
-  const finalSx: SxProps<Theme> = [breakLine && sxBreakLine, typographySX].filter(Boolean) as SxProps<Theme>;
+  const finalSx: SxProps<Theme> = [breakLine && sxLineClamp, typographySX].filter(Boolean) as SxProps<Theme>;
 
   return (
     <Tooltip title={tooltipText ?? text} slotProps={{ tooltip: { sx: { fontSize: "1.5rem" } } }}>
