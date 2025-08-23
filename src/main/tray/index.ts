@@ -9,15 +9,15 @@ export function createTray(window: BrowserWindow) {
   const tray = new Tray(icon);
 
   const menu = Menu.buildFromTemplate([
-    { label: "TidyFlux - Organização Inteligente", enabled: false },
+    { label: "FolderFlux - Organização Inteligente", enabled: false },
     { type: "separator" },
     { label: "Abrir", enabled: true, click: () => window.show() },
     { label: "Forçar verificação", click: async () => await RuleEngine.processAll() },
     { label: "Sair", enabled: true, role: "quit" },
   ]);
 
-  tray.setToolTip("O TidyFlux está sendo executado em segundo plano");
-  tray.addListener("double-click", () => window.show());
+  tray.setToolTip("O FolderFlux está sendo executado em segundo plano");
   tray.addListener("click", () => tray.popUpContextMenu());
+  tray.addListener("right-click", () => tray.popUpContextMenu());
   tray.setContextMenu(menu);
 }

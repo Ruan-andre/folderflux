@@ -3,7 +3,7 @@ import { NewSettings } from "../schema";
 export const settingSeed: NewSettings[] = [
   {
     title: "Iniciar com o sistema",
-    description: "Executar o TidyFlux quando computador for ligado",
+    description: "Executar o FolderFlux quando computador for ligado",
     category: "general",
     isActive: true,
     type: "startWithOS",
@@ -19,7 +19,7 @@ export const settingSeed: NewSettings[] = [
     title: "Notificações",
     description: "Exibir notificações quando arquivos forem organizados",
     category: "general",
-    isActive: true,
+    isActive: false, // por padrão false porque penso que como o app ficará rodando em segundo plano, pode haver uma chuva de notificações se ocorrer muitas organizações
     type: "notifications",
   },
   {

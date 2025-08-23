@@ -1,5 +1,5 @@
 {
-  "name": "tidyflux-app",
+  "name": "FolderFlux-app",
   "version": "1.0.0",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
@@ -28,6 +28,7 @@
     "@emotion/styled": "^11.14.0",
     "@iconify/react": "^5.2.1",
     "@mui/material": "^7.0.2",
+    "auto-launch": "^5.0.6",
     "better-sqlite3": "^11.9.1",
     "chokidar": "^4.0.3",
     "date-fns": "^4.1.0",
@@ -48,6 +49,7 @@
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/auto-launch": "^5.0.5",
     "@types/better-sqlite3": "^7.6.13",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/node": "^22.14.1",

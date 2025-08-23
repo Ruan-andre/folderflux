@@ -14,8 +14,8 @@ const __dirname = path.dirname(__filename);
 // Caminho para o banco (AppData/UserData no Electron)
 const dbPath =
   process.platform === "darwin"
-    ? path.join(app.getPath("appData"), "tidyflux.db")
-    : path.join(app.getPath("userData"), "tidyflux.db");
+    ? path.join(app.getPath("appData"), "FolderFlux.db")
+    : path.join(app.getPath("userData"), "FolderFlux.db");
 
 // Garante que a pasta existe
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
