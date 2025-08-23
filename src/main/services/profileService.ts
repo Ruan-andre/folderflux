@@ -282,6 +282,11 @@ export async function updateProfile(data: FullProfile): Promise<DbResponse> {
   }
 }
 
+export async function getProfilesActiveInactiveCount(): Promise<string> {
+  const profileStatus = await db.select({ isActive: ProfileTable.isActive }).from(ProfileTable);
+  return `${profileStatus.filter((p) => p.isActive).length} ativo(s), ${profileStatus.filter((p) => !p.isActive).length} inativo(s)`;
+}
+
 export async function getSystemProfilesCount(): Promise<number> {
   return (await db.select({ count: count() }).from(ProfileTable).where(eq(ProfileTable.isSystem, true)))[0]
     .count;
