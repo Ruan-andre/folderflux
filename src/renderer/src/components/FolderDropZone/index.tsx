@@ -1,5 +1,5 @@
 import { useState, DragEvent } from "react";
-import { Box, Typography, Stack } from "@mui/material";
+import { Box, Typography, Stack, useTheme } from "@mui/material";
 import Icon from "../../assets/icons/";
 
 interface FolderDropZoneProps {
@@ -8,6 +8,7 @@ interface FolderDropZoneProps {
 }
 
 const FolderDropZone = ({ onClick, onItemsDropped }: FolderDropZoneProps) => {
+  const theme = useTheme();
   const [isDragActive, setIsDragActive] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
 
@@ -43,13 +44,21 @@ const FolderDropZone = ({ onClick, onItemsDropped }: FolderDropZoneProps) => {
     }
   };
 
-  const borderColor = isInvalid ? "error.main" : isDragActive ? "success.main" : "#4a5a75";
+  const borderColor = isInvalid
+    ? "error.main"
+    : isDragActive
+      ? "success.main"
+      : theme.palette.mode === "dark"
+        ? "#4a5a75"
+        : "#d1ccc8";
   const backgroundColor = isInvalid
     ? "rgba(175, 76, 76, 0.1)"
     : isDragActive
       ? "rgba(76, 175, 80, 0.1)"
-      : "#2d3646";
-  const fontColor = isInvalid ? "error.main" : isDragActive ? "success.main" : "var(--title-gray-dark)";
+      : theme.palette.mode === "dark"
+        ? "#2d3646"
+        : "#f5f2ef";
+  const fontColor = isInvalid ? "error.main" : isDragActive ? "success.main" : theme.palette.text.primary;
 
   return (
     <Box
@@ -86,7 +95,7 @@ const FolderDropZone = ({ onClick, onItemsDropped }: FolderDropZoneProps) => {
           height="45"
           color={isDragActive ? "#4caf50" : "inherit"}
         />
-        <Typography fontWeight={600} color="white" fontSize="1.8rem">
+        <Typography fontWeight={600} color={theme.palette.text.primary} fontSize="1.8rem">
           Organizar Pastas
         </Typography>
         <Typography fontWeight={isDragActive ? 600 : 400} color={fontColor} fontSize="1.5rem">

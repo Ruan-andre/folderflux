@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material";
+import { Box, Button, SxProps, Theme } from "@mui/material";
 import GenericInput from "../GenericInput";
 
 type GenericFolderSelectorProps = {
@@ -6,8 +6,9 @@ type GenericFolderSelectorProps = {
   inputLabel?: string;
   btnLabel?: string;
   placeholder?: string;
-  flexDirection?: "row" | "column";
   hideSearchButton?: boolean;
+  sx: SxProps<Theme>;
+  className?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -16,8 +17,9 @@ const GenericFolderSelector = ({
   inputLabel,
   btnLabel,
   placeholder,
-  flexDirection,
   hideSearchButton,
+  sx,
+  className,
   onChange,
 }: GenericFolderSelectorProps) => {
   const handleBrowse = async () => {
@@ -32,7 +34,7 @@ const GenericFolderSelector = ({
   };
 
   return (
-    <Box display="flex" flexDirection={flexDirection ?? "column"} gap="1rem">
+    <Box display="flex" className={className} sx={sx} gap="1rem">
       <Box display="flex" gap={1} alignItems={"center"} justifyContent={"center"}>
         <Box flex={1}>
           <GenericInput

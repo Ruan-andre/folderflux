@@ -1,4 +1,4 @@
-import { Box, Button, Modal, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Button, Modal, Stack, styled, Typography, useTheme } from "@mui/material";
 import ContentWrapper from "../ContentWrapper";
 import IconSelector from "../IconSelector";
 import GenericListItems from "../GenericListItems";
@@ -19,6 +19,12 @@ import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import { formHelper } from "../../functions/form";
 import normalizeSafe from "../../functions/normalizeSafe";
 
+const GenericList = styled(GenericListItems)({
+  maxHeight: "15rem",
+  "& .MuiListItemText-primary": {
+    fontSize: "1.5rem",
+  },
+});
 const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const theme = useTheme();
   const { showMessage } = useSnackbar();
@@ -266,15 +272,14 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           }}
         >
           <ContentWrapper
+            sx={{ gap: "1.5rem", padding: "2rem" }}
             title={profileToEdit ? "Editar Perfil" : "Criar Novo Perfil"}
-            titleSize={22}
+            titleTagType="h3"
             commonBtn={{
               style: "outlined",
               text: "X",
               Action: closePopup,
             }}
-            gap="1.5rem"
-            padding="2rem"
             hr
           >
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -311,42 +316,38 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
 
             <ContentWrapper
               title="Pastas"
+              sx={{ gap: "0.5rem" }}
               commonBtn={{ text: "Gerenciar Pastas", Action: () => setIsFolderSelectorOpen(true) }}
-              gap="0.5rem"
-              titleSize={18}
+              titleTagType="h4"
               hr
             >
-              <GenericListItems
+              <GenericList
                 mode="page"
                 btnDelete
+                listItemSx={{ padding: "2px 0px" }}
                 isButton={false}
                 onClickDelete={handleRemoveFolder}
                 list={foldersForGenericList}
-                titleSize="1.5rem"
-                listItemPadding="0px"
-                maxListHeight="15rem"
               />
             </ContentWrapper>
 
             <ContentWrapper
+              sx={{ gap: "0.5rem" }}
               id="rulesList"
               title="Regras"
               commonBtn={{
                 text: "Gerenciar Regras",
                 Action: isSystem ? undefined : () => setIsRuleSelectorOpen(true),
               }}
-              gap="0.5rem"
-              titleSize={18}
+              titleTagType="h4"
               hr
             >
-              <GenericListItems
+              <GenericList
                 btnDelete
+                listItemSx={{ padding: "2px 0px" }}
                 isButton={false}
                 onClickDelete={isSystem ? undefined : handleRuleListRemove}
                 list={rulesForGenericList}
-                titleSize="1.5rem"
-                listItemPadding="2px 0px"
-                maxListHeight="15rem"
               />
             </ContentWrapper>
 

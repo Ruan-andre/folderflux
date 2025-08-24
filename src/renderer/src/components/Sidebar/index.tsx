@@ -1,12 +1,48 @@
-import { Drawer, List } from "@mui/material";
+import {
+  Drawer,
+  List,
+  Box,
+  Typography,
+  styled,
+  ListItemText,
+  ListItemButton,
+  ListItemIcon,
+} from "@mui/material";
 import Icon from "../../assets/icons";
-import MenuButton from "../MenuButton";
-import "./sidebar.css";
 import logo from "../../assets/img/logo.svg";
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+
+const SidebarTitle = styled(Typography)(({ theme }) => ({
+  fontSize: "1.4rem",
+  textTransform: "uppercase",
+  color: theme.palette.text.secondary,
+  marginBottom: theme.spacing(1),
+  fontWeight: 600,
+}));
+
+const StyledListItemText = styled(ListItemText)(() => ({
+  "& .MuiListItemText-primary": {
+    fontSize: "1.8rem",
+  },
+}));
+
+const SidebarButton = ({ text, children, to }: { text: string; children: React.ReactNode; to: string }) => {
+  const location = useLocation();
+  const isActive = location.pathname.replaceAll("/", "") === to;
+  return (
+    <ListItemButton component={Link} to={to || "#"} selected={isActive}>
+      <ListItemIcon>{children}</ListItemIcon>
+      <StyledListItemText primary={text} />
+    </ListItemButton>
+  );
+};
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const SidebarSection = styled(Box)(({ theme }) => ({
+    marginTop: isOpen ? theme.spacing(5) : undefined,
+  }));
 
   const widthMenu = isOpen ? "245px" : "75px";
   return (
@@ -29,57 +65,58 @@ const Sidebar = () => {
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
-        <img
+        <Box
+          component={"img"}
           src={logo}
           alt="Logo"
-          style={{ maxHeight: 150, objectFit: "contain" }}
+          sx={{ maxHeight: 150, objectFit: "contain" }}
           hidden={isOpen ? false : true}
         />
         <List>
-          <div className={isOpen ? "sidebar-section" : "closed"}>
-            <h3 className="sidebar-title" hidden={isOpen ? false : true}>
+          <SidebarSection>
+            <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
               Organização
-            </h3>
-            <MenuButton text="Início" to="/">
+            </SidebarTitle>
+            <SidebarButton text="Início" to="/">
               <Icon icon="fluent-color:home-16" width="30" height="30" />
-            </MenuButton>
+            </SidebarButton>
 
-            <MenuButton text="Regras" to="rules">
+            <SidebarButton text="Regras" to="rules">
               <Icon icon="gala:settings" width="30" height="30" color="#00ceff" />
-            </MenuButton>
+            </SidebarButton>
 
-            <MenuButton text="Perfis" to="profiles">
+            <SidebarButton text="Perfis" to="profiles">
               <Icon icon="fluent-color:person-add-24" width="30" height="30" />
-            </MenuButton>
-            <MenuButton text="Pastas" to="folders">
+            </SidebarButton>
+            <SidebarButton text="Pastas" to="folders">
               <Icon icon="fluent-emoji:file-folder" width="30" height="30" />
-            </MenuButton>
-          </div>
+            </SidebarButton>
+          </SidebarSection>
 
-          <div className={isOpen ? "sidebar-section" : "closed"}>
-            <h3 className="sidebar-title" hidden={isOpen ? false : true}>
+          <SidebarSection>
+            <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
               Ferramentas
-            </h3>
-            <MenuButton text="Relatórios" to="report">
+            </SidebarTitle>
+            <SidebarButton text="Relatórios" to="report">
               <Icon icon="nimbus:stats" width="30" height="30" color="#e52e2e" />
-            </MenuButton>
-          </div>
-          <div className={isOpen ? "sidebar-section" : "closed"}>
-            <h3 className="sidebar-title" hidden={isOpen ? false : true}>
+            </SidebarButton>
+          </SidebarSection>
+          <SidebarSection>
+            <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
               Configurações
-            </h3>
-            <MenuButton text="Preferências" to="settings">
+            </SidebarTitle>
+            <SidebarButton text="Preferências" to="settings">
               <Icon icon="flat-color-icons:settings" width="30" height="30" />
-            </MenuButton>
+            </SidebarButton>
 
-            <MenuButton text="Sobre" to="about">
+            <SidebarButton text="Sobre" to="about">
               <Icon icon="flat-color-icons:about" width="30" height="30" />
-            </MenuButton>
+            </SidebarButton>
 
-            <MenuButton text="Ajuda" to="help">
+            <SidebarButton text="Ajuda" to="help">
               <Icon icon="noto:sos-button" width="30" height="30" />
-            </MenuButton>
-          </div>
+            </SidebarButton>
+          </SidebarSection>
         </List>
       </Drawer>
     </>

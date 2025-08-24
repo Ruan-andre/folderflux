@@ -41,7 +41,7 @@ const ActionInput = ({ action, onChange }: ActionInputProps) => {
       />
       {action?.type !== "delete" && (
         <GenericFolderSelector
-          flexDirection="column"
+          sx={{ flexDirection: "column" }}
           onChange={(e) => handleValueChange(e.target.value)}
           value={action?.value ?? ""}
           placeholder={action?.type === "rename" ? "Novo nome" : "Pasta de destino"}

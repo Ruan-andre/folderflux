@@ -9,6 +9,8 @@ import {
   Box,
   Checkbox,
   Typography,
+  SxProps,
+  Theme,
 } from "@mui/material";
 import GenericListItemsType from "../../types/GenericListItemsType";
 import Icon from "../../assets/icons";
@@ -25,12 +27,10 @@ interface GenericListItemsProps {
   btnDelete?: boolean;
   btnSwitch?: boolean;
   isButton?: boolean;
-  titleSize?: string;
-  subtitleSize?: string;
   noGutters?: boolean;
-  listItemPadding?: string;
-  maxListHeight?: string;
-  borderBottom?: string;
+  sx?: SxProps<Theme>;
+  listItemSx?: SxProps<Theme>;
+  className?: string;
   selectedIds?: number[];
   lastItemRef?: RefObject<HTMLLIElement>;
   onClickEdit?: (id: number) => void;
@@ -45,12 +45,10 @@ const GenericListItems = ({
   id,
   mode = "page",
   isButton = true,
-  titleSize,
-  subtitleSize,
   noGutters,
-  listItemPadding,
-  maxListHeight,
-  borderBottom,
+  sx,
+  listItemSx,
+  className,
   btnEdit,
   btnDelete,
   btnSwitch,
@@ -86,21 +84,19 @@ const GenericListItems = ({
   return (
     <List
       id={id}
+      className={className}
       sx={{
         width: "100%",
         overflowY: "auto",
         overflowX: "hidden",
-        maxHeight: maxListHeight ?? "inherit",
+        ...sx,
       }}
     >
       {list.map((item, index) => (
         <ListItem
           key={index}
           ref={index === list.length - 1 ? lastItemRef : null}
-          sx={{
-            padding: listItemPadding ?? 0,
-            borderBottom: borderBottom ?? "none",
-          }}
+          sx={listItemSx}
           disableGutters={noGutters ?? false}
           secondaryAction={
             (btnEdit || btnDelete) && (
@@ -139,12 +135,6 @@ const GenericListItems = ({
               <ListItemText
                 sx={{
                   alignItems: "flex-start",
-                  "& .MuiListItemText-primary": {
-                    fontSize: titleSize ?? theme.typography.caption,
-                  },
-                  "& .MuiListItemText-secondary": {
-                    fontSize: subtitleSize ?? theme.typography.subtitle1,
-                  },
                 }}
                 primary={item.title}
                 slotProps={{
@@ -164,10 +154,10 @@ const GenericListItems = ({
               <ListItemText
                 sx={{
                   "& .MuiListItemText-primary": {
-                    fontSize: titleSize ?? theme.typography.caption,
+                    fontSize: theme.typography.caption,
                   },
                   "& .MuiListItemText-secondary": {
-                    fontSize: subtitleSize ?? theme.typography.subtitle1,
+                    fontSize: theme.typography.subtitle1,
                   },
                 }}
                 primary={item.title}

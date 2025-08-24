@@ -1,4 +1,3 @@
-// src/context/SnackbarContext.tsx
 import React, { createContext, useContext, useState } from "react";
 import { Snackbar, Alert, AlertColor } from "@mui/material";
 
@@ -61,8 +60,8 @@ export const SnackbarProvider = ({ children }: { children: React.ReactNode }) =>
             width: "100%",
             fontSize: "2rem",
             "& .MuiAlert-icon": {
-              fontSize: "2.5rem", // Ajuste aqui para alinhar visualmente
-              marginRight: "1rem", // espaçamento opcional
+              fontSize: "2.5rem",
+              marginRight: "1rem",
               alignItems: "center",
             },
             display: "flex",

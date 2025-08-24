@@ -1,4 +1,14 @@
-import { Box, Button, useTheme, Typography, Stack, AlertColor } from "@mui/material";
+import {
+  Box,
+  Button,
+  useTheme,
+  Typography,
+  Stack,
+  AlertColor,
+  styled,
+  BoxProps,
+  Divider,
+} from "@mui/material";
 import CustomSwitch from "../CustomSwitch";
 
 type ContentWrapperProps = {
@@ -6,7 +16,6 @@ type ContentWrapperProps = {
   id?: string;
   title?: string;
   titleTagType?: "h1" | "h2" | "h3" | "h4";
-  titleSize?: number;
   switchBtn?: {
     Action?: () => void;
     value?: boolean;
@@ -17,106 +26,89 @@ type ContentWrapperProps = {
     text?: string;
     color?: AlertColor;
   };
-  bgColor?: string;
-  maxHeightStyle?: string | number;
-  minHeightStyle?: string | number;
-  wrapStyle?: string;
-  gap?: string;
-  padding?: string;
   hr?: boolean;
-  alignItems?: string;
-  justifyContent?: string;
-  boxShadow?: string;
+  sx?: BoxProps["sx"];
+  className?: string;
 };
+
+const Wrapper = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(4),
+  backgroundColor: theme.palette.background.paper,
+  boxShadow:
+    theme.palette.mode === "dark"
+      ? theme.shadows[15]
+      : "0 2px 8px 0 rgba(139, 133, 127, 0.15), 0 1px 3px 0 rgba(139, 133, 127, 0.1)",
+  padding: theme.spacing(3),
+  borderRadius: theme.shape.borderRadius,
+  overflow: "auto",
+  scrollBehavior: "smooth",
+  width: "100%",
+  backgroundImage: "none",
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  fontSize: "1rem",
+  borderRadius: theme.shape.borderRadius,
+}));
+
 const ContentWrapper = ({
   children,
   id,
   title,
-  titleTagType,
-  titleSize,
+  titleTagType = "h2",
   switchBtn,
   commonBtn,
-  bgColor,
-  maxHeightStyle,
-  minHeightStyle,
-  wrapStyle,
-  gap,
-  padding,
   hr,
-  alignItems,
-  justifyContent,
-  boxShadow,
+  sx,
 }: ContentWrapperProps) => {
   const theme = useTheme();
-  let btnField;
-  if (commonBtn?.Action) {
-    btnField = (
-      <>
-        <Button
+
+  const renderHeaderControl = () => {
+    if (commonBtn?.Action) {
+      return (
+        <ActionButton
           variant={commonBtn.style || "contained"}
-          sx={{
-            fontSize: "1rem",
-            borderRadius: "1rem",
-            ":hover": {
-              backgroundColor: commonBtn.color === "error" ? "brown" : "inherit",
-            },
-          }}
           onClick={commonBtn.Action}
           color={commonBtn.color ?? "primary"}
+          sx={{
+            "&:hover": {
+              backgroundColor: commonBtn.color === "error" ? theme.palette.error.dark : undefined,
+            },
+          }}
         >
           {commonBtn.text || "Ver tudo"}
-        </Button>
-      </>
-    );
-  } else if (switchBtn) {
-    btnField = (
-      <CustomSwitch
-        title={switchBtn.value ? "Desativar" : "Ativar"}
-        onClick={switchBtn.Action}
-        checked={switchBtn.value}
-      />
-    );
-  } else {
-    btnField = undefined;
-  }
+        </ActionButton>
+      );
+    }
+    if (switchBtn) {
+      return (
+        <CustomSwitch
+          title={switchBtn.value ? "Desativar" : "Ativar"}
+          onClick={switchBtn.Action}
+          checked={switchBtn.value}
+        />
+      );
+    }
+    return null;
+  };
+
+  const headerControl = renderHeaderControl();
 
   return (
-    <Box
-      id={id}
-      onDragEnter={() => console.log("minha picona")}
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        flexWrap: wrapStyle ? wrapStyle : "",
-        justifyContent: justifyContent ?? "center",
-        alignItems: alignItems ?? "",
-        gap: gap ? gap : "3rem",
-        backgroundColor: bgColor ?? theme.palette.background.paper,
-        boxShadow: boxShadow ?? "0 4px 12px rgba(0, 0, 0, 0.4)",
-        padding: padding ?? "1.5rem",
-        borderRadius: theme.shape.borderRadius,
-        fontSize: theme.typography.fontSize,
-        overflow: "auto",
-        scrollBehavior: "smooth",
-        width: "100%",
-        maxHeight: maxHeightStyle ?? "100%",
-        minHeight: minHeightStyle ? minHeightStyle : "",
-      }}
-    >
-      <Stack direction={"column"} spacing={1}>
-        {(title || btnField) && (
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography variant={titleTagType ? titleTagType : "h1"} fontSize={titleSize || 32}>
-              {title}
-            </Typography>
-            {btnField}
+    <Wrapper id={id} sx={sx}>
+      {(title || headerControl) && (
+        <Stack spacing={1.5}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            {title && <Typography variant={titleTagType}>{title}</Typography>}
+            {headerControl}
           </Box>
-        )}
-
-        {hr && <hr />}
-      </Stack>
+          {hr && <Divider />}
+        </Stack>
+      )}
       {children}
-    </Box>
+    </Wrapper>
   );
 };
 

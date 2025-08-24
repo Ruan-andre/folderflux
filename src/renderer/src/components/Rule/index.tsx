@@ -1,4 +1,4 @@
-import { Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import ContentWrapper from "../ContentWrapper";
 import { useSnackbar } from "../../context/SnackBarContext";
 import { useRuleStore } from "../../store/ruleStore";
@@ -56,11 +56,9 @@ const Rule = (rule: FullRule) => {
   const extensions = getExtensionsFromTree(conditionsTree).join(", ");
   return (
     <ContentWrapper
+      sx={{ gap: "1rem", backgroundColor: theme.palette.mode === "dark" ? "#2A3040" : "#e6e6e6ff" }}
       title={name}
       titleTagType="h4"
-      titleSize={22}
-      gap="1rem"
-      bgColor="#2A3040"
       switchBtn={{ Action: () => toggleActive(id), value: isActive }}
     >
       <Typography sx={{ color: theme.palette.text.secondary, fontSize: theme.typography.subtitle1 }}>
@@ -68,23 +66,24 @@ const Rule = (rule: FullRule) => {
       </Typography>
 
       {extensions.length > 0 && (
-        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+        <Box style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
           {extensions.split(",").map((item, index) => (
-            <span
+            <Typography
+              component={"span"}
               key={index}
               style={{
                 border: "1px solid",
-                borderColor: "turquoise",
+                borderColor: theme.palette.mode === "dark" ? "turquoise" : "blueviolet",
                 padding: "5px 8px",
                 borderRadius: "8px",
                 fontSize: "10px",
-                color: "turquoise",
+                color: theme.palette.mode === "dark" ? "turquoise" : "blueviolet",
               }}
             >
               {item.toUpperCase()}
-            </span>
+            </Typography>
           ))}
-        </div>
+        </Box>
       )}
 
       <div style={{ display: "flex", gap: 5 }}>

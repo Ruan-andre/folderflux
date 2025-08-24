@@ -72,7 +72,7 @@ const OrganizationLogPopup = ({ log, isOpen, onClose }: PopupProps) => {
             <TableCell colSpan={2} sx={{ fontSize: "1.5rem" }}>
               {item.currentValue}
             </TableCell>
-          ); // Use colSpan para preencher a linha
+          ); 
         case "organization":
           return (
             <>

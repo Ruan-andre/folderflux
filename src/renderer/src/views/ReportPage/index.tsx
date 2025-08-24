@@ -3,7 +3,9 @@ import ContentWrapper from "../../components/ContentWrapper";
 
 const ReportPage = () => {
   return (
-    <ContentWrapper minHeightStyle="95vh" alignItems="center">
+    <ContentWrapper
+      sx={{ display: "flex", minHeight: "95vh", alignItems: "center", justifyContent: "center" }}
+    >
       <Typography fontSize={50}>Em breve...</Typography>
     </ContentWrapper>
   );

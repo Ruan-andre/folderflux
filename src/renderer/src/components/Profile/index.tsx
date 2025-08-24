@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@mui/material";
+import { Box, styled, Typography } from "@mui/material";
 import GenericCard from "../GenericCard";
 import Icon from "../../assets/icons";
 import CrudButtons from "../CrudButtons";
@@ -19,7 +19,6 @@ const Profile = ({
   rules,
   isSystem,
 }: FullProfile) => {
-  const theme = useTheme();
   const { showMessage } = useSnackbar();
   const { showConfirm } = useConfirmDialog();
   const { deleteProfile, duplicateProfile, toggleActive } = useProfileStore();
@@ -66,55 +65,59 @@ const Profile = ({
 
   if (!id) return;
 
+  const ProfileCard = styled(GenericCard)(() => ({
+    display: "flex",
+    flexDirection: "column",
+    width: "37rem",
+    height: "23.5rem",
+    gap: "1rem",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: 8,
+  }));
+
   return (
-    <GenericCard
-      displayCardStyle="flex"
-      flexDirectionCard="column"
-      gapCard="1rem"
+    <ProfileCard
       title={name}
-      widthCard="370px"
-      heightCard="235px"
-      bgColor="#242A35"
-      paddingCard={4}
-      border="1px solid rgba(255, 255, 255, 0.1)"
       icon={<Icon icon={iconId} width="30" height="30" />}
-      bgColorIcon="#273048"
+      iconSx={{
+        backgroundColor: (theme) =>
+          theme.palette.mode === "dark" ? "#323e5fff" : theme.palette.primary.light,
+      }}
     >
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: "1rem",
+          gap: "1.5rem",
         }}
       >
         <LabelTextWithTooltip
           tooltipText={description!}
           text={description!}
           breakLine
-          typographySX={{
-            fontSize: "1.5rem",
+          typographySX={(theme) => ({
+            fontSize: theme.typography.subtitle1.fontSize,
             fontVariant: "body2",
-            color: "var(--title-gray-dark)",
-          }}
+            color: theme.palette.text.secondary,
+          })}
         />
 
         <Box display={"flex"} gap={2}>
           {rules.length > 0 && (
-            <div>
-              <span style={{ color: theme.palette.primary.main, fontWeight: "bolder" }}>
+            <Box>
+              <Typography component={"span"} variant="h5" color="primary.main">
                 {rules?.length}{" "}
-              </span>
+              </Typography>
               {rules?.length > 1 ? "Regras" : "Regra"}
-            </div>
+            </Box>
           )}
           {folders?.length > 0 && (
-            <div>
-              <span style={{ color: theme.palette.primary.main, fontWeight: "bolder" }}>
-                {" "}
+            <Box>
+              <Typography component={"span"} variant="h5" color="primary.main">
                 {folders.length}{" "}
-              </span>
+              </Typography>
               {folders.length > 1 ? "Pastas" : "Pasta"}
-            </div>
+            </Box>
           )}
         </Box>
         <Box display={"flex"} gap={1}>
@@ -137,7 +140,7 @@ const Profile = ({
           />
         </Box>
       </Box>
-    </GenericCard>
+    </ProfileCard>
   );
 };
 

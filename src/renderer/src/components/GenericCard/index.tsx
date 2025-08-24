@@ -14,14 +14,15 @@ type GenericCardProps = {
   iconSx?: SxProps<Theme>;
   children?: React.ReactNode;
   onClick?: () => void;
-  sx?: PaperProps["sx"]; // Permite passar o sx para o Paper
+  sx?: PaperProps["sx"]; 
   className?: string;
 };
 
 const CardPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.background.paper, // Cor do tema!
+  backgroundColor: theme.palette.background.paper,
+  backgroundImage: "none",
   transition: theme.transitions.create(["box-shadow", "transform"], {
     duration: theme.transitions.duration.short,
   }),
@@ -59,7 +60,7 @@ const GenericCard = ({
   iconSx,
 }: GenericCardProps) => {
   return (
-    <CardPaper className={className} onClick={onClick} elevation={3} sx={sx}>
+    <CardPaper className={className} onClick={onClick} elevation={8} sx={sx}>
       <Box display="flex" alignItems="center" gap={2}>
         {icon && (
           <IconWrapper iconColor={iconColor} sx={iconSx}>

@@ -185,10 +185,10 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       >
         <Box sx={{ flex: 1, overflowY: "auto" }}>
           <ContentWrapper
+            sx={{ gap: "1.5rem" }}
             title={ruleToEdit ? "Editar Regra" : "Criar Nova Regra"}
-            titleSize={22}
+            titleTagType="h3"
             commonBtn={{ style: "outlined", text: "X", Action: closePopup }}
-            gap="1.5rem"
             hr
           >
             <Box>

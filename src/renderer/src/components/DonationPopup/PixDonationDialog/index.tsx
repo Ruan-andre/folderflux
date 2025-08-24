@@ -9,7 +9,6 @@ interface PixDonationDialogProps {
 }
 
 // --- DADOS DO PIX ---
-// !!! IMPORTANTE: Substitua estes valores pelos seus dados reais !!!
 const PIX_KEY = "bef3cb4c-55b5-48c2-bd10-b8c6608fc728";
 const PIX_COPY_PASTE_CODE =
   "00020126580014BR.GOV.BCB.PIX0136bef3cb4c-55b5-48c2-bd10-b8c6608fc7285204000053039865802BR5925Andre Ruan Oliveira Leite6009SAO PAULO62140510CnZxkLyvpi63049FC0";
@@ -27,7 +26,6 @@ const PixDonationDialog = ({ open, onClose }: PixDonationDialogProps) => {
       const set = elementId === "pixKey" ? setCopiedKey : setCopiedCode;
 
       set(true);
-      // Reseta o estado do botão após 3 segundos
       setTimeout(() => set(false), 3000);
     } catch (err) {
       console.error("Falha ao copiar o código: ", err);

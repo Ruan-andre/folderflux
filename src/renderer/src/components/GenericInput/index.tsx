@@ -1,4 +1,13 @@
-import { TextField, Typography, useTheme, Box, MenuItem, FormHelperText } from "@mui/material";
+import {
+  TextField,
+  Typography,
+  useTheme,
+  Box,
+  MenuItem,
+  FormHelperText,
+  SxProps,
+  Theme,
+} from "@mui/material";
 
 type SelectOption = {
   label: string;
@@ -9,63 +18,65 @@ type GenericInputProps = {
   name: string;
   id?: string;
   label?: string;
-  labelSize?: string;
-  textFieldType?: "outlined" | "standard" | "filled";
   placeholder?: string;
   inputLabel?: string;
   inputSize?: "small" | "medium";
   required?: boolean;
-  borderRadius?: number | string;
-  inputWidth?: number | string;
   fullWidth?: boolean;
   multiline?: boolean;
   rows?: number;
   helperText?: string;
   error?: boolean;
-  fontSize?: string;
   value?: string;
   type?: React.HTMLInputTypeAttribute | undefined;
   select?: boolean;
   selectOptions?: SelectOption[];
   maxLength?: number;
-  bgColor?: "default" | string;
-  borderColor?: string;
-  margin?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  inputWidth?: number | string;
+  margin?: string | number;
+  textFieldType?: "outlined" | "standard" | "filled";
+  bgColor?: "default" | string;
+  sx?: SxProps<Theme>;
+  inputSx?: SxProps<Theme>;
 };
 
 const GenericInput = ({
   name,
   id,
   label,
-  labelSize,
-  textFieldType,
   placeholder,
   inputLabel,
   inputSize,
   required,
-  borderRadius,
-  inputWidth,
+  fullWidth,
   multiline,
   rows,
   helperText,
   error,
-  fontSize,
   value = "",
   onChange,
   type,
   select,
   selectOptions = [],
   maxLength,
-  bgColor,
-  borderColor,
-  fullWidth,
+  inputWidth,
   margin,
+  textFieldType,
+  bgColor,
+  sx,
+  inputSx,
 }: GenericInputProps) => {
   const theme = useTheme();
   const remaining = maxLength ? maxLength - value.length : undefined;
+
   const inputBgColor =
-    select && !bgColor ? "transparent" : !bgColor || bgColor === "default" ? "#2d3646" : bgColor;
+    select && !bgColor
+      ? "transparent"
+      : !bgColor || bgColor === "default"
+        ? theme.palette.background.paper
+        : bgColor;
+
   return (
     <Box
       display="flex"
@@ -73,15 +84,28 @@ const GenericInput = ({
       flexDirection="column"
       gap={1}
       width={inputWidth ?? "100%"}
-      maxWidth={"100%"}
+      maxWidth="100%"
       margin={margin}
+      sx={sx}
     >
       {/* Label personalizada */}
       {label && (
-        <Typography fontSize={labelSize ?? "1.8rem"}>
+        <Typography
+          sx={{
+            fontSize: "1.8rem",
+            color: theme.palette.text.primary,
+          }}
+        >
           {label}
           {required && (
-            <Typography fontSize={labelSize ?? "1.8rem"} component="span" color="error" ml={0.5}>
+            <Typography
+              component="span"
+              color="error"
+              ml={0.5}
+              sx={{
+                fontSize: "1.8rem",
+              }}
+            >
               *
             </Typography>
           )}
@@ -113,15 +137,36 @@ const GenericInput = ({
         sx={{
           backgroundColor: inputBgColor,
           "& .MuiOutlinedInput-root": {
-            borderRadius: borderRadius ?? theme.shape.borderRadius,
-            fontSize: fontSize ?? "1.4rem",
+            borderRadius: theme.shape.borderRadius,
+            fontSize: "1.4rem",
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: theme.palette.primary.main,
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: theme.palette.primary.main,
+            },
           },
           "& .MuiInputLabel-root": {
-            fontSize: fontSize ?? "1.4rem",
+            fontSize: "1.4rem",
+            color: theme.palette.text.secondary,
+            "&.Mui-focused": {
+              color: theme.palette.primary.main,
+            },
           },
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: borderColor ?? "#4a5a75",
+            borderColor: theme.palette.divider,
           },
+          "& .MuiInputBase-input": {
+            color: theme.palette.text.primary,
+            "&::placeholder": {
+              color: theme.palette.text.secondary,
+              opacity: 0.7,
+            },
+          },
+          "& .MuiFormHelperText-root": {
+            color: error ? theme.palette.error.main : theme.palette.text.secondary,
+          },
+          ...inputSx,
         }}
       >
         {select &&
@@ -135,7 +180,13 @@ const GenericInput = ({
 
       {/* Contador de caracteres */}
       {maxLength !== undefined && (
-        <FormHelperText sx={{ alignSelf: "flex-end", fontSize: "1.2rem" }}>
+        <FormHelperText
+          sx={{
+            alignSelf: "flex-end",
+            fontSize: "1.2rem",
+            color: theme.palette.text.secondary,
+          }}
+        >
           {remaining} caractere{remaining === 1 ? "" : "s"} restante
         </FormHelperText>
       )}

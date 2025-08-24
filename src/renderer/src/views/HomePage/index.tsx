@@ -214,14 +214,15 @@ const HomePage = () => {
     setProfilesLegend(result);
   };
 
-  const HomePageCard = styled(GenericCard)(() => ({
+  const HomePageCard = styled(GenericCard)(({ theme }) => ({
     width: "35rem",
     height: "11rem",
-    backgroundColor: "#1e2533",
+    backgroundColor: theme.palette.mode === "dark" ? "#1e2533" : "#f5f2ef",
     borderRadius: 8,
+    border: theme.palette.mode === "light" ? "1px solid #e8e4e0" : "none",
   }));
   return (
-    <ContentWrapper minHeightStyle="95vh" justifyContent="flex-start">
+    <ContentWrapper sx={{ minHeight: "95vh", display: "flex", justifyContent: "flex-start" }}>
       <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
         <HomePageCard
           title="Forçar Verificação"
@@ -261,8 +262,9 @@ const HomePage = () => {
       </Box>
       <FolderDropZone onClick={handleClickSelectFolder} onItemsDropped={handleItemsDropped} />
       <ContentWrapper
+        titleTagType="h3"
+        sx={{ maxHeight: "52rem", borderRadius: 8 }}
         title="Atividade Recente"
-        maxHeightStyle={"52rem"}
         commonBtn={
           recentActivityList.length > 0
             ? {
@@ -284,6 +286,14 @@ const HomePage = () => {
               onClickListItem={handleOpenDetails}
               lastItemRef={lastLogRef as RefObject<HTMLLIElement>}
               list={recentActivityList}
+              sx={{
+                "& .MuiListItemText-primary": {
+                  fontSize: "1.8rem",
+                },
+                "& .MuiListItemText-secondary": {
+                  fontSize: "3rem",
+                },
+              }}
             />
           </>
         ) : (

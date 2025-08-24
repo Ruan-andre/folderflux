@@ -143,7 +143,7 @@ const FolderManagementView = ({
           spacing={2}
           justifyContent="flex-end"
           p={2}
-          sx={{ borderTop: 1, borderColor: "divider", flexShrink: 0 }} // flexShrink: 0 impede que ele encolha
+          sx={{ borderTop: 1, borderColor: "divider", flexShrink: 0 }}
         >
           <Button
             variant="outlined"
