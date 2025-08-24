@@ -1,36 +1,36 @@
 import ContentWrapper from "../../components/ContentWrapper";
 import GenericListItems from "../../components/GenericListItems";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { SettingsSchema } from "~/src/db/schema";
 import { useSnackbar } from "../../context/SnackBarContext";
 import GenericListItemsType from "../../types/GenericListItemsType";
+import { useTheme } from "../../context/ThemeContext";
+import { styled } from "@mui/material";
 
+const SettingWrapper = styled(ContentWrapper)({ boxShadow: "none", gap: "1rem", padding: "1rem" });
 const SettingPage = () => {
   const { showMessage } = useSnackbar();
+  const { toggleTheme } = useTheme();
 
   const [settings, setSettings] = useState<SettingsSchema[]>([]);
 
-  const generalSettingsList: GenericListItemsType[] = useMemo(() => {
-    return settings
-      .filter((s) => s.category === "general")
-      .map((s) => ({
-        id: s.id,
-        title: s.title,
-        subtitle: s.description ?? "",
-        active: s.isActive,
-      }));
-  }, [settings]);
+  const generalSettingsList: GenericListItemsType[] = settings
+    .filter((s) => s.category === "general")
+    .map((s) => ({
+      id: s.id,
+      title: s.title,
+      subtitle: s.description ?? "",
+      active: s.isActive,
+    }));
 
-  const appearanceSettingsList: GenericListItemsType[] = useMemo(() => {
-    return settings
-      .filter((s) => s.category === "appearance")
-      .map((s) => ({
-        id: s.id,
-        title: s.title,
-        subtitle: s.description ?? "",
-        active: s.isActive,
-      }));
-  }, [settings]);
+  const appearanceSettingsList: GenericListItemsType[] = settings
+    .filter((s) => s.category === "appearance")
+    .map((s) => ({
+      id: s.id,
+      title: s.title,
+      subtitle: s.description ?? "",
+      active: s.isActive,
+    }));
 
   useEffect(() => {
     async function fetchData() {
@@ -50,8 +50,18 @@ const SettingPage = () => {
 
     try {
       const selectedSetting = originalSettings.find((s) => s.id === id);
-      const settingType = selectedSetting?.type === "startWithOS" ? "startWithOS" : undefined;
-      await window.api.settings.toggleSettingActive(id, settingType);
+      switch (selectedSetting?.type) {
+        case "startWithOS":
+          await window.api.settings.toggleSettingActive(id, "startWithOS");
+          break;
+        case "darkMode":
+          toggleTheme();
+          await window.api.settings.toggleSettingActive(id);
+          break;
+        default:
+          await window.api.settings.toggleSettingActive(id);
+          break;
+      }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showMessage("Erro ao atualizar a configuração.", "error");
@@ -63,26 +73,17 @@ const SettingPage = () => {
 
   return (
     <ContentWrapper title="Configurações">
-      <ContentWrapper title="Geral" hr boxShadow="none" titleSize={20} gap="1rem" padding="1rem">
-        <GenericListItems
-          list={generalSettingsList}
-          btnSwitch
-          onToggle={handleToggle}
-          isButton={false}
-          borderBottom="1px solid rgba(245, 245, 245, 0.27)"
-          listItemPadding="1.5rem"
-        />
-      </ContentWrapper>
-      <ContentWrapper title="Aparência" hr boxShadow="none" titleSize={20} gap="1rem" padding="1rem">
-        <GenericListItems
-          list={appearanceSettingsList}
-          btnSwitch
-          onToggle={handleToggle}
-          isButton={false}
-          borderBottom="1px solid rgba(245, 245, 245, 0.27)"
-          listItemPadding="1.5rem"
-        />
-      </ContentWrapper>
+      <SettingWrapper
+        sx={{ boxShadow: "none", gap: "1rem", padding: "1rem" }}
+        title="Geral"
+        hr
+        titleTagType="h3"
+      >
+        <GenericListItems list={generalSettingsList} btnSwitch onToggle={handleToggle} isButton={false} />
+      </SettingWrapper>
+      <SettingWrapper title="Aparência" hr titleTagType="h3">
+        <GenericListItems list={appearanceSettingsList} btnSwitch onToggle={handleToggle} isButton={false} />
+      </SettingWrapper>
     </ContentWrapper>
   );
 };
