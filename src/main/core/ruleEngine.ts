@@ -1,4 +1,3 @@
-// src/main/core/RuleEngine.ts
 import path from "path";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import FileInfo from "~/src/shared/types/FileInfo";
