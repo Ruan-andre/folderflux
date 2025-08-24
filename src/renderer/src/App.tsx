@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, HashRouter } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 import HomePage from "./views/HomePage";
 import RulePage from "./views/RulePage";
@@ -10,6 +10,7 @@ import AboutPage from "./views/AboutPage";
 import HelpPage from "./views/HelpPage";
 import FolderPage from "./views/FolderPage";
 
+const Router = import.meta.env.MODE === "development" ? BrowserRouter : HashRouter;
 function App() {
   return (
     <Router>
