@@ -4,10 +4,9 @@ import Database from "better-sqlite3";
 import path from "path";
 import { app } from "electron";
 import fs from "fs";
-import * as schema from "./schema"; // caminho ajustado
+import * as schema from "./schema";
 import { fileURLToPath } from "url";
 
-// Resolve __dirname no ESM (Electron usa ESM no renderer)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -17,10 +16,9 @@ const dbPath =
     ? path.join(app.getPath("appData"), "FolderFlux.db")
     : path.join(app.getPath("userData"), "FolderFlux.db");
 
-// Garante que a pasta existe
+
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
-// Cria conexão SQLite
 const sqlite = new Database(dbPath);
 
 // Instância do Drizzle
@@ -34,7 +32,6 @@ export type DbOrTx = DbInstance | Transaction;
  * Executa migrations pendentes
  */
 export function runMigrations() {
-  // Caminho absoluto da pasta de migrations
   const migrationsDir = path.join(__dirname, "/db/migrations");
 
   if (!fs.existsSync(migrationsDir)) {
@@ -45,7 +42,7 @@ export function runMigrations() {
   try {
     migrate(db, {
       migrationsFolder: migrationsDir,
-      migrationsTable: "drizzle_migrations", // tabela de controle
+      migrationsTable: "drizzle_migrations",
     });
     console.log("Migrations aplicadas com sucesso");
   } catch (error) {

@@ -1,7 +1,6 @@
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import { getSystemProfile } from "../services/profileService";
 import RuleEngine from "./ruleEngine";
-// import RuleEngine from "./ruleEngine";
 
 export async function defaultOrganization(paths: string[]) {
   const defaultProfile = await getSystemProfile();

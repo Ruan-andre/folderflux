@@ -36,7 +36,7 @@ async function seedProfiles() {
 
     await createFullProfile(profileSeed_allRules);
   } catch (error) {
-    // só mostra no console por enquanto e continua a criação da regra
+    // só mostra no console por enquanto e continua a criação do perfil
     console.error(error);
   }
 }

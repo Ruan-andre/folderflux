@@ -1,5 +1,3 @@
-// src/db/schema/profileFolders.ts
-
 import { sqliteTable, integer, primaryKey } from "drizzle-orm/sqlite-core";
 import { ProfileTable } from "./profiles";
 import { FolderTable } from "./folders";

@@ -227,7 +227,7 @@ export const ruleSeed_codigo: NewFullRulePayload = {
   action: {
     type: "move",
     value: "CÓDIGO", // O nome da pasta a ser criada dentro da pasta monitorada
-    ruleId: 0, // Será preenchido pelo backend após a inserção da regra
+    ruleId: 0,
   },
 };
 
@@ -860,7 +860,7 @@ export const ruleSeed_executaveis: NewFullRulePayload = {
     name: "Organizar Executáveis e Instaladores",
     description: "Move executáveis e instaladores (exe, msi, dmg, etc.) para a pasta 'EXECUTÁVEIS'.",
     isSystem: true,
-    isActive: true, // Sugiro que talvez esta seja `false` por padrão ou tenha um aviso para o usuário
+    isActive: true,
   },
   conditionsTree: {
     id: generateConditionId(),
@@ -894,7 +894,6 @@ export const ruleSeed_executaveis: NewFullRulePayload = {
         value: "dmg",
         displayOrder: displayOrderCount++,
       },
-      // macOS
       {
         id: generateConditionId(),
         type: "condition",
@@ -903,7 +902,6 @@ export const ruleSeed_executaveis: NewFullRulePayload = {
         value: "app",
         displayOrder: displayOrderCount++,
       },
-      // macOS (bundles)
       {
         id: generateConditionId(),
         type: "condition",
@@ -912,7 +910,6 @@ export const ruleSeed_executaveis: NewFullRulePayload = {
         value: "deb",
         displayOrder: displayOrderCount++,
       },
-      // Linux
       {
         id: generateConditionId(),
         type: "condition",
@@ -921,7 +918,6 @@ export const ruleSeed_executaveis: NewFullRulePayload = {
         value: "rpm",
         displayOrder: displayOrderCount++,
       },
-      // Linux
     ],
   },
 
