@@ -4,12 +4,12 @@ import App from "./App";
 import "./assets/css/globals.css";
 import { SnackbarProvider } from "./context/SnackBarContext";
 import { ConfirmDialogProvider } from "./context/ConfirmDialogContext";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { GeneralTheme } from "./themes/GeneralTheme";
+import { CssBaseline } from "@mui/material";
+import { ThemeProvider } from "./context/ThemeContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider theme={GeneralTheme}>
+    <ThemeProvider>
       <CssBaseline />
       <ConfirmDialogProvider>
         <SnackbarProvider>
