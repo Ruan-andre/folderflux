@@ -57,11 +57,3 @@ body {
 a {
   text-decoration: none;
 }
-
-.flex-center {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
-  gap: 3rem 2rem;
-  width: 100%;
-}
