@@ -1,15 +1,15 @@
 import { DbResponse } from "~/src/shared/types/DbResponse";
-import { db } from "../../db";
 import { FolderSchema, FolderTable, NewFolder } from "../../db/schema";
 import { createResponse } from "../../db/functions";
 import { eq } from "drizzle-orm";
 import { FullFolder } from "~/src/shared/types/FolderWithDetails";
+import { DbOrTx } from "~/src/db";
 
-export async function getAllFolders(): Promise<FolderSchema[]> {
+export async function getAllFolders(db: DbOrTx): Promise<FolderSchema[]> {
   return await db.query.FolderTable.findMany();
 }
 
-export async function addFolders(folders: NewFolder[]): Promise<DbResponse> {
+export async function addFolders(db: DbOrTx, folders: NewFolder[]): Promise<DbResponse> {
   for (const folder of folders) {
     try {
       await db.insert(FolderTable).values(folder);
@@ -22,18 +22,18 @@ export async function addFolders(folders: NewFolder[]): Promise<DbResponse> {
   return createResponse(true, "Pastas inseridas com sucesso");
 }
 
-export async function deleteFolder(folderId: number) {
+export async function deleteFolder(db: DbOrTx, folderId: number) {
   await db.delete(FolderTable).where(eq(FolderTable.id, folderId));
 }
 
-export async function updateFolder(folder: FolderSchema) {
+export async function updateFolder(db: DbOrTx, folder: FolderSchema) {
   await db
     .update(FolderTable)
     .set({ name: folder.name, fullPath: folder.fullPath })
     .where(eq(FolderTable.id, folder.id));
 }
 
-export async function getFolderById(folderId: number): Promise<DbResponse<FullFolder>> {
+export async function getFolderById(db: DbOrTx, folderId: number): Promise<DbResponse<FullFolder>> {
   const folder = await db.query.FolderTable.findFirst({
     where: eq(FolderTable.id, folderId),
     with: { profileFolders: { with: { profile: true } } },

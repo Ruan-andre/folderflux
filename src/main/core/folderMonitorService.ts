@@ -4,6 +4,7 @@ import { getSettingByType } from "../services/settingsService";
 import { getAllProfiles, getCountProfilesWithFolder, getProfileById } from "../services/profileService";
 import path from "path";
 import { getStats } from "../services/fileService";
+import { DbOrTx } from "~/src/db";
 
 const temporaryFilePatterns = [/(^|[/\\])\../, "**/*.tmp", "**/*.part", "**/*.crdownload", "**/*.opdownload"];
 
@@ -14,6 +15,7 @@ class FolderMonitorService {
   private watchedFolders: Set<string> = new Set();
   private debounceSeconds: number = 2 * 1000; // 2000ms = 2 segundos
   private processingRequest: Set<string> = new Set();
+  private db!: DbOrTx;
 
   constructor() {
     this.monitor = chokidar.watch([], {
@@ -25,8 +27,9 @@ class FolderMonitorService {
     this.monitor.on("add", (filePath) => this.handleFileEvent(filePath));
   }
 
-  public async start() {
-    const realTimeSetting = await getSettingByType("realTime");
+  public async start(db: DbOrTx) {
+    this.db = db;
+    const realTimeSetting = await getSettingByType(this.db, "realTime");
     if (!realTimeSetting?.isActive) return;
     this.initialLoad();
   }
@@ -55,8 +58,8 @@ class FolderMonitorService {
     }
   }
 
-  public async startMonitoringProfileFolders(profileId: number) {
-    const responseFolders = (await getProfileById(profileId)).items?.folders;
+  public async startMonitoringProfileFolders(profileId: number, startVerification: boolean = false) {
+    const responseFolders = (await getProfileById(this.db, profileId)).items?.folders;
     const foldersToWatch = new Set<string>();
 
     if (responseFolders && responseFolders.length > 0) {
@@ -66,17 +69,17 @@ class FolderMonitorService {
         }
         foldersToWatch.add(folder.fullPath);
       }
-      if (foldersToWatch.size > 0) this.startMonitoring(Array.from(foldersToWatch));
+      if (foldersToWatch.size > 0) this.startMonitoring(Array.from(foldersToWatch), startVerification);
     }
   }
 
   public async stopMonitoringProfileFolders(profileId: number) {
-    const responseFolders = (await getProfileById(profileId)).items?.folders;
+    const responseFolders = (await getProfileById(this.db, profileId)).items?.folders;
     const foldersToUnwatch = new Set<string>();
 
     if (responseFolders && responseFolders.length > 0) {
       for (const folder of responseFolders) {
-        const count = await getCountProfilesWithFolder(folder.id);
+        const count = await getCountProfilesWithFolder(this.db, folder.id);
         if (count <= 1) {
           foldersToUnwatch.add(folder.fullPath);
           this.watchedFolders.delete(folder.fullPath);
@@ -87,7 +90,7 @@ class FolderMonitorService {
   }
 
   private async initialLoad() {
-    const response = await getAllProfiles();
+    const response = await getAllProfiles(this.db);
     if (response.status && response.items) {
       const activeProfiles = response.items.filter((p) => p.isActive);
       const folders = activeProfiles.flatMap((p) => p.folders.map((f) => f.fullPath));
@@ -121,7 +124,7 @@ class FolderMonitorService {
      DE SOMENTE OS ARQUIVOS RECEBIDOS COMO PARÂMETRO NO FILEPATHS */
     const handleFiles = async (filePaths: string[]) => {
       if (filePaths.length > 0) {
-        const activeProfiles = (await getAllProfiles()).items?.filter((p) => p.isActive);
+        const activeProfiles = (await getAllProfiles(this.db)).items?.filter((p) => p.isActive);
         if (activeProfiles) {
           const filteredPaths = (await getStats(filePaths)).filter((f) => !f.isDirectory).map((f) => f.path);
           const dirnames = new Set(filteredPaths.map((x) => path.dirname(x)));
@@ -130,21 +133,22 @@ class FolderMonitorService {
           );
           for (const profile of associatedProfiles) {
             const activeRules = profile.rules.filter((r) => r.isActive);
-            await RuleEngine.process(activeRules, Array.from(dirnames), profile.name);
+            await RuleEngine.process(this.db, activeRules, Array.from(dirnames), profile.name);
           }
         }
       }
     };
 
     const handleFolders = async (dirnames: string[]) => {
-      const activeProfiles = (await getAllProfiles()).items?.filter((p) => p.isActive);
+      const activeProfiles = (await getAllProfiles(this.db)).items?.filter((p) => p.isActive);
       if (activeProfiles) {
         const associatedProfiles = activeProfiles.filter((p) =>
           p.folders.some((f) => dirnames.includes(f.fullPath))
         );
         for (const profile of associatedProfiles) {
           const activeRules = profile.rules.filter((r) => r.isActive);
-          await RuleEngine.process(activeRules, Array.from(dirnames), profile.name);
+          const associatedFolders = profile.folders.map((f) => f.fullPath);
+          await RuleEngine.process(this.db, activeRules, associatedFolders, profile.name);
         }
       }
     };
@@ -159,13 +163,21 @@ class FolderMonitorService {
     this.monitor.unwatch(paths);
   }
 
-  public startMonitoring(paths: string[] | string) {
+  public stopMonitoringAll() {
+    this.monitor.close();
+  }
+
+  public startMonitoring(paths: string[] | string, startVerification: boolean = false) {
     if (typeof paths === "string") {
       this.watchedFolders.add(paths);
     } else if (typeof paths === "object") {
       paths.forEach((p) => this.watchedFolders.add(p));
     }
     this.monitor.add(paths);
+
+    if (startVerification) {
+      RuleEngine.processAll(this.db);
+    }
   }
 }
 

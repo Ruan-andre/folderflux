@@ -10,11 +10,12 @@ import {
 import { DbResponse } from "~/src/shared/types/DbResponse";
 import { handleError } from "../../../db/functions";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
+import { db } from "../../../db";
 
 export function registerRuleHandlers() {
   ipcMain.handle("get-all-rules-with-details", async (): Promise<DbResponse<FullRule[]>> => {
     try {
-      return await getAllRules();
+      return await getAllRules(db);
     } catch (e) {
       return handleError(e, "Erro ao buscar regras");
     }
@@ -22,7 +23,7 @@ export function registerRuleHandlers() {
 
   ipcMain.handle("create-full-rule", async (_e, data) => {
     try {
-      return await createFullRule(data);
+      return await createFullRule(db, data);
     } catch (e) {
       return handleError(e, "Erro ao adicionar regra");
     }
@@ -30,7 +31,7 @@ export function registerRuleHandlers() {
 
   ipcMain.handle("duplicate-rule", async (_e, ruleId): Promise<DbResponse<FullRule>> => {
     try {
-      return await duplicateRule(ruleId);
+      return await duplicateRule(db, ruleId);
     } catch (e) {
       return handleError(e, "Erro ao duplicar regra");
     }
@@ -38,7 +39,7 @@ export function registerRuleHandlers() {
 
   ipcMain.handle("delete-rule", async (_e, id) => {
     try {
-      return await deleteRule(id);
+      return await deleteRule(db, id);
     } catch (e) {
       return handleError(e, "Erro ao excluir regra");
     }
@@ -46,7 +47,7 @@ export function registerRuleHandlers() {
 
   ipcMain.handle("update-rule", async (_e, ruleUpdated) => {
     try {
-      return await updateRule(ruleUpdated);
+      return await updateRule(db, ruleUpdated);
     } catch (e) {
       return handleError(e, "Erro ao atualizar regra");
     }
@@ -54,7 +55,7 @@ export function registerRuleHandlers() {
 
   ipcMain.handle("toggle-active", async (_e, id) => {
     try {
-      return await toggleRuleActive(id);
+      return await toggleRuleActive(db, id);
     } catch (e) {
       return handleError(e, "Erro ao alterar status");
     }

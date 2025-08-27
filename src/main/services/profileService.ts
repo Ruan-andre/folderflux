@@ -1,4 +1,3 @@
-import { db } from "../../db";
 import { createResponse, handleError, toggleColumnStatus } from "../../db/functions";
 import { DbResponse } from "~/src/shared/types/DbResponse";
 import { FullProfile, NewFullProfile } from "~/src/shared/types/ProfileWithDetails";
@@ -14,8 +13,9 @@ import {
 import { and, count, eq, inArray, like } from "drizzle-orm";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import { buildTreeFromDb } from "./ruleService";
+import { DbOrTx } from "~/src/db";
 
-export async function createFullProfile(data: NewFullProfile): Promise<DbResponse<FullProfile>> {
+export async function createFullProfile(db: DbOrTx, data: NewFullProfile): Promise<DbResponse<FullProfile>> {
   const { folders, rules } = data;
   const newProfileData: NewProfile = data;
   const exists = await db.query.ProfileTable.findFirst({
@@ -89,7 +89,7 @@ export async function createFullProfile(data: NewFullProfile): Promise<DbRespons
   }
 }
 
-export async function getAllProfiles(): Promise<DbResponse<FullProfile[]>> {
+export async function getAllProfiles(db: DbOrTx): Promise<DbResponse<FullProfile[]>> {
   const profilesWithRelations = await db.query.ProfileTable.findMany({
     with: {
       profileFolders: { with: { folder: true } },
@@ -122,7 +122,7 @@ export async function getAllProfiles(): Promise<DbResponse<FullProfile[]>> {
   return createResponse(true, "Sucesso ao buscar perfis", fullProfiles);
 }
 
-export async function getProfileById(profileId: number): Promise<DbResponse<FullProfile>> {
+export async function getProfileById(db: DbOrTx, profileId: number): Promise<DbResponse<FullProfile>> {
   const profile = await db.query.ProfileTable.findFirst({
     where: eq(ProfileTable.id, profileId),
     with: {
@@ -156,7 +156,7 @@ export async function getProfileById(profileId: number): Promise<DbResponse<Full
   }
 }
 
-export async function getSystemProfile(): Promise<FullProfile | null> {
+export async function getSystemProfile(db: DbOrTx): Promise<FullProfile | null> {
   const defaultProfile = await db.query.ProfileTable.findFirst({
     where: eq(ProfileTable.isSystem, true),
     with: {
@@ -189,7 +189,7 @@ export async function getSystemProfile(): Promise<FullProfile | null> {
   return fullProfile;
 }
 
-export async function deleteProfile(profileId: number): Promise<DbResponse> {
+export async function deleteProfile(db: DbOrTx, profileId: number): Promise<DbResponse> {
   try {
     const deleted = await db.delete(ProfileTable).where(eq(ProfileTable.id, profileId)).returning();
     if (deleted.length > 0) {
@@ -202,20 +202,23 @@ export async function deleteProfile(profileId: number): Promise<DbResponse> {
   }
 }
 
-export async function duplicateProfile(profileToDuplicate: FullProfile): Promise<DbResponse<FullProfile>> {
+export async function duplicateProfile(
+  db: DbOrTx,
+  profileToDuplicate: FullProfile
+): Promise<DbResponse<FullProfile>> {
   const newProfile: NewFullProfile = {
     ...profileToDuplicate,
     id: undefined,
-    name: await getNewProfileName(profileToDuplicate.name),
+    name: await getNewProfileName(db, profileToDuplicate.name),
   };
-  return createFullProfile(newProfile);
+  return createFullProfile(db, newProfile);
 }
 
-export async function toggleProfileStatus(profileId: number): Promise<DbResponse> {
-  return await toggleColumnStatus(ProfileTable, profileId);
+export async function toggleProfileStatus(db: DbOrTx, profileId: number): Promise<DbResponse> {
+  return await toggleColumnStatus(db, ProfileTable, profileId);
 }
 
-export async function updateProfile(data: FullProfile): Promise<DbResponse> {
+export async function updateProfile(db: DbOrTx, data: FullProfile): Promise<DbResponse> {
   const { rules: updatedRules, folders: updatedFolders } = data;
   const { id, name, description, iconId } = data as ProfileSchema;
 
@@ -282,17 +285,17 @@ export async function updateProfile(data: FullProfile): Promise<DbResponse> {
   }
 }
 
-export async function getProfilesActiveInactiveCount(): Promise<string> {
+export async function getProfilesActiveInactiveCount(db: DbOrTx): Promise<string> {
   const profileStatus = await db.select({ isActive: ProfileTable.isActive }).from(ProfileTable);
   return `${profileStatus.filter((p) => p.isActive).length} ativo(s), ${profileStatus.filter((p) => !p.isActive).length} inativo(s)`;
 }
 
-export async function getSystemProfilesCount(): Promise<number> {
+export async function getSystemProfilesCount(db: DbOrTx): Promise<number> {
   return (await db.select({ count: count() }).from(ProfileTable).where(eq(ProfileTable.isSystem, true)))[0]
     .count;
 }
 
-export async function getCountProfilesWithFolder(folderId: number) {
+export async function getCountProfilesWithFolder(db: DbOrTx, folderId: number) {
   return (
     await db
       .select({ count: count() })
@@ -303,7 +306,7 @@ export async function getCountProfilesWithFolder(folderId: number) {
 }
 
 // Internal helper
-async function getNewProfileName(existentProfileName: string): Promise<string> {
+async function getNewProfileName(db: DbOrTx, existentProfileName: string): Promise<string> {
   const existentProfile = await db
     .select()
     .from(ProfileTable)

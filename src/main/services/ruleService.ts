@@ -1,4 +1,3 @@
-import { db, DbOrTx } from "../../db";
 import {
   RuleTable,
   ConditionsTreeTable,
@@ -13,10 +12,11 @@ import { DbResponse } from "~/src/shared/types/DbResponse";
 import { FullRule, NewFullRulePayload } from "@/shared/types/RuleWithDetails";
 import { IConditionGroup, ICondition } from "@/shared/types/ConditionsType";
 import { createResponse, toggleColumnStatus } from "@/db/functions";
+import { DbOrTx } from "../../db";
 
 // --- LEITURA ---
 
-export async function getAllRules(): Promise<DbResponse<FullRule[]>> {
+export async function getAllRules(db: DbOrTx): Promise<DbResponse<FullRule[]>> {
   const rulesList = await db.query.RuleTable.findMany({
     with: {
       action: true,
@@ -42,8 +42,8 @@ export async function getAllRules(): Promise<DbResponse<FullRule[]>> {
   return createResponse(true, "Regras carregadas com sucesso", fullRules);
 }
 
-export async function getRuleById(ruleId: number, tx: DbOrTx = db): Promise<DbResponse<FullRule>> {
-  const rule = await tx.query.RuleTable.findFirst({
+export async function getRuleById(db: DbOrTx, ruleId: number): Promise<DbResponse<FullRule>> {
+  const rule = await db.query.RuleTable.findFirst({
     where: eq(RuleTable.id, ruleId),
     with: {
       action: true,
@@ -69,7 +69,7 @@ export async function getRuleById(ruleId: number, tx: DbOrTx = db): Promise<DbRe
 
 // --- CRIAÇÃO / ATUALIZAÇÃO / EXCLUSÃO ---
 
-export async function createFullRule(data: NewFullRulePayload): Promise<DbResponse<FullRule>> {
+export async function createFullRule(db: DbOrTx, data: NewFullRulePayload): Promise<DbResponse<FullRule>> {
   const { rule, action, conditionsTree } = data;
 
   const exists = await db.query.RuleTable.findFirst({
@@ -81,11 +81,11 @@ export async function createFullRule(data: NewFullRulePayload): Promise<DbRespon
     const [insertedRule] = await tx.insert(RuleTable).values(rule).returning();
     await insertConditionTree(tx, conditionsTree, insertedRule.id, null);
     await tx.insert(ActionTable).values({ ...action, ruleId: insertedRule.id });
-    return await getRuleById(insertedRule.id, tx);
+    return await getRuleById(db, insertedRule.id);
   });
 }
 
-export async function updateRule(ruleUpdated: FullRule): Promise<DbResponse> {
+export async function updateRule(db: DbOrTx, ruleUpdated: FullRule): Promise<DbResponse> {
   await db
     .update(RuleTable)
     .set({
@@ -95,31 +95,31 @@ export async function updateRule(ruleUpdated: FullRule): Promise<DbResponse> {
     })
     .where(eq(RuleTable.id, ruleUpdated.id));
 
-  await updateConditionTree(ruleUpdated.id, ruleUpdated.conditionsTree);
-  await updateActionRule(ruleUpdated.action);
+  await updateConditionTree(db, ruleUpdated.id, ruleUpdated.conditionsTree);
+  await updateActionRule(db, ruleUpdated.action);
 
   return createResponse(true, "Regra atualizada com sucesso");
 }
 
-export async function deleteRule(id: number): Promise<DbResponse> {
+export async function deleteRule(db: DbOrTx, id: number): Promise<DbResponse> {
   await db.delete(RuleTable).where(eq(RuleTable.id, id));
   return createResponse(true, "Regra excluída");
 }
 
-export async function duplicateRule(ruleIdToDuplicate: number): Promise<DbResponse<FullRule>> {
-  const originalRuleResponse = await getRuleById(ruleIdToDuplicate);
+export async function duplicateRule(db: DbOrTx, ruleIdToDuplicate: number): Promise<DbResponse<FullRule>> {
+  const originalRuleResponse = await getRuleById(db, ruleIdToDuplicate);
   if (!originalRuleResponse.status || !originalRuleResponse.items) {
     return createResponse(false, "Regra original não encontrada");
   }
 
   const original = originalRuleResponse.items;
-  const newRuleName = await getNewRuleName(original.name);
+  const newRuleName = await getNewRuleName(db, original.name);
 
   const newRulePayload: NewRule = {
     name: newRuleName,
     description: original.description,
-    isSystem: original.isSystem,
-    isActive: false,
+    isSystem: false,
+    isActive: original.isActive,
   };
 
   const newActionPayload: NewAction = {
@@ -128,7 +128,7 @@ export async function duplicateRule(ruleIdToDuplicate: number): Promise<DbRespon
     value: original.action.value ?? undefined,
   };
 
-  return await createFullRule({
+  return await createFullRule(db, {
     rule: newRulePayload,
     action: newActionPayload,
     conditionsTree: original.conditionsTree,
@@ -137,11 +137,11 @@ export async function duplicateRule(ruleIdToDuplicate: number): Promise<DbRespon
 
 // --- STATUS / SISTEMA ---
 
-export async function toggleRuleActive(id: number): Promise<DbResponse> {
-  return toggleColumnStatus(RuleTable, id);
+export async function toggleRuleActive(db: DbOrTx, id: number): Promise<DbResponse> {
+  return toggleColumnStatus(db, RuleTable, id);
 }
 
-export async function getSystemRules(): Promise<FullRule[]> {
+export async function getSystemRules(db: DbOrTx): Promise<FullRule[]> {
   const rules = await db.query.RuleTable.findMany({
     where: eq(RuleTable.isSystem, true),
     with: { action: true, conditionsTree: true },
@@ -165,7 +165,7 @@ export async function getSystemRules(): Promise<FullRule[]> {
   return fullRules;
 }
 
-export async function getSystemRulesCount(): Promise<number> {
+export async function getSystemRulesCount(db: DbOrTx): Promise<number> {
   const result = await db.select({ count: count() }).from(RuleTable).where(eq(RuleTable.isSystem, true));
 
   return result[0].count;
@@ -299,19 +299,19 @@ async function insertConditionTree(
   }
 }
 
-async function updateConditionTree(ruleId: number, newTree: IConditionGroup): Promise<void> {
+async function updateConditionTree(db: DbOrTx, ruleId: number, newTree: IConditionGroup): Promise<void> {
   await db.delete(ConditionsTreeTable).where(eq(ConditionsTreeTable.ruleId, ruleId));
   await insertConditionTree(db, newTree, ruleId, null);
 }
 
-async function updateActionRule(action: ActionSchema): Promise<void> {
+async function updateActionRule(db: DbOrTx, action: ActionSchema): Promise<void> {
   await db
     .update(ActionTable)
     .set({ type: action.type, value: action.value })
     .where(eq(ActionTable.ruleId, action.ruleId));
 }
 
-async function getNewRuleName(existentRuleName: string): Promise<string> {
+async function getNewRuleName(db: DbOrTx, existentRuleName: string): Promise<string> {
   const baseName = existentRuleName.replace(/\s\(\d+\)$/, "").trim();
   const existentRules = await db.query.RuleTable.findMany({
     where: like(RuleTable.name, `${baseName}%`),

@@ -1,6 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { DbResponse } from "~/src/shared/types/DbResponse";
-import { db } from "..";
+import { DbOrTx } from "..";
+
 
 export function createResponse<T>(status: boolean, message: string, items?: T): DbResponse<T> {
   return { status, message, items };
@@ -12,12 +13,13 @@ export function handleError<T>(error: unknown, fallbackMsg: string): DbResponse<
 }
 
 export async function toggleColumnStatus(
+  dbInstance: DbOrTx,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   table: any,
   id: number
 ): Promise<DbResponse> {
   try {
-    const updated = await db
+    const updated = await dbInstance
       .update(table)
       .set({ isActive: sql`NOT is_active` })
       .where(eq(table.id, id));

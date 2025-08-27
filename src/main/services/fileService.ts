@@ -4,31 +4,47 @@ import * as fs from "fs";
 import { friendlyFsError } from "../../shared/functions/handleFsErrorMessage";
 
 export async function getFilesInfo(directoryPath: string): Promise<FileInfo[] | undefined> {
-  const files = await fs.promises.readdir(directoryPath);
-  if (files && files.length > 0) {
-    const statsPromises = files.map(async (file) => {
-      const filePath = path.join(directoryPath, file);
-      const stats = await fs.promises.stat(filePath);
-      if (!stats.isDirectory()) {
-        return {
-          name: path.parse(filePath).name,
-          nameWithExtension: file,
-          size: stats.size,
-          ctime: stats.ctime,
-          mtime: stats.mtime,
-          fullPath: filePath,
-          parentDirectory: directoryPath,
-          extension: path.extname(filePath),
-        };
-      }
-    });
+  try {
+    const files = await fs.promises.readdir(directoryPath);
 
-    const allResults = await Promise.all(statsPromises);
+    if (files && files.length > 0) {
+      const statsPromises = files.map(async (file) => {
+        const filePath = path.join(directoryPath, file);
+        const stats = await fs.promises.stat(filePath);
+        if (!stats.isDirectory()) {
+          return {
+            name: path.parse(filePath).name,
+            nameWithExtension: file,
+            size: stats.size,
+            ctime: stats.ctime,
+            mtime: stats.mtime,
+            fullPath: filePath,
+            parentDirectory: directoryPath,
+            extension: path.extname(filePath),
+          };
+        }
+        return null;
+      });
 
-    return allResults.filter((result) => result !== undefined);
+      const allResults = await Promise.allSettled(statsPromises);
+
+      const successfulFiles: FileInfo[] = [];
+
+      allResults.forEach((result) => {
+        if (result.status === "fulfilled") {
+          if (result.value) {
+            successfulFiles.push(result.value);
+          }
+        }
+      });
+      return successfulFiles;
+    }
+
+    return [];
+  } catch (error) {
+    console.error(`[DEBUG] Erro crítico em getFilesInfo para ${directoryPath}:`, error);
+    return [];
   }
-
-  return undefined;
 }
 
 export async function moveFile(filePath: string, newPath: string) {

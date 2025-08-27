@@ -1,13 +1,13 @@
 import { DbResponse } from "~/src/shared/types/DbResponse";
-import { db } from "../../db";
 import { AffectedFilesTable, AffectedFilesTableSchema, OrganizationLogsTable } from "../../db/schema";
 import { LogMetadata } from "~/src/shared/types/LogMetaDataType";
 import { createResponse, handleError } from "../../db/functions";
 import { desc } from "drizzle-orm/sql/expressions/select";
 import { eq, lt } from "drizzle-orm/sql/expressions/conditions";
+import { DbOrTx } from "~/src/db";
 
-export async function saveLog(log: LogMetadata): Promise<LogMetadata> {
-  const { id, metadata, files, createdAt } = await db.transaction(async (tx) => {
+export async function saveLog(dbInstance: DbOrTx, log: LogMetadata): Promise<LogMetadata> {
+  const { id, metadata, files, createdAt } = await dbInstance.transaction(async (tx) => {
     //Para salvar na tabela de arquivos
     const files = log.files;
     delete log.files;
@@ -65,9 +65,9 @@ export async function saveLog(log: LogMetadata): Promise<LogMetadata> {
   }
 }
 
-export async function getLogs(lastId?: number): Promise<DbResponse<LogMetadata[]>> {
+export async function getLogs(dbInstance: DbOrTx, lastId?: number): Promise<DbResponse<LogMetadata[]>> {
   try {
-    const response = await db.query.OrganizationLogsTable.findMany({
+    const response = await dbInstance.query.OrganizationLogsTable.findMany({
       orderBy: desc(OrganizationLogsTable.id),
       where: lastId ? lt(OrganizationLogsTable.id, lastId) : undefined,
       with: { fileLogs: true },
@@ -111,9 +111,9 @@ export async function getLogs(lastId?: number): Promise<DbResponse<LogMetadata[]
   }
 }
 
-export async function deleteLogById(logId: number): Promise<DbResponse<void>> {
+export async function deleteLogById(dbInstance: DbOrTx, logId: number): Promise<DbResponse<void>> {
   try {
-    const { changes } = await db.delete(OrganizationLogsTable).where(eq(OrganizationLogsTable.id, logId));
+    const { changes } = await dbInstance.delete(OrganizationLogsTable).where(eq(OrganizationLogsTable.id, logId));
     const isValid = changes > 0 ? true : false;
     const message = isValid ? "Log excluído com sucesso" : "Log não encontrado";
     return createResponse(isValid, message);
@@ -122,9 +122,9 @@ export async function deleteLogById(logId: number): Promise<DbResponse<void>> {
   }
 }
 
-export async function deleteAllLogs(): Promise<DbResponse<void>> {
+export async function deleteAllLogs(dbInstance: DbOrTx): Promise<DbResponse<void>> {
   try {
-    const { changes } = await db.delete(OrganizationLogsTable);
+    const { changes } = await dbInstance.delete(OrganizationLogsTable);
     const isValid = changes > 0 ? true : false;
     const message = isValid ? "Logs excluídos com sucesso" : "Logs não encontrados";
     return createResponse<void>(isValid, message);

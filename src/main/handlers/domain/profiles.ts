@@ -13,11 +13,12 @@ import {
   getProfilesActiveInactiveCount,
 } from "../../services/profileService";
 import { handleError } from "../../../db/functions";
+import { db } from "../../../db";
 
 export function registerProfileHandlers() {
   ipcMain.handle("get-all-profiles-with-details", async (): Promise<DbResponse<FullProfile[]>> => {
     try {
-      return await getAllProfiles();
+      return await getAllProfiles(db);
     } catch (e) {
       return handleError(e, "Erro ao buscar perfis");
     }
@@ -25,7 +26,7 @@ export function registerProfileHandlers() {
 
   ipcMain.handle("get-profile-by-id", async (_e, profileId): Promise<DbResponse<FullProfile>> => {
     try {
-      return await getProfileById(profileId);
+      return await getProfileById(db, profileId);
     } catch (e) {
       return handleError(e, "Erro ao buscar perfil");
     }
@@ -33,7 +34,7 @@ export function registerProfileHandlers() {
 
   ipcMain.handle("get-profiles-active-inactive-count", async (): Promise<string> => {
     try {
-      return await getProfilesActiveInactiveCount();
+      return await getProfilesActiveInactiveCount(db);
     } catch (e) {
       throw handleError(e, "Erro ao buscar informações");
     }
@@ -41,7 +42,7 @@ export function registerProfileHandlers() {
 
   ipcMain.handle("get-count-profiles-with-folder", async (_e, folderId): Promise<number> => {
     try {
-      return await getCountProfilesWithFolder(folderId);
+      return await getCountProfilesWithFolder(db, folderId);
     } catch (e) {
       throw handleError(e, "Erro ao buscar perfil");
     }
@@ -49,7 +50,7 @@ export function registerProfileHandlers() {
 
   ipcMain.handle("create-full-profile", async (_e, data) => {
     try {
-      return await createFullProfile(data);
+      return await createFullProfile(db, data);
     } catch (e) {
       return handleError(e, "Erro ao adicionar perfil");
     }
@@ -57,7 +58,7 @@ export function registerProfileHandlers() {
 
   ipcMain.handle("delete-profile", async (_e, profileId): Promise<DbResponse> => {
     try {
-      return await deleteProfile(profileId);
+      return await deleteProfile(db, profileId);
     } catch (e) {
       return handleError(e, "Erro ao excluir perfil");
     }
@@ -65,7 +66,7 @@ export function registerProfileHandlers() {
 
   ipcMain.handle("duplicate-profile", async (_e, profile): Promise<DbResponse<FullProfile>> => {
     try {
-      return await duplicateProfile(profile);
+      return await duplicateProfile(db, profile);
     } catch (e) {
       return handleError(e, "Erro ao duplicar perfil");
     }
@@ -73,7 +74,7 @@ export function registerProfileHandlers() {
 
   ipcMain.handle("toggle-profile-status", async (_e, profileId): Promise<DbResponse> => {
     try {
-      return await toggleProfileStatus(profileId);
+      return await toggleProfileStatus(db, profileId);
     } catch (e) {
       return handleError(e, "Erro ao alterar status do perfil");
     }
@@ -81,7 +82,7 @@ export function registerProfileHandlers() {
 
   ipcMain.handle("update-profile", async (_e, data): Promise<DbResponse> => {
     try {
-      return await updateProfile(data);
+      return await updateProfile(db, data);
     } catch (e) {
       return handleError(e, "Erro ao atualizar perfil");
     }
