@@ -6,8 +6,8 @@ export function registerChokidarHandlers() {
     folderMonitorService.stopMonitoringProfileFolders(profileId);
   });
 
-  ipcMain.handle("watch-profile-folders", (_e, profileId) => {
-    folderMonitorService.startMonitoringProfileFolders(profileId);
+  ipcMain.handle("watch-profile-folders", (_e, profileId, startVerification) => {
+    folderMonitorService.startMonitoringProfileFolders(profileId, startVerification);
   });
 
   ipcMain.handle("watch", (_e, paths) => {
