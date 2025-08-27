@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useMemo } from "react";
 import GenericInput from "../GenericInput";
 import { ICondition } from "../../../../shared/types/ConditionsType";
@@ -13,7 +13,7 @@ const allOperators: Record<Operator, { label: string }> = {
   equals: { label: "é igual a" },
   notEquals: { label: "não é igual a" },
   higherThan: { label: "é maior que" },
-  lessThan: { label: "é menor que" },
+  lowerThan: { label: "é menor que" },
   isBetween: { label: "está entre" },
 };
 
@@ -28,15 +28,15 @@ const fieldConfig: Record<Field, { label: string; operators: Operator[] }> = {
   },
   creationDate: {
     label: "Data de Criação",
-    operators: ["equals", "isBetween", "higherThan", "lessThan"],
+    operators: ["equals", "isBetween", "higherThan", "lowerThan"],
   },
   modifiedDate: {
     label: "Data de modificação",
-    operators: ["higherThan", "lessThan", "isBetween"],
+    operators: ["isBetween", "higherThan", "lowerThan"],
   },
   fileSize: {
     label: "Tamanho do arquivo (em KB)",
-    operators: ["higherThan", "lessThan", "equals"],
+    operators: ["higherThan", "lowerThan", "equals"],
   },
 };
 
@@ -78,7 +78,18 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
   }, [condition.field]);
 
   const showSecondValue = condition.fieldOperator === "isBetween";
-
+  const typeOfGenericInput =
+    (condition.field === "modifiedDate" || condition.field === "creationDate") &&
+    (showSecondValue || condition.fieldOperator === "equals")
+      ? "date"
+      : (condition.field === "modifiedDate" ||
+            condition.field === "creationDate" ||
+            condition.field === "fileSize") &&
+          (condition.fieldOperator === "higherThan" ||
+            condition.fieldOperator === "lowerThan" ||
+            condition.fieldOperator === "equals")
+        ? "number"
+        : "text";
   return (
     <Box display="inline-flex" alignItems="center" gap={1} mb={2} width={"100%"} flexWrap="wrap">
       <GenericInput
@@ -116,7 +127,7 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
             value={condition.value}
             onChange={(e) => handleChange("value", e.target.value)}
             placeholder="De"
-            type={condition.field === "modifiedDate" || condition.field === "creationDate" ? "date" : "text"}
+            type={typeOfGenericInput}
           />
           <GenericInput
             name="value2"
@@ -125,7 +136,7 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
             value={condition.value2 ?? ""}
             onChange={(e) => handleChange("value2", e.target.value)}
             placeholder="Até"
-            type={condition.field === "modifiedDate" || condition.field === "creationDate" ? "date" : "text"}
+            type={typeOfGenericInput}
           />
         </Box>
       ) : (
@@ -133,19 +144,16 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
           <GenericInput
             name="value"
             value={condition.value}
+            placeholder={"valor"}
             onChange={(e) => handleChange("value", e.target.value)}
-            placeholder="Valor"
-            type={
-              condition.field === "modifiedDate" || condition.field === "creationDate"
-                ? "date"
-                : condition.field === "fileSize"
-                  ? "number"
-                  : "text"
-            }
+            type={typeOfGenericInput}
           />
         </Box>
       )}
-
+      {(condition.field === "modifiedDate" || condition.field === "creationDate") &&
+        (condition.fieldOperator === "higherThan" || condition.fieldOperator === "lowerThan") && (
+          <Typography variant="caption">dias</Typography>
+        )}
       {/* Botão de Remover */}
       <Button
         sx={{
