@@ -1,10 +1,11 @@
 {
-  "name": "FolderFlux-app",
+  "name": "foldeflux-app",
+  "productName": "FolderFlux",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "FolderFlux - Organização inteligente",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "André Ruan <ruan.fullstack@gmail.com>",
+  "homepage": "https://folderflux.com",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -38,11 +39,13 @@
     "immer": "^10.1.1",
     "lodash.clonedeep": "^4.5.0",
     "react": "^19.0.0",
+    "react-dom": "^19.1.0",
     "react-dropzone": "^14.3.8",
     "react-router-dom": "^7.5.3",
     "use-immer": "^0.11.0",
     "vite-plugin-electron": "^0.29.0",
     "vite-plugin-static-copy": "^2.3.1",
+    "winreg": "^1.2.5",
     "zustand": "^5.0.5"
   },
   "devDependencies": {
@@ -66,8 +69,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "prettier": "^3.5.3",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
     "typescript": "^5.8.3",
     "vite": "^6.2.6"
   }
