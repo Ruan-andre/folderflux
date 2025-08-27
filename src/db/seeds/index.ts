@@ -4,23 +4,24 @@ import { createSettings, getSystemSettingsCount } from "../../main/services/sett
 import { allRuleSeeds } from "./rulesSeeds";
 import { profileSeed_allRules } from "./profilesSeeds";
 import { settingSeed } from "./settingsSeed";
+import { DbOrTx } from "..";
 
-const systemRulesCount = 10;
+const systemRulesCount = allRuleSeeds.length;
 const systemProfilesCount = 1;
-const systemSettingsCount = 4;
+const systemSettingsCount = settingSeed.length;
 
-export async function seedDatabase() {
-  if ((await getSystemRulesCount()) < systemRulesCount) await seedRules();
+export async function seedDatabase(db: DbOrTx) {
+  if ((await getSystemRulesCount(db)) < systemRulesCount) await seedRules(db);
 
-  if ((await getSystemProfilesCount()) < systemProfilesCount) await seedProfiles();
+  if ((await getSystemProfilesCount(db)) < systemProfilesCount) await seedProfiles(db);
 
-  if ((await getSystemSettingsCount()) < systemSettingsCount) await seedSettings();
+  if ((await getSystemSettingsCount(db)) < systemSettingsCount) await seedSettings(db);
 }
 
-async function seedRules() {
-  for (const element of allRuleSeeds) {
+async function seedRules(db: DbOrTx) {
+  for (const rule of allRuleSeeds.reverse()) {
     try {
-      await createFullRule(element);
+      await createFullRule(db, rule);
     } catch (error) {
       // só mostra no console por enquanto e continua a criação da regra
       console.error(error);
@@ -29,17 +30,17 @@ async function seedRules() {
   }
 }
 
-async function seedProfiles() {
+async function seedProfiles(db: DbOrTx) {
   try {
-    const systemRules = await getSystemRules();
+    const systemRules = await getSystemRules(db);
     profileSeed_allRules.rules = systemRules;
 
-    await createFullProfile(profileSeed_allRules);
+    await createFullProfile(db, profileSeed_allRules);
   } catch (error) {
     // só mostra no console por enquanto e continua a criação do perfil
     console.error(error);
   }
 }
-function seedSettings() {
-  createSettings(settingSeed);
+function seedSettings(db: DbOrTx) {
+  createSettings(db, settingSeed);
 }

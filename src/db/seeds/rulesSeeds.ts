@@ -212,13 +212,44 @@ export const ruleSeed_codigo: NewFullRulePayload = {
         value: "kt",
         displayOrder: displayOrderCount++,
       },
-
       {
         id: generateConditionId(),
         type: "condition",
         field: "fileExtension",
         fieldOperator: "equals",
         value: "tsx",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "jsx",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "sql",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "yaml",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "yml",
         displayOrder: displayOrderCount++,
       },
     ],
@@ -306,6 +337,22 @@ export const ruleSeed_compactados: NewFullRulePayload = {
         field: "fileExtension",
         fieldOperator: "equals",
         value: "xz",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "tgz",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "dmg",
         displayOrder: displayOrderCount++,
       },
     ],
@@ -464,7 +511,38 @@ export const ruleSeed_imagem: NewFullRulePayload = {
         value: "jpg",
         displayOrder: displayOrderCount++,
       },
-
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "ico",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "psd",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "ai",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "avif",
+        displayOrder: displayOrderCount++,
+      },
       {
         id: generateConditionId(),
         type: "condition",
@@ -570,7 +648,30 @@ export const ruleSeed_video: NewFullRulePayload = {
         value: "mp4",
         displayOrder: displayOrderCount++,
       },
-
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "mpeg",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "mpg",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "mts",
+        displayOrder: displayOrderCount++,
+      },
       {
         id: generateConditionId(),
         type: "condition",
@@ -782,6 +883,14 @@ export const ruleSeed_planilha: NewFullRulePayload = {
         value: "csv",
         displayOrder: displayOrderCount++,
       },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "numbers",
+        displayOrder: displayOrderCount++,
+      },
     ],
   },
 
@@ -918,6 +1027,22 @@ export const ruleSeed_executaveis: NewFullRulePayload = {
         value: "rpm",
         displayOrder: displayOrderCount++,
       },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "jar",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "apk",
+        displayOrder: displayOrderCount++,
+      },
     ],
   },
 
@@ -926,6 +1051,251 @@ export const ruleSeed_executaveis: NewFullRulePayload = {
     value: "EXECUTÁVEIS",
     ruleId: 0,
   },
+};
+
+// 11. Regra para Certificados Digitais
+displayOrderCount = 1;
+export const ruleSeed_certificados: NewFullRulePayload = {
+  rule: {
+    name: "Organizar Certificados Digitais",
+    description:
+      "Move arquivos de certificados e chaves (.pfx, .p12, .cer, etc.) para a pasta 'CERTIFICADOS'.",
+    isSystem: true,
+    isActive: true,
+  },
+  conditionsTree: {
+    id: generateConditionId(),
+    type: "group",
+    operator: "OR",
+    displayOrder: displayOrderCount,
+    children: [
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "pfx",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "p12",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "cer",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "crt",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "pem",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "key",
+        displayOrder: displayOrderCount++,
+      },
+    ],
+  },
+  action: { type: "move", value: "CERTIFICADOS", ruleId: 0 },
+};
+
+// 12. Regra para Torrents
+displayOrderCount = 1;
+export const ruleSeed_torrents: NewFullRulePayload = {
+  rule: {
+    name: "Organizar Arquivos Torrent",
+    description: "Move arquivos .torrent para a pasta 'TORRENTS'.",
+    isSystem: true,
+    isActive: true,
+  },
+  conditionsTree: {
+    id: generateConditionId(),
+    type: "group",
+    operator: "AND",
+    displayOrder: displayOrderCount,
+    children: [
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "torrent",
+        displayOrder: displayOrderCount++,
+      },
+    ],
+  },
+  action: { type: "move", value: "TORRENTS", ruleId: 0 },
+};
+
+// 13. Regra para Imagens de Disco
+displayOrderCount = 1;
+export const ruleSeed_imagens_disco: NewFullRulePayload = {
+  rule: {
+    name: "Organizar Imagens de Disco",
+    description: "Move arquivos de imagem de disco (.iso, .img, etc.) para a pasta 'IMAGENS DE DISCO'.",
+    isSystem: true,
+    isActive: true,
+  },
+  conditionsTree: {
+    id: generateConditionId(),
+    type: "group",
+    operator: "OR",
+    displayOrder: displayOrderCount,
+    children: [
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "iso",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "img",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "vhd",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "vhdx",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "vdi",
+        displayOrder: displayOrderCount++,
+      },
+    ],
+  },
+  action: { type: "move", value: "IMAGENS DE DISCO", ruleId: 0 },
+};
+
+// 14. Regra para E-books
+displayOrderCount = 1;
+export const ruleSeed_ebooks: NewFullRulePayload = {
+  rule: {
+    name: "Organizar E-books",
+    description: "Move arquivos de livros digitais (.epub, .mobi, etc.) para a pasta 'E-BOOKS'.",
+    isSystem: true,
+    isActive: true,
+  },
+  conditionsTree: {
+    id: generateConditionId(),
+    type: "group",
+    operator: "OR",
+    displayOrder: displayOrderCount,
+    children: [
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "epub",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "mobi",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "azw3",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "cbr",
+        displayOrder: displayOrderCount++,
+      },
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileExtension",
+        fieldOperator: "equals",
+        value: "cbz",
+        displayOrder: displayOrderCount++,
+      },
+    ],
+  },
+  action: { type: "move", value: "E-BOOKS", ruleId: 0 },
+};
+
+// 15. Regra para Backups
+displayOrderCount = 1;
+export const ruleSeed_backups: NewFullRulePayload = {
+  rule: {
+    name: "Organizar Arquivos de Backup",
+    description: "Move arquivos que contenham 'backup' no nome para a pasta 'BACKUPS'.",
+    isSystem: true,
+    isActive: true,
+  },
+  conditionsTree: {
+    id: generateConditionId(),
+    type: "group",
+    operator: "AND",
+    displayOrder: displayOrderCount,
+    children: [
+      {
+        id: generateConditionId(),
+        type: "condition",
+        field: "fileName",
+        fieldOperator: "contains",
+        value: "backup",
+        displayOrder: displayOrderCount++,
+      },
+    ],
+  },
+  action: { type: "move", value: "BACKUPS", ruleId: 0 },
 };
 
 // Array com todos os seeds de regras para facilitar a importação e inserção
@@ -938,6 +1308,11 @@ export const allRuleSeeds: NewFullRulePayload[] = [
   ruleSeed_video,
   ruleSeed_documento,
   ruleSeed_planilha,
-  ruleSeed_apresentacao,
   ruleSeed_executaveis,
+  ruleSeed_apresentacao,
+  ruleSeed_certificados,
+  ruleSeed_torrents,
+  ruleSeed_imagens_disco,
+  ruleSeed_ebooks,
+  ruleSeed_backups,
 ];
