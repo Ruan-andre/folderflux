@@ -38,7 +38,7 @@ export const useRuleStore = create<RuleState>((set) => ({
     if (response.status && response.items) {
       const newFullRule = response.items;
       set((state) => ({
-        rules: [...state.rules, newFullRule],
+        rules: [newFullRule, ...state.rules],
       }));
     }
     return response;

@@ -4,7 +4,7 @@ export type Operator =
   | "startsWith"
   | "endsWith"
   | "higherThan"
-  | "lessThan"
+  | "lowerThan"
   | "isBetween"
   | "equals"
   | "notEquals";
