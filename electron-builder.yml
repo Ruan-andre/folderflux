@@ -1,7 +1,9 @@
-appId: com.electron.app
-productName: FolderFlux-app
+# electron-builder.yml - Atualizar
+appId: com.folderflux.app
+productName: FolderFlux
 directories:
   buildResources: build
+  output: dist
 files:
   - "!**/.vscode/*"
   - "!src/*"
@@ -9,35 +11,40 @@ files:
   - "!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}"
   - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
   - "!{tsconfig.json}"
+  - "!{drizzle.config.ts}"
 asarUnpack:
   - resources/**
 win:
-  executableName: FolderFlux-app
+  executableName: FolderFlux
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
-  shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
+  artifactName: FolderFlux-${version}-setup.${ext}
+  shortcutName: FolderFlux
+  uninstallDisplayName: FolderFlux
   createDesktopShortcut: always
+  createStartMenuShortcut: true
+  runAfterFinish: true
+  include: build/installer.nsh
+  oneClick: false
+  allowToChangeInstallationDirectory: true
 mac:
+  target: dmg
+  category: public.app-category.productivity
   entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
-dmg:
-  artifactName: ${name}-${version}.${ext}
 linux:
   target:
     - AppImage
-    - snap
     - deb
-  maintainer: electronjs.org
+    - rpm
+    - freebsd
+    - pacman
+  synopsis: "${description}"
   category: Utility
-appImage:
-  artifactName: ${name}-${version}.${ext}
-npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  maintainer: "André Ruan <ruan.fullstack@gmail.com>"
+# publish:
+#   provider: github
+#   releaseType: release
