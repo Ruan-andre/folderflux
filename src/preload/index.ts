@@ -99,22 +99,27 @@ const api = {
       ipcRenderer.invoke("select-multiple-directories"),
   },
   organization: {
-    organizeAll: async (): Promise<DbResponse<number>> => await ipcRenderer.invoke("organize-all"),
+    organizeAll: async (): Promise<DbResponse<number>> => await ipcRenderer.invoke("worker:processAll"),
     defaultOrganization: async (paths: string[]): Promise<DbResponse<number>> =>
-      ipcRenderer.invoke("default-organization", paths),
+      ipcRenderer.invoke("worker:default-organization", paths),
     organizeWithSelectedRules: async (rules: FullRule[], paths: string[]): Promise<DbResponse<number>> =>
-      ipcRenderer.invoke("organize-with-selected-rules", rules, paths),
+      ipcRenderer.invoke("worker:organizeWithSelectedRules", rules, paths),
+    organizeWithSelectedProfiles: async (
+      profiles: FullProfile[],
+      paths: string[]
+    ): Promise<DbResponse<number>> =>
+      ipcRenderer.invoke("worker:organizeWithSelectedProfiles", profiles, paths),
     getLogs: async (lastId?: number): Promise<DbResponse<LogMetadata[]>> =>
       ipcRenderer.invoke("get-logs", lastId),
     deleteLogById: async (logId: number): Promise<DbResponse<void>> =>
       ipcRenderer.invoke("delete-log-by-id", logId),
-    deleteAllLogs: async (): Promise<DbResponse<void>> => ipcRenderer.invoke("delete-all-logs"),
+    deleteAllLogs: async (): Promise<DbResponse<void>> => ipcRenderer.invoke("worker:deleteAllLogs"),
   },
   monitoring: {
     startMonitoring: (folders: string[] | string) => ipcRenderer.invoke("watch", folders),
 
-    startMonitoringProfileFolders: (profileId: number) =>
-      ipcRenderer.invoke("watch-profile-folders", profileId),
+    startMonitoringProfileFolders: (profileId: number, startVerification: boolean = false) =>
+      ipcRenderer.invoke("watch-profile-folders", profileId, startVerification),
 
     stopMonitoring: (folders: string[] | string) => ipcRenderer.invoke("unwatch", folders),
 
@@ -122,7 +127,6 @@ const api = {
       ipcRenderer.invoke("unwatch-profile-folders", profileId),
   },
 };
-
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
