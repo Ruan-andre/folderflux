@@ -15,6 +15,7 @@ import { createResponse } from "../../db/functions";
 import { DbResponse } from "~/src/shared/types/DbResponse";
 import { mainProcessEmitter } from "../emitter/mainProcessEmitter";
 import { getAllProfiles } from "../services/profileService";
+import { DbOrTx } from "~/src/db";
 
 type FileValue = string | number | Date | null;
 type EvaluatorFunc = (
@@ -37,7 +38,31 @@ export default class RuleEngine {
     fileExtension: {
       equals: (fileValue, value) => String(fileValue).toLowerCase() === value.toLowerCase().replace(".", ""),
       notContains: (fileValue, value) =>
-        String(fileValue).toLowerCase() !== value.toLowerCase().replace(".", ""),
+        !String(fileValue).toLowerCase().includes(value.toLowerCase().replace(".", "")),
+    },
+    creationDate: {
+      equals: (fileValue, value) => {
+        if (!fileValue || !value) return false;
+        const fileDate = new Date(fileValue as string | number | Date);
+        return fileDate.getTime() === new Date(value).getTime();
+      },
+      isBetween: (fileValue, value, value2) => {
+        if (!value || !value2) return false;
+        const fileDate = new Date(fileValue as string | number | Date);
+        return fileDate >= new Date(value) && fileDate <= new Date(value2);
+      },
+      higherThan: (fileValue, value) => {
+        //A comparação é feita somente pelos dias (números inteiros)
+        if (!fileValue || !value) return false;
+        const diffDays = RuleEngine.DiffDays(fileValue);
+        return diffDays > parseInt(value);
+      },
+      lowerThan: (fileValue, value) => {
+        //A comparação é feita somente pelos dias (números inteiros)
+        if (!fileValue || !value) return false;
+        const diffDays = RuleEngine.DiffDays(fileValue);
+        return diffDays < parseInt(value);
+      },
     },
     modifiedDate: {
       isBetween: (fileValue, value, value2) => {
@@ -45,12 +70,34 @@ export default class RuleEngine {
         const fileDate = new Date(fileValue as string | number | Date);
         return fileDate >= new Date(value) && fileDate <= new Date(value2);
       },
+      higherThan: (fileValue, value) => {
+        //A comparação é feita somente pelos dias (números inteiros)
+        if (!fileValue || !value) return false;
+        const diffDays = RuleEngine.DiffDays(fileValue);
+        return diffDays > parseInt(value);
+      },
+      lowerThan: (fileValue, value) => {
+        //A comparação é feita somente pelos dias (números inteiros)
+        if (!fileValue || !value) return false;
+        const diffDays = RuleEngine.DiffDays(fileValue);
+        return diffDays < parseInt(value);
+      },
     },
     fileSize: {
       isBetween: (fileValue, value, value2) => {
         if (!value || !value2) return false;
         const fileSizeMB = Number(fileValue) / (1024 * 1024);
         return fileSizeMB >= parseFloat(value) && fileSizeMB <= parseFloat(value2);
+      },
+      higherThan: (fileValue, value) => {
+        if (!value) return false;
+        const fileSizeMB = Number(fileValue) / (1024 * 1024);
+        return fileSizeMB > parseFloat(value);
+      },
+      lowerThan: (fileValue, value) => {
+        if (!value) return false;
+        const fileSizeMB = Number(fileValue) / (1024 * 1024);
+        return fileSizeMB < parseFloat(value);
       },
     },
   };
@@ -78,22 +125,30 @@ export default class RuleEngine {
 
   private rules: FullRule[];
   private folderPaths: string[];
-  private profileName?: string;
   private logs: ReturnType<typeof this.initiateLogs>;
   private operationsToExecute: { file: FileInfo; rule: FullRule }[] = [];
 
+  private static DiffDays(fileValue: string | number | Date) {
+    const dateToCompare = new Date(fileValue);
+    const now = new Date();
+    const diffMs = now.getTime() - dateToCompare.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    return diffDays;
+  }
+
   public static async process(
+    db: DbOrTx,
     rules: FullRule[],
     folderPaths: string[],
     profileName?: string
   ): Promise<DbResponse<number>> {
     const engineInstance = new RuleEngine(rules, folderPaths, profileName);
-    return await engineInstance.run();
+    return await engineInstance.run(db);
   }
 
-  public static async processAll(): Promise<DbResponse<number>> {
+  public static async processAll(db: DbOrTx): Promise<DbResponse<number>> {
     try {
-      const profiles = (await getAllProfiles()).items;
+      const profiles = (await getAllProfiles(db)).items?.filter((p) => p.isActive);
 
       if (!profiles || profiles.length === 0) {
         return createResponse(true, "Nenhum perfil encontrado.", 0);
@@ -107,7 +162,7 @@ export default class RuleEngine {
             folders.map((f) => f.fullPath),
             name
           );
-          return engineInstance.run();
+          return engineInstance.run(db);
         })
       );
 
@@ -128,11 +183,10 @@ export default class RuleEngine {
   private constructor(rules: FullRule[], folderPaths: string[], profileName?: string) {
     this.rules = rules;
     this.folderPaths = folderPaths;
-    this.profileName = profileName;
     this.logs = this.initiateLogs(profileName);
   }
 
-  private async run(): Promise<DbResponse<number>> {
+  private async run(db: DbOrTx): Promise<DbResponse<number>> {
     // 1. Encontrar todos os arquivos que correspondem às regras
     await this.findMatchingFiles();
 
@@ -152,7 +206,7 @@ export default class RuleEngine {
 
     this.processResults(results);
 
-    this.saveLogs();
+    await this.saveLogs(db);
 
     console.log("Processamento concluído.");
     return createResponse(true, "Processamento finalizado. Verifique os logs para detalhes.", 1);
@@ -162,15 +216,15 @@ export default class RuleEngine {
     for (const folderPath of this.folderPaths) {
       try {
         const files = await getFilesInfo(folderPath);
-        if (files) {
-          for (const file of files) {
+        if (Array.isArray(files)) {
+          files.forEach((file) => {
             const matchingRule = this.rules.find((rule) =>
               this.evaluateConditionTree(file, rule.conditionsTree)
             );
             if (matchingRule) {
               this.operationsToExecute.push({ file, rule: matchingRule });
             }
-          }
+          });
         }
       } catch (error) {
         this.logs.error.files?.push({ currentValue: folderPath, reason: error as PromiseRejectedResult });
@@ -230,6 +284,8 @@ export default class RuleEngine {
         return file.extension.replace(".", "");
       case "fileSize":
         return file.size;
+      case "creationDate":
+        return file.ctime;
       case "modifiedDate":
         return file.mtime;
       default:
@@ -241,24 +297,24 @@ export default class RuleEngine {
     return length > 1 ? "s" : "";
   }
 
-  private async saveLogs(): Promise<void> {
+  private async saveLogs(db: DbOrTx): Promise<void> {
     const { organization, cleanup, error } = this.logs;
     const promises: { type: LogTypes; promise: Promise<LogMetadata> }[] = [];
 
     if (organization.files && organization.files.length > 0) {
       organization.filesAffected = organization.files.length;
       organization.description = `${organization.filesAffected} arquivos movidos, copiados ou renomeados ${organization.description}`;
-      promises.push({ type: "organization", promise: saveLog(organization) });
+      promises.push({ type: "organization", promise: saveLog(db, organization) });
     }
     if (cleanup.files && cleanup.files.length > 0) {
       cleanup.filesAffected = cleanup.files.length;
       cleanup.spaceFreedMB = parseFloat((cleanup.spaceFreedMB / (1024 * 1024)).toFixed(2));
       cleanup.description = `${cleanup.filesAffected} ${cleanup.description} (${cleanup.spaceFreedMB} MB liberados)`;
-      promises.push({ type: "cleanup", promise: saveLog(cleanup) });
+      promises.push({ type: "cleanup", promise: saveLog(db, cleanup) });
     }
     if (error.files && error.files.length > 0) {
       error.description += ` (${error.files.length} arquivo${this.isPlural(error.files.length)})`;
-      promises.push({ type: "error", promise: saveLog(error) });
+      promises.push({ type: "error", promise: saveLog(db, error) });
     }
 
     if (promises.length === 0) return;
