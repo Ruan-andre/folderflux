@@ -224,11 +224,14 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           folders: currentData.associatedFolders,
           rules: currentData.associatedRules,
           isActive: true,
-          iconId: CommonIcons.find((x) => x.value === currentData.icon)?.icon ?? "",
+          iconId: CommonIcons.find((x) => x.icon === currentData.icon)?.icon ?? "",
         };
         const response = await addProfile(newProfile);
         showMessage(response.message, response.status ? "success" : "error");
-        if (response.status) closePopup();
+        if (response.status && response.items) {
+          closePopup();
+          window.api.monitoring.startMonitoringProfileFolders(response.items?.id, true);
+        }
       }
       onUpdateSuccess();
     } catch (error) {
