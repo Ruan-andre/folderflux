@@ -87,14 +87,12 @@ const Rule = (rule: FullRule) => {
       )}
 
       <div style={{ display: "flex", gap: 5 }}>
-        {!isSystem && (
-          <CrudButtons
-            id={id}
-            onEdit={() => openPopup("edit", rule)}
-            onDelete={() => handleDelete(id)}
-            onDuplicate={() => handleDuplicate(id)}
-          />
-        )}
+        <CrudButtons
+          id={id}
+          onEdit={!isSystem ? () => openPopup("edit", rule) : undefined}
+          onDelete={!isSystem ? () => handleDelete(id) : undefined}
+          onDuplicate={() => handleDuplicate(id)}
+        />
       </div>
     </ContentWrapper>
   );
