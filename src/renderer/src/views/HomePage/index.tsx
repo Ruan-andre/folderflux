@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, RefObject } from "react";
-import { Box, Modal, styled, Typography } from "@mui/material";
+import { Backdrop, Box, CircularProgress, Modal, styled, Typography } from "@mui/material";
 import ContentWrapper from "../../components/ContentWrapper";
 import FolderDropZone from "../../components/FolderDropZone";
 import GenericListItems from "../../components/GenericListItems";
@@ -20,6 +20,8 @@ import { PathStats } from "~/src/shared/types/pathStatsType";
 import { useLogStore } from "../../store/logStore";
 import { useNavigate } from "react-router-dom";
 import DonationPopup from "../../components/DonationPopup";
+import ProfileManagementView from "../ProfileManagementView";
+import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
 
 const HomePage = () => {
   const { showConfirm } = useConfirmDialog();
@@ -27,6 +29,7 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   const [isRuleSelectorOpen, setIsRuleSelectorOpen] = useState<boolean>(false);
+  const [isProfileSelectorOpen, setIsProfileSelectorOpen] = useState<boolean>(false);
   const [foldersForQuickClean, setFoldersForQuickClean] = useState<string[]>([]);
   const [lastLogId, setLastLogId] = useState<number | undefined>(undefined);
   const lastLogRef = useRef<HTMLLIElement>(null);
@@ -126,27 +129,55 @@ const HomePage = () => {
     if (!paths || paths.length === 0) return;
     const stats = await window.api.getStatsForPaths(paths);
     const folders = stats.filter((s) => s.isDirectory).map((f) => f.path);
-    if (folders.length > 0) showQuickCleanOptions(folders);
+    if (folders.length > 0) showQuickOrganizationOptions(folders);
     else if (handleError) handleError();
   };
 
   const handleClickSelectFolder = async () => {
     const paths = await window.api.dialog.selectMultipleDirectories();
-    if (paths && paths.length > 0) showQuickCleanOptions(paths);
+    if (paths && paths.length > 0) showQuickOrganizationOptions(paths);
   };
 
   const handleRuleSelectionSave = async (selectedRules: FullRule[]) => {
     setIsRuleSelectorOpen(false);
     if (foldersForQuickClean.length > 0 && selectedRules.length > 0) {
-      const response = await window.api.organization.organizeWithSelectedRules(
-        selectedRules,
-        foldersForQuickClean
-      );
+      try {
+        setIsLoading(true);
+        const response = await window.api.organization.organizeWithSelectedRules(
+          selectedRules,
+          foldersForQuickClean
+        );
 
-      handleMessage(response);
-      if (response.items && response.items > 0) {
-        setLastLogId(undefined);
-        getLogs();
+        handleMessage(response);
+        if (response.items && response.items > 0) {
+          setLastLogId(undefined);
+          // getLogs();
+        }
+      } catch (error) {
+        showMessage((error as Error).message, "error");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleProfileSelectionSave = async (selectedProfiles: FullProfile[]) => {
+    setIsProfileSelectorOpen(false);
+    if (foldersForQuickClean.length > 0 && selectedProfiles.length > 0) {
+      try {
+        setIsLoading(true);
+        const response = await window.api.organization.organizeWithSelectedProfiles(
+          selectedProfiles,
+          foldersForQuickClean
+        );
+        handleMessage(response);
+        if (response.items && response.items > 0) {
+          setLastLogId(undefined);
+        }
+      } catch (error) {
+        showMessage((error as Error).message, "error");
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -159,27 +190,49 @@ const HomePage = () => {
 
     return `Organizar ${folders.length} pasta(s):\n${folderNames}`;
   }
-  async function showQuickCleanOptions(folderPaths: string[]) {
+  const handleDefaultOrganization = async (paths: string[]) => {
+    try {
+      setIsLoading(true);
+      const response = await window.api.organization.defaultOrganization(paths);
+      // if (response.items && response.items > 0) {
+      //   getLogs();
+      // }
+      handleMessage(response);
+    } catch (error: unknown) {
+      showMessage((error as Error).message, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  async function showQuickOrganizationOptions(folderPaths: string[]) {
     const message = await montaMensagemPastas(folderPaths);
     showConfirm(
       {
         message,
         confirmText: "Usar Perfil Padrão",
-        thirdButton: { text: "Selecionar Regras" },
         confirmBtnColor: "success",
       },
       async () => {
-        const response = await window.api.organization.defaultOrganization(folderPaths);
-        if (response.items && response.items > 0) {
-          getLogs();
-        }
-        handleMessage(response);
+        await handleDefaultOrganization(folderPaths);
       },
-      async () => {
-        // Ação para "Selecionar Regras"
-        setFoldersForQuickClean(folderPaths);
-        setIsRuleSelectorOpen(true);
-      }
+      [
+        {
+          text: "Selecionar Regras",
+          thirdButtonColor: "warning",
+          action: () => {
+            setFoldersForQuickClean(folderPaths);
+            setIsRuleSelectorOpen(true);
+          },
+        },
+        {
+          text: "Selecionar Perfil",
+          thirdButtonColor: "info",
+          action: () => {
+            setFoldersForQuickClean(folderPaths);
+            setIsProfileSelectorOpen(true);
+          },
+        },
+      ]
     );
   }
 
@@ -191,10 +244,17 @@ const HomePage = () => {
 
   const handleDeleteAllLogs = async () => {
     showConfirm({}, async () => {
-      const response = await deleteAllLogs();
-      const messageType = response.status ? "success" : "error";
-      showMessage(response.message, messageType);
-      setLastLogId(undefined);
+      setIsLoading(true);
+      try {
+        const response = await deleteAllLogs();
+        const messageType = response.status ? "success" : "error";
+        showMessage(response.message, messageType);
+        setLastLogId(undefined);
+      } catch (error) {
+        showMessage((error as Error).message, "error");
+      } finally {
+        setIsLoading(false);
+      }
     });
   };
 
@@ -205,8 +265,15 @@ const HomePage = () => {
   };
 
   async function handleClickForceVerification() {
-    const response = await window.api.organization.organizeAll();
-    handleMessage(response);
+    try {
+      setIsLoading(true);
+      const response = await window.api.organization.organizeAll();
+      handleMessage(response);
+    } catch (error) {
+      showMessage((error as Error).message, "error");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleSubTitleProfiles = async () => {
@@ -315,12 +382,33 @@ const HomePage = () => {
           onCancel={() => setIsRuleSelectorOpen(false)}
         />
       </Modal>
+      <Modal
+        open={isProfileSelectorOpen}
+        onClose={() => setIsProfileSelectorOpen(false)}
+        sx={{ bgcolor: "background.paper", borderRadius: 8, width: "90vw", height: "90vh", margin: "auto" }}
+      >
+        <ProfileManagementView
+          mode="selection"
+          initialSelectedProfiles={undefined}
+          onSelectionSave={handleProfileSelectionSave}
+          onCancel={() => setIsProfileSelectorOpen(false)}
+        />
+      </Modal>
       <OrganizationLogPopup
         key={selectedLog?.id}
         log={selectedLog}
         isOpen={isDetailsOpen}
         onClose={() => setIsDetailsOpen(false)}
       />
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1, whiteSpace: "break-spaces" }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+        <Typography component={"div"} marginTop={2} fontSize={18}>
+          Processando...
+        </Typography>
+      </Backdrop>
     </ContentWrapper>
   );
 };
