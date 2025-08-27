@@ -50,18 +50,10 @@ const SettingPage = () => {
 
     try {
       const selectedSetting = originalSettings.find((s) => s.id === id);
-      switch (selectedSetting?.type) {
-        case "startWithOS":
-          await window.api.settings.toggleSettingActive(id, "startWithOS");
-          break;
-        case "darkMode":
-          toggleTheme();
-          await window.api.settings.toggleSettingActive(id);
-          break;
-        default:
-          await window.api.settings.toggleSettingActive(id);
-          break;
+      if (selectedSetting?.type === "darkMode") {
+        toggleTheme();
       }
+      await window.api.settings.toggleSettingActive(id, selectedSetting?.type);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showMessage("Erro ao atualizar a configuração.", "error");
