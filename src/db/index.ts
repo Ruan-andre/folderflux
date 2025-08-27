@@ -11,13 +11,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Caminho para o banco (AppData/UserData no Electron)
-const dbPath =
-  process.platform === "darwin"
-    ? path.join(app.getPath("appData"), "FolderFlux.db")
-    : path.join(app.getPath("userData"), "FolderFlux.db");
-
-
+const dbPath = path.join(app.getPath("userData"), "FolderFlux.db");
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+
+// Exporte uma função para obter o caminho
+export function getDbPath() {
+  return dbPath;
+}
 
 const sqlite = new Database(dbPath);
 
@@ -32,7 +32,9 @@ export type DbOrTx = DbInstance | Transaction;
  * Executa migrations pendentes
  */
 export function runMigrations() {
-  const migrationsDir = path.join(__dirname, "/db/migrations");
+  const migrationsDir = app.isPackaged
+    ? path.join(process.resourcesPath, "db/migrations") // Em produção
+    : path.join(__dirname, "./db/migrations");
 
   if (!fs.existsSync(migrationsDir)) {
     console.warn("Nenhuma pasta de migrations encontrada:", migrationsDir);
