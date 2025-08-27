@@ -23,6 +23,14 @@ export default defineConfig({
         ],
       }),
     ],
+    build: {
+      rollupOptions: {
+        input: {
+          index: resolve(rootDir, "src/main/index.ts"),
+          taskWorker: resolve(rootDir, "src/main/workers/taskWorker.ts"),
+        },
+      },
+    },
   },
   preload: {
     resolve: {
