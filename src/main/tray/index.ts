@@ -1,6 +1,7 @@
 import { Menu, Tray, nativeImage, BrowserWindow } from "electron";
 import path from "path";
 import RuleEngine from "../core/ruleEngine";
+import { db } from "../../db";
 
 export function createTray(window: BrowserWindow) {
   const appIcon = path.join(__dirname, "resources", "icon.png");
@@ -12,8 +13,8 @@ export function createTray(window: BrowserWindow) {
     { label: "FolderFlux - Organização Inteligente", enabled: false },
     { type: "separator" },
     { label: "Abrir", enabled: true, click: () => window.show() },
-    { label: "Forçar verificação", click: async () => await RuleEngine.processAll() },
-    { label: "Sair", enabled: true, role: "quit" },
+    { label: "Forçar verificação", click: async () => await RuleEngine.processAll(db) },
+    { label: "Sair", enabled: true, click: () => window.destroy() },
   ]);
 
   tray.setToolTip("O FolderFlux está sendo executado em segundo plano");
