@@ -4,15 +4,25 @@ import path from "path";
 import { Worker } from "worker_threads";
 import { getDbPath } from "../../../db";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
+import { DbResponse } from "~/src/shared/types/DbResponse";
+import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
+import { mainProcessEmitter } from "../../emitter/mainProcessEmitter";
 
-function runTaskInWorker(task: string, payload?: { rules?: FullRule[]; paths?: string[] }): Promise<void> {
+export function runTaskInWorker(
+  task: string,
+  payload?: { rules?: FullRule[]; profiles?: FullProfile[]; paths?: string[] }
+): Promise<DbResponse> {
   return new Promise((resolve, reject) => {
-    const workerPath = path.resolve(__dirname, "taskWorker.js"); // Aponta para o novo worker
+    const workerPath = path.resolve(__dirname, "taskWorker.js");
     const dbPath = getDbPath();
 
     const worker = new Worker(workerPath, { workerData: { dbPath } });
 
     worker.on("message", (response) => {
+      if (response?.type === "progress" && response?.task === "log-added") {
+        mainProcessEmitter.emit("log-added", response.data);
+        return;
+      }
       if (response.success) {
         resolve(response.data);
       } else {
@@ -48,7 +58,7 @@ export function registerWorkerHandlers() {
     return runTaskInWorker("organizeWithSelectedRules", { rules, paths });
   });
 
-  ipcMain.handle("worker:organizeWithSelectedProfiles", (_e, rules, paths) => {
-    return runTaskInWorker("organizeWithSelectedProfiles", { rules, paths });
+  ipcMain.handle("worker:organizeWithSelectedProfiles", (_e, profiles, paths) => {
+    return runTaskInWorker("organizeWithSelectedProfiles", { profiles, paths });
   });
 }
