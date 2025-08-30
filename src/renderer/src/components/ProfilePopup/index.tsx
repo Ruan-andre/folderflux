@@ -212,7 +212,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
               foldersIdToUnwatch.clear();
             }
           }
-          window.api.monitoring.startMonitoringProfileFolders(updatedProfile.id);
+          window.api.monitoring.startMonitoringProfileFolders(updatedProfile.id, true);
           showMessage("Perfil atualizado com sucesso!", "success");
           closePopup();
         } else showMessage("Erro ao atualizar o perfil!", "error");
