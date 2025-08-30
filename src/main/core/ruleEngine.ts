@@ -13,7 +13,6 @@ import {
 import { saveLog } from "../services/organizationLogsService";
 import { createResponse } from "../../db/functions";
 import { DbResponse } from "~/src/shared/types/DbResponse";
-import { mainProcessEmitter } from "../emitter/mainProcessEmitter";
 import { getAllProfiles } from "../services/profileService";
 import { DbOrTx } from "~/src/db";
 
@@ -126,27 +125,37 @@ export default class RuleEngine {
   private rules: FullRule[];
   private folderPaths: string[];
   private logs: ReturnType<typeof this.initiateLogs>;
+  private onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void;
   private operationsToExecute: { file: FileInfo; rule: FullRule }[] = [];
 
-  private static DiffDays(fileValue: string | number | Date) {
-    const dateToCompare = new Date(fileValue);
-    const now = new Date();
-    const diffMs = now.getTime() - dateToCompare.getTime();
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-    return diffDays;
+  // O construtor é privado para forçar o uso do método estático `process`.
+  private constructor(
+    rules: FullRule[],
+    folderPaths: string[],
+    profileName?: string,
+    onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void
+  ) {
+    this.rules = rules;
+    this.folderPaths = folderPaths;
+    this.logs = this.initiateLogs(profileName);
+    this.onLogAdded = onLogAdded;
   }
 
   public static async process(
     db: DbOrTx,
     rules: FullRule[],
     folderPaths: string[],
-    profileName?: string
+    profileName?: string,
+    onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void
   ): Promise<DbResponse<number>> {
-    const engineInstance = new RuleEngine(rules, folderPaths, profileName);
+    const engineInstance = new RuleEngine(rules, folderPaths, profileName, onLogAdded);
     return await engineInstance.run(db);
   }
 
-  public static async processAll(db: DbOrTx): Promise<DbResponse<number>> {
+  public static async processAll(
+    db: DbOrTx,
+    onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void
+  ): Promise<DbResponse<number>> {
     try {
       const profiles = (await getAllProfiles(db)).items?.filter((p) => p.isActive);
 
@@ -160,7 +169,8 @@ export default class RuleEngine {
           const engineInstance = new RuleEngine(
             rules,
             folders.map((f) => f.fullPath),
-            name
+            name,
+            onLogAdded
           );
           return engineInstance.run(db);
         })
@@ -179,11 +189,12 @@ export default class RuleEngine {
     }
   }
 
-  // O construtor é privado para forçar o uso do método estático `process`.
-  private constructor(rules: FullRule[], folderPaths: string[], profileName?: string) {
-    this.rules = rules;
-    this.folderPaths = folderPaths;
-    this.logs = this.initiateLogs(profileName);
+  private static DiffDays(fileValue: string | number | Date) {
+    const dateToCompare = new Date(fileValue);
+    const now = new Date();
+    const diffMs = now.getTime() - dateToCompare.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    return diffDays;
   }
 
   private async run(db: DbOrTx): Promise<DbResponse<number>> {
@@ -331,8 +342,10 @@ export default class RuleEngine {
       }
     });
 
-    if (Object.keys(successfulLogs).length > 0) {
-      mainProcessEmitter.emit("log-added", Object.values(successfulLogs));
+    if (Object.keys(successfulLogs).length > 0 && this.onLogAdded) {
+      this.onLogAdded(
+        Object.keys(successfulLogs).map((key) => successfulLogs[key as LogTypes]) as LogMetadata[]
+      );
     }
   }
 
