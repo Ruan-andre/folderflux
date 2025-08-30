@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, RefObject } from "react";
-import { Backdrop, Box, CircularProgress, Modal, styled, Typography } from "@mui/material";
+import { Box, Modal, styled, Typography } from "@mui/material";
 import ContentWrapper from "../../components/ContentWrapper";
 import FolderDropZone from "../../components/FolderDropZone";
 import GenericListItems from "../../components/GenericListItems";
@@ -22,10 +22,12 @@ import { useNavigate } from "react-router-dom";
 import DonationPopup from "../../components/DonationPopup";
 import ProfileManagementView from "../ProfileManagementView";
 import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
+import Loading from "../../components/Loading";
+import { useTourStore } from "../../store/tourStore";
 
 const HomePage = () => {
-  const { showConfirm } = useConfirmDialog();
   const { showMessage } = useSnackbar();
+  const { showConfirm } = useConfirmDialog();
   const navigate = useNavigate();
 
   const [isRuleSelectorOpen, setIsRuleSelectorOpen] = useState<boolean>(false);
@@ -44,21 +46,26 @@ const HomePage = () => {
   const deleteLog = useLogStore((state) => state.deleteLog);
   const addSavedLogFromBD = useLogStore((state) => state.addSavedLogFromBD);
   const [isDonationPopupOpen, setIsDonationPopupOpen] = useState(false);
+  const { startTour, tourNext, isTourActive, getCurrentStepId, initializeTour } = useTourStore();
+
+  useEffect(() => {
+    initializeTour(navigate);
+    // const tourHasBeenSeen = localStorage.getItem("folderfluxTourCompleted");
+    // if (!tourHasBeenSeen) {
+    //   setTimeout(() => startTour("simple"), 500);
+    // }
+  }, [initializeTour, navigate]);
 
   useEffect(() => {
     async function fetchData() {
       if (isLoading || !hasMore) return;
-      setIsLoading(true);
-      try {
+
+      handleActionWithLoading(async () => {
         const newLogsCount = await getLogs(lastLogId);
         if (newLogsCount && newLogsCount < 10) {
           setHasMore(false);
         }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
+      }, false);
     }
 
     fetchData();
@@ -71,6 +78,38 @@ const HomePage = () => {
     return () => removeListener();
   }, [addSavedLogFromBD]);
 
+  useIntersectionObserver(lastLogRef as RefObject<Element>, () => {
+    if (isLoading || !hasMore || logs.length === 0) return;
+    const nextId = logs[logs.length - 1].id;
+    setLastLogId(nextId);
+  });
+
+  const handleHowToUse = () => {
+    showConfirm(
+      {
+        title: "Escolha uma opção",
+        confirmText: "Tutorial Guiado",
+        confirmBtnColor: "success",
+      },
+      () => startTour("simple"),
+      [{ text: "Tutorial em Vídeo", action: () => {}, thirdButtonColor: "info" }]
+    );
+  };
+
+  async function handleActionWithLoading<T>(
+    action: () => Promise<DbResponse<T>> | Promise<void>,
+    message?: boolean
+  ) {
+    setIsLoading(true);
+    try {
+      const response = await action();
+      if (message && response) handleMessage(response);
+    } catch (error) {
+      showMessage((error as Error).message, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  }
   const recentActivityList: GenericListItemsType[] = logs.map((item) => {
     const icon =
       item.type === "organization"
@@ -85,12 +124,6 @@ const HomePage = () => {
       icon: icon?.icon,
       dateItem: item.createdAt,
     };
-  });
-
-  useIntersectionObserver(lastLogRef as RefObject<Element>, () => {
-    if (isLoading || !hasMore || logs.length === 0) return;
-    const nextId = logs[logs.length - 1].id;
-    setLastLogId(nextId);
   });
 
   const handleOpenDetails = (logId: number) => {
@@ -122,6 +155,11 @@ const HomePage = () => {
       }
       setSelectedLog(logMetadata);
       setIsDetailsOpen(true);
+      if (isTourActive() && getCurrentStepId() === "recent-activity-list") {
+        setTimeout(() => {
+          tourNext();
+        }, 250);
+      }
     }
   };
 
@@ -133,52 +171,47 @@ const HomePage = () => {
     else if (handleError) handleError();
   };
 
-  const handleClickSelectFolder = async () => {
-    const paths = await window.api.dialog.selectMultipleDirectories();
-    if (paths && paths.length > 0) showQuickOrganizationOptions(paths);
+  const handleSelectFolderClick = async () => {
+    const paths = await window.api.dialog.selectMultipleDirectories(isTourActive());
+
+    if (paths && paths.length > 0) {
+      showQuickOrganizationOptions(paths);
+      if (isTourActive() && getCurrentStepId() === "click-drop-zone") {
+        setTimeout(() => tourNext(), 250);
+      }
+    }
   };
 
   const handleRuleSelectionSave = async (selectedRules: FullRule[]) => {
     setIsRuleSelectorOpen(false);
     if (foldersForQuickClean.length > 0 && selectedRules.length > 0) {
-      try {
-        setIsLoading(true);
+      handleActionWithLoading(async () => {
         const response = await window.api.organization.organizeWithSelectedRules(
           selectedRules,
           foldersForQuickClean
         );
-
-        handleMessage(response);
         if (response.items && response.items > 0) {
           setLastLogId(undefined);
           // getLogs();
         }
-      } catch (error) {
-        showMessage((error as Error).message, "error");
-      } finally {
-        setIsLoading(false);
-      }
+        return response;
+      }, true);
     }
   };
 
   const handleProfileSelectionSave = async (selectedProfiles: FullProfile[]) => {
     setIsProfileSelectorOpen(false);
     if (foldersForQuickClean.length > 0 && selectedProfiles.length > 0) {
-      try {
-        setIsLoading(true);
+      handleActionWithLoading(async () => {
         const response = await window.api.organization.organizeWithSelectedProfiles(
           selectedProfiles,
           foldersForQuickClean
         );
-        handleMessage(response);
         if (response.items && response.items > 0) {
           setLastLogId(undefined);
         }
-      } catch (error) {
-        showMessage((error as Error).message, "error");
-      } finally {
-        setIsLoading(false);
-      }
+        return response;
+      }, true);
     }
   };
 
@@ -191,23 +224,16 @@ const HomePage = () => {
     return `Organizar ${folders.length} pasta(s):\n${folderNames}`;
   }
   const handleDefaultOrganization = async (paths: string[]) => {
-    try {
-      setIsLoading(true);
-      const response = await window.api.organization.defaultOrganization(paths);
-      // if (response.items && response.items > 0) {
-      //   getLogs();
-      // }
-      handleMessage(response);
-    } catch (error: unknown) {
-      showMessage((error as Error).message, "error");
-    } finally {
-      setIsLoading(false);
+    handleActionWithLoading(() => window.api.organization.defaultOrganization(paths), true);
+    if (isTourActive() && getCurrentStepId() === "click-default-profile") {
+      tourNext();
     }
   };
   async function showQuickOrganizationOptions(folderPaths: string[]) {
     const message = await montaMensagemPastas(folderPaths);
     showConfirm(
       {
+        confirmBtnId: "btn-default",
         message,
         confirmText: "Usar Perfil Padrão",
         confirmBtnColor: "success",
@@ -236,26 +262,24 @@ const HomePage = () => {
     );
   }
 
-  function handleMessage(response: DbResponse<number>) {
+  function handleMessage<T>(response: DbResponse<T>) {
     let messageType: AlertColor = response.status ? "success" : "error";
     if (response.status && response.items === 0) messageType = "info";
     showMessage(response.message, messageType);
   }
 
   const handleDeleteAllLogs = async () => {
-    showConfirm({}, async () => {
-      setIsLoading(true);
-      try {
-        const response = await deleteAllLogs();
-        const messageType = response.status ? "success" : "error";
-        showMessage(response.message, messageType);
-        setLastLogId(undefined);
-      } catch (error) {
-        showMessage((error as Error).message, "error");
-      } finally {
-        setIsLoading(false);
+    showConfirm(
+      {
+        title: "ATENÇÃO!",
+        message: "Esta ação apagará todos os logs e poderá demorar vários minutos, deseja prosseguir?",
+        confirmBtnColor: "success",
+        cancelBtnColor: "error",
+      },
+      async () => {
+        await handleActionWithLoading(deleteAllLogs, true);
       }
-    });
+    );
   };
 
   const handleDeleteLogById = async (logId: number) => {
@@ -265,15 +289,7 @@ const HomePage = () => {
   };
 
   async function handleClickForceVerification() {
-    try {
-      setIsLoading(true);
-      const response = await window.api.organization.organizeAll();
-      handleMessage(response);
-    } catch (error) {
-      showMessage((error as Error).message, "error");
-    } finally {
-      setIsLoading(false);
-    }
+    handleActionWithLoading(window.api.organization.organizeAll, true);
   }
 
   const handleSubTitleProfiles = async () => {
@@ -289,7 +305,7 @@ const HomePage = () => {
     border: theme.palette.mode === "light" ? "1px solid #e8e4e0" : "none",
   }));
   return (
-    <ContentWrapper sx={{ minHeight: "95vh", display: "flex", justifyContent: "flex-start" }}>
+    <ContentWrapper sx={{ minHeight: "95vh", display: "flex", justifyContent: "flex-start" }} id="home-page">
       <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
         <HomePageCard
           title="Forçar Verificação"
@@ -307,10 +323,12 @@ const HomePage = () => {
         />
 
         <HomePageCard
+          id="how-to-use-card"
           title="Como usar?"
           subtitle="Guia rápido de início"
           icon={<Icon icon="noto-v1:graduation-cap" width="45" height="45" />}
           iconSx={{ backgroundColor: "transparent" }}
+          onClick={handleHowToUse}
         />
 
         <HomePageCard
@@ -327,8 +345,13 @@ const HomePage = () => {
           }}
         />
       </Box>
-      <FolderDropZone onClick={handleClickSelectFolder} onItemsDropped={handleItemsDropped} />
+      <FolderDropZone
+        id="folder-drop-zone"
+        onClick={handleSelectFolderClick}
+        onItemsDropped={handleItemsDropped}
+      />
       <ContentWrapper
+        id="recent-activity"
         titleTagType="h3"
         sx={{ maxHeight: "52rem", borderRadius: 8 }}
         title="Atividade Recente"
@@ -347,6 +370,7 @@ const HomePage = () => {
         {recentActivityList.length > 0 ? (
           <>
             <GenericListItems
+              id="recent-activity-list"
               isButton
               btnDelete
               onClickDelete={handleDeleteLogById}
@@ -398,17 +422,16 @@ const HomePage = () => {
         key={selectedLog?.id}
         log={selectedLog}
         isOpen={isDetailsOpen}
-        onClose={() => setIsDetailsOpen(false)}
+        onClose={() => {
+          setIsDetailsOpen(false);
+          if (isTourActive() && getCurrentStepId() === "close-organization-log") {
+            setTimeout(() => {
+              tourNext();
+            }, 150);
+          }
+        }}
       />
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1, whiteSpace: "break-spaces" }}
-        open={isLoading}
-      >
-        <CircularProgress color="inherit" />
-        <Typography component={"div"} marginTop={2} fontSize={18}>
-          Processando...
-        </Typography>
-      </Backdrop>
+      <Loading isLoading={isLoading} />
     </ContentWrapper>
   );
 };
