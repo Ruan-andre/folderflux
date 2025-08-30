@@ -95,13 +95,13 @@ const api = {
   },
   dialog: {
     selectDirectory: (): Promise<string | null> => ipcRenderer.invoke("select-directory"),
-    selectMultipleDirectories: (): Promise<string[] | null> =>
-      ipcRenderer.invoke("select-multiple-directories"),
+    selectMultipleDirectories: (isTutorialPath?: boolean): Promise<string[] | null> =>
+      ipcRenderer.invoke("select-multiple-directories", isTutorialPath),
   },
   organization: {
     organizeAll: async (): Promise<DbResponse<number>> => await ipcRenderer.invoke("worker:processAll"),
     defaultOrganization: async (paths: string[]): Promise<DbResponse<number>> =>
-      ipcRenderer.invoke("worker:default-organization", paths),
+      ipcRenderer.invoke("worker:defaultOrganization", paths),
     organizeWithSelectedRules: async (rules: FullRule[], paths: string[]): Promise<DbResponse<number>> =>
       ipcRenderer.invoke("worker:organizeWithSelectedRules", rules, paths),
     organizeWithSelectedProfiles: async (
