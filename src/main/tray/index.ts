@@ -1,7 +1,6 @@
-import { Menu, Tray, nativeImage, BrowserWindow } from "electron";
+import { Menu, Tray, nativeImage, BrowserWindow, dialog } from "electron";
 import path from "path";
-import RuleEngine from "../core/ruleEngine";
-import { db } from "../../db";
+import { runTaskInWorker } from "../handlers/workers";
 
 export function createTray(window: BrowserWindow) {
   const appIcon = path.join(__dirname, "resources", "icon.png");
@@ -13,7 +12,22 @@ export function createTray(window: BrowserWindow) {
     { label: "FolderFlux - Organização Inteligente", enabled: false },
     { type: "separator" },
     { label: "Abrir", enabled: true, click: () => window.show() },
-    { label: "Forçar verificação", click: async () => await RuleEngine.processAll(db) },
+    {
+      label: "Forçar verificação",
+      click: async () => {
+        try {
+          const response = await runTaskInWorker("processAll");
+          dialog.showMessageBox({
+            type: "info",
+            title: "Operação Concluída",
+            message: response.message,
+          });
+        } catch (error) {
+          console.error("Falha ao executar a tarefa de verificação via Tray:", error);
+          dialog.showErrorBox("Erro", "Ocorreu um erro ao forçar a verificação.");
+        }
+      },
+    },
     { label: "Sair", enabled: true, click: () => window.destroy() },
   ]);
 
