@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 
 type ConfirmDialogOptions = {
+  confirmBtnId?: string;
   title?: string;
   message?: string;
   confirmText?: string;
@@ -20,6 +21,7 @@ type ConfirmDialogOptions = {
 
 type ThirdButtonsType = Array<{
   text: ConfirmDialogOptions["confirmText"];
+  id?: string;
   thirdButtonColor?: ConfirmDialogOptions["confirmBtnColor"];
   action: () => void;
 }>;
@@ -96,6 +98,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
               backgroundColor: theme.palette.background.paper,
               minWidth: 360,
             },
+            id: "confirm-dialog",
           },
         }}
       >
@@ -110,6 +113,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
         </DialogTitle>
         <DialogContent>
           <DialogContentText
+            id="confirm-dialog-content-text"
             sx={{
               fontSize: "1.5rem",
               color: theme.palette.text.primary,
@@ -120,11 +124,11 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
             {options.message ?? "Deseja continuar com essa operação?"}
           </DialogContentText>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: "flex-end", gap: 1 }}>
+        <DialogActions sx={{ justifyContent: "flex-end", gap: 1 }} id="confirm-dialog-actions">
           <Button
             onClick={handleClose}
             variant="contained"
-            color={options.cancelBtnColor ?? "error"}
+            color={options.cancelBtnColor ?? "primary"}
             sx={{
               borderRadius: 3,
               fontWeight: "bold",
@@ -135,10 +139,15 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
             {options.cancelText ?? "Cancelar"}
           </Button>
           {thirdButtons &&
-            thirdButtons?.map((b) => {
+            thirdButtons?.map((b, index) => {
               return (
                 <Button
-                  onClick={b.action}
+                  key={index}
+                  id={b.id}
+                  onClick={() => {
+                    b.action();
+                    setOpen(false);
+                  }}
                   variant="contained"
                   color={b.thirdButtonColor ?? "warning"}
                   sx={{
@@ -154,6 +163,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
               );
             })}
           <Button
+            id={options.confirmBtnId}
             onClick={handleConfirm}
             variant="contained"
             color={options.confirmBtnColor ?? "error"}
