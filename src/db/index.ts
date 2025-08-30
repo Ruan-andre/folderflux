@@ -20,7 +20,7 @@ export function getDbPath() {
 }
 
 const sqlite = new Database(dbPath);
-
+sqlite.pragma("auto_vacuum = FULL");
 // Instância do Drizzle
 export const db: BetterSQLite3Database<typeof schema> = drizzle(sqlite, { schema });
 
