@@ -5,6 +5,8 @@ import { getAllProfiles, getCountProfilesWithFolder, getProfileById } from "../s
 import path from "path";
 import { getStats } from "../services/fileService";
 import { DbOrTx } from "~/src/db";
+import { mainProcessEmitter } from "../emitter/mainProcessEmitter";
+import { LogMetadata } from "~/src/shared/types/LogMetaDataType";
 
 const temporaryFilePatterns = [/(^|[/\\])\../, "**/*.tmp", "**/*.part", "**/*.crdownload", "**/*.opdownload"];
 
@@ -33,6 +35,10 @@ class FolderMonitorService {
     if (!realTimeSetting?.isActive) return;
     this.initialLoad();
   }
+
+  private onLogAdded = (logs: LogMetadata | LogMetadata[]) => {
+    mainProcessEmitter.emit("log-added", logs);
+  };
 
   private handleFileEvent(filePath: string): void {
     if (this.processingRequest.has(filePath)) {
@@ -133,7 +139,14 @@ class FolderMonitorService {
           );
           for (const profile of associatedProfiles) {
             const activeRules = profile.rules.filter((r) => r.isActive);
-            await RuleEngine.process(this.db, activeRules, Array.from(dirnames), profile.name);
+
+            await RuleEngine.process(
+              this.db,
+              activeRules,
+              Array.from(dirnames),
+              profile.name,
+              this.onLogAdded
+            );
           }
         }
       }
@@ -148,7 +161,7 @@ class FolderMonitorService {
         for (const profile of associatedProfiles) {
           const activeRules = profile.rules.filter((r) => r.isActive);
           const associatedFolders = profile.folders.map((f) => f.fullPath);
-          await RuleEngine.process(this.db, activeRules, associatedFolders, profile.name);
+          await RuleEngine.process(this.db, activeRules, associatedFolders, profile.name, this.onLogAdded);
         }
       }
     };
@@ -176,7 +189,7 @@ class FolderMonitorService {
     this.monitor.add(paths);
 
     if (startVerification) {
-      RuleEngine.processAll(this.db);
+      RuleEngine.processAll(this.db, this.onLogAdded);
     }
   }
 }
