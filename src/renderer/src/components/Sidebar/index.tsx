@@ -48,6 +48,7 @@ const Sidebar = () => {
   return (
     <>
       <Drawer
+        className="sidebar-home"
         open
         variant="permanent"
         sx={{
