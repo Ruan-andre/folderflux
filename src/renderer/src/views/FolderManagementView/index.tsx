@@ -54,6 +54,13 @@ const FolderManagementView = ({
         fullPath: p,
       }));
       await window.api.folder.addFolders(listFolders);
+      if (mode === "selection" && listFolders.length > 0) {
+        const response = await window.api.folder.getAllFolders();
+        if (response.status && response.items) {
+          const newlyAddedFolders = response.items.filter((f) => paths.includes(f.fullPath));
+          setSelectedFolders((prev) => [...prev, ...newlyAddedFolders]);
+        }
+      }
       showMessage("Pasta adicionada com sucesso", "success");
       refreshFolders();
     }
