@@ -13,13 +13,12 @@ import { registerOrganizationHandlers } from "./handlers/domain/organization";
 
 import { registerChokidarHandlers } from "./handlers/system/chokidar";
 import { folderMonitorService } from "./core/folderMonitorService";
-import { mainProcessEmitter } from "./emitter/mainProcessEmitter";
-import { LogMetadata } from "../shared/types/LogMetaDataType";
 import { createTray } from "./tray";
 import { syncAppSettings } from "./services/settingsService";
 import { defaultOrganization } from "./core/organizationService";
 import { registerWorkerHandlers } from "./handlers/workers";
 import { db } from "../db";
+import { registerEmitterHandlers } from "./handlers/emitter";
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -119,12 +118,8 @@ if (!gotTheLock) {
     registerChokidarHandlers();
     registerWorkerHandlers();
     syncAppSettings(db);
+    registerEmitterHandlers(mainWindow);
 
-    mainProcessEmitter.on("log-added", (log: LogMetadata) => {
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("log-added", log);
-      }
-    });
     await folderMonitorService.start(db);
     handleFolderPathArgument(process.argv);
   });
@@ -138,7 +133,7 @@ if (!gotTheLock) {
     );
 
     if (folderPath && mainWindow) {
-      defaultOrganization([folderPath]);
+      defaultOrganization(db, [folderPath]);
     }
   }
   // Quit when all windows are closed, except on macOS. There, it's common
