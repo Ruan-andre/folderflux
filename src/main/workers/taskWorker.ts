@@ -26,7 +26,6 @@ parentPort?.on(
     const { dbPath } = workerData;
 
     const sqlite = new Database(dbPath);
-    sqlite.pragma("auto_vacuum = FULL");
     const localDb: BetterSQLite3Database<typeof schema> = drizzle(sqlite, { schema });
 
     try {
