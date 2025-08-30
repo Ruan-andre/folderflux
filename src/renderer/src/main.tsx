@@ -2,6 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./assets/css/globals.css";
+import "shepherd.js/dist/css/shepherd.css";
+import "./assets/css/tour.css";
 import { SnackbarProvider } from "./context/SnackBarContext";
 import { ConfirmDialogProvider } from "./context/ConfirmDialogContext";
 import { CssBaseline } from "@mui/material";

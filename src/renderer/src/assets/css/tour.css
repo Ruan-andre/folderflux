@@ -1,0 +1,225 @@
+/* Variáveis para facilitar a customização das cores principais */
+:root {
+  --bg: rgba(30, 41, 59, 0.7);
+  --bg-blur: blur(16px);
+  --gradient: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+  --gradient-end: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  --text-primary: #f3f4f6;
+  --text-secondary: #cbd5e1;
+  --primary-color: #0ea5e9;
+  --primary-glow: 0 0 8px #0ea5e9aa;
+  --arrow-color: #6366f1;
+  --border-color: #6366f1;
+  --shadow: 0 8px 32px 0 rgba(14, 165, 233, 0.25);
+  --shadow-end: 0 4px 14px 0 rgba(239, 68, 68, 0.25);
+  --radius: 18px;
+}
+
+/* O contêiner principal do pop-up */
+.shepherd-element {
+  background: var(--bg);
+  backdrop-filter: var(--bg-blur);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--border-color);
+  max-width: 370px;
+  font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  animation: modalFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Cabeçalho com o título */
+.shepherd-header {
+  background: var(--gradient) !important;
+  padding: 1.2rem 1.5rem 1rem !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+  box-shadow: 0 2px 8px 0 rgba(99, 102, 241, 0.08);
+}
+
+/* Título do passo */
+.shepherd-title {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 8px #0ea5e955;
+}
+
+/* Botão de fechar (X) */
+.shepherd-cancel-icon {
+  color: #fff !important;
+  padding: 0.3rem;
+  font-size: 1.5rem;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.shepherd-cancel-icon:hover {
+  color: red !important;
+}
+
+/* Corpo do texto principal */
+.shepherd-text {
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  padding: 1.5rem;
+  line-height: 1.7;
+  background: rgba(30, 41, 59, 0.25);
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: 0 1px 8px 0 rgba(14, 165, 233, 0.08);
+}
+
+/* Rodapé com os botões */
+.shepherd-footer {
+  padding: 0 1.5rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.8rem;
+  background: transparent;
+}
+
+/* Estilo base dos botões */
+.shepherd-button {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-left: 0.8rem;
+  padding: 0.9rem 2.2rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px 0 rgba(14, 165, 233, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.shepherd-button.btnEnd {
+  background: var(--gradient-end) !important;
+  box-shadow: var(--shadow-end) !important;
+  border: 1.5px solid #ef4444 !important;
+  color: #fff !important;
+}
+
+.shepherd-button.btnEnd:hover {
+  /* Mantém o mesmo efeito de brilho e movimento do botão primário */
+  filter: brightness(110%) !important;
+  transform: translateY(-2px) scale(1.04) !important;
+
+  /* Cria uma sombra de hover mais intensa, baseada na cor do gradiente */
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
+}
+/* Botão primário (Próximo/Finalizar) - o botão colorido */
+.shepherd-button:not(.shepherd-button-secondary) {
+  background: var(--gradient);
+  color: #fff;
+  box-shadow: var(--primary-glow);
+  border: 1.5px solid #0ea5e9;
+}
+.shepherd-button:not(.shepherd-button-secondary):hover {
+  filter: brightness(110%);
+  box-shadow: 0 0 16px #0ea5e9cc;
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* Botão secundário (Anterior/Pular) - o botão de texto */
+.shepherd-button.shepherd-button-secondary {
+  background: transparent;
+  color: var(--primary-color);
+  font-weight: 500;
+  padding: 0.9rem 1.2rem;
+  margin-right: auto;
+  border: 1.5px solid transparent;
+  box-shadow: none;
+}
+.shepherd-button.shepherd-button-secondary:hover {
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1.5px solid #6366f1;
+}
+
+/* Efeito de brilho animado no botão primário */
+.shepherd-button:not(.shepherd-button-secondary)::after {
+  content: "";
+  position: absolute;
+  left: -40%;
+  top: 0;
+  width: 140%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent 0%, #fff3 50%, transparent 100%);
+  opacity: 0.3;
+  transform: skewX(-20deg);
+  transition: left 0.4s;
+  pointer-events: none;
+}
+.shepherd-button:not(.shepherd-button-secondary):hover::after {
+  left: 60%;
+}
+
+/* Seta do modal Shepherd.js */
+.shepherd-arrow,
+.shepherd-arrow:before {
+  width: 18px !important;
+  height: 9px !important;
+  background: var(--gradient) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px 0 rgba(14, 165, 233, 0.1);
+  z-index: 10;
+}
+
+/* Seta para baixo (modal acima do alvo) */
+.shepherd-element[data-popper-placement^="top"] .shepherd-arrow {
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+/* Seta para cima (modal abaixo do alvo) */
+.shepherd-element[data-popper-placement^="bottom"] .shepherd-arrow {
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+}
+.shepherd-element[data-popper-placement^="left"] .shepherd-arrow {
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  height: 15px !important;
+  right: -18px;
+}
+.shepherd-element[data-popper-placement^="right"] .shepherd-arrow {
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+  height: 15px !important;
+  left: -18px;
+}
+
+.shepherd-arrow:before {
+  display: none;
+}
+
+/* ===================================================================
+ * Classes de Utilitário para o Tour
+ * =================================================================== */
+
+/* Classe para um modal de tour mais largo */
+.tour-step-wide {
+  max-width: 600px; /* Defina a largura máxima desejada aqui */
+}
+
+/* Opcional: para modais ainda maiores, se precisar */
+.tour-step-extra-wide {
+  max-width: 800px;
+}
+
+/* Opcional: para modais com altura específica */
+.tour-step-tall {
+  min-height: 500px;
+}
