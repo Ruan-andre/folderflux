@@ -22,6 +22,7 @@ type PopupProps = {
   log: LogMetadata | null;
   isOpen: boolean;
   onClose: () => void;
+  children?: React.ReactNode;
 };
 
 const getDescriptiveErrorReason = (reason: PromiseRejectedResult | undefined | null): string => {
@@ -34,7 +35,12 @@ const getDescriptiveErrorReason = (reason: PromiseRejectedResult | undefined | n
   return "Erro";
 };
 
-const OrganizationLogPopup = ({ log, isOpen, onClose }: PopupProps) => {
+const OrganizationLogPopup = ({
+  log,
+  isOpen,
+  onClose,
+  ...rest
+}: PopupProps & React.HTMLAttributes<HTMLDivElement>) => {
   const [textSearch, setTextSearch] = useState("");
 
   if (!log) return null;
@@ -72,7 +78,7 @@ const OrganizationLogPopup = ({ log, isOpen, onClose }: PopupProps) => {
             <TableCell colSpan={2} sx={{ fontSize: "1.5rem" }}>
               {item.currentValue}
             </TableCell>
-          ); 
+          );
         case "organization":
           return (
             <>
@@ -98,7 +104,7 @@ const OrganizationLogPopup = ({ log, isOpen, onClose }: PopupProps) => {
   });
 
   return (
-    <Dialog open={isOpen} onClose={onClose} fullWidth  maxWidth="lg">
+    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="lg" slotProps={{ paper: { ...rest } }}>
       <DialogTitle variant="h3" sx={{ fontWeight: 700 }}>
         {log.title}
       </DialogTitle>
@@ -108,6 +114,7 @@ const OrganizationLogPopup = ({ log, isOpen, onClose }: PopupProps) => {
         </Typography>
         <Box mt={5}>
           <GenericInput
+            id="details-search"
             name="search"
             value={textSearch}
             placeholder="Pesquisar"
@@ -120,7 +127,7 @@ const OrganizationLogPopup = ({ log, isOpen, onClose }: PopupProps) => {
         </Box>
 
         {filteredRows && filteredRows.length > 0 ? (
-          <TableContainer component={Paper} sx={{ mt: 2, maxHeight: "60vh" }}>
+          <TableContainer id="details-items" component={Paper} sx={{ mt: 2, maxHeight: "60vh" }}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
@@ -153,6 +160,7 @@ const OrganizationLogPopup = ({ log, isOpen, onClose }: PopupProps) => {
       </DialogContent>
       <DialogActions>
         <Button
+          id="close-organization-log"
           variant="contained"
           sx={{ borderRadius: 2, marginRight: 2 }}
           color="error"

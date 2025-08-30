@@ -5,9 +5,14 @@ import Icon from "../../assets/icons/";
 interface FolderDropZoneProps {
   onClick: () => void;
   onItemsDropped: (paths: string[], callback?: () => void) => void;
+  children?: React.ReactNode;
 }
 
-const FolderDropZone = ({ onClick, onItemsDropped }: FolderDropZoneProps) => {
+const FolderDropZone = ({
+  onClick,
+  onItemsDropped,
+  ...rest
+}: FolderDropZoneProps & React.HTMLAttributes<HTMLDivElement>) => {
   const theme = useTheme();
   const [isDragActive, setIsDragActive] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
@@ -67,6 +72,7 @@ const FolderDropZone = ({ onClick, onItemsDropped }: FolderDropZoneProps) => {
       onDragLeave={handleDragLeave}
       onDragOver={preventDefaults}
       onDrop={handleDrop}
+      {...rest}
       sx={{
         border: "2px dashed",
         borderColor,

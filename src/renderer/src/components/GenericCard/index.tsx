@@ -14,7 +14,7 @@ type GenericCardProps = {
   iconSx?: SxProps<Theme>;
   children?: React.ReactNode;
   onClick?: () => void;
-  sx?: PaperProps["sx"]; 
+  sx?: PaperProps["sx"];
   className?: string;
 };
 
@@ -58,9 +58,10 @@ const GenericCard = ({
   className,
   iconColor,
   iconSx,
-}: GenericCardProps) => {
+  ...rest
+}: GenericCardProps & React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <CardPaper className={className} onClick={onClick} elevation={8} sx={sx}>
+    <CardPaper className={className} onClick={onClick} elevation={8} sx={sx} {...rest}>
       <Box display="flex" alignItems="center" gap={2}>
         {icon && (
           <IconWrapper iconColor={iconColor} sx={iconSx}>
