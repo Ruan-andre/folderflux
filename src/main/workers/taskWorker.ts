@@ -14,6 +14,7 @@ import {
   organizeWithSelectedRules,
 } from "../core/organizationService";
 import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
+import { LogMetadata } from "~/src/shared/types/LogMetaDataType";
 
 parentPort?.on(
   "message",
@@ -25,26 +26,34 @@ parentPort?.on(
     const { dbPath } = workerData;
 
     const sqlite = new Database(dbPath);
+    sqlite.pragma("auto_vacuum = FULL");
     const localDb: BetterSQLite3Database<typeof schema> = drizzle(sqlite, { schema });
 
     try {
       let response;
 
       // Roteador de tarefas
+      const reportLogProgress = (logs: LogMetadata | LogMetadata[]) => {
+        parentPort?.postMessage({ type: "progress", task: "log-added", data: logs });
+      };
       switch (task) {
         case "defaultOrganization":
-          response = await defaultOrganization(message.payload?.paths || []);
+          response = await defaultOrganization(localDb, message.payload?.paths || [], reportLogProgress);
           break;
         case "organizeWithSelectedProfiles":
           response = await organizeWithSelectedProfiles(
+            localDb,
             message.payload?.profiles ?? [],
-            message.payload?.paths ?? []
+            message.payload?.paths ?? [],
+            reportLogProgress
           );
           break;
         case "organizeWithSelectedRules":
           response = await organizeWithSelectedRules(
+            localDb,
             message.payload?.rules ?? [],
-            message.payload?.paths ?? []
+            message.payload?.paths ?? [],
+            reportLogProgress
           );
           break;
         case "deleteAllLogs":
@@ -52,7 +61,7 @@ parentPort?.on(
           break;
 
         case "processAll":
-          response = await RuleEngine.processAll(localDb);
+          response = await RuleEngine.processAll(localDb, reportLogProgress);
           break;
 
         // Adicione mais casos para outras tarefas aqui
