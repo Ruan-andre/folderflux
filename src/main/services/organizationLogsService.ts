@@ -7,7 +7,7 @@ import { eq, lt } from "drizzle-orm/sql/expressions/conditions";
 import { DbOrTx } from "~/src/db";
 
 export async function saveLog(dbInstance: DbOrTx, log: LogMetadata): Promise<LogMetadata> {
-  const { id, metadata, files, createdAt } = await dbInstance.transaction(async (tx) => {
+  const { id, metadata, files, createdAt } = await dbInstance.transaction((tx) => {
     //Para salvar na tabela de arquivos
     const files = log.files;
     delete log.files;
@@ -17,7 +17,8 @@ export async function saveLog(dbInstance: DbOrTx, log: LogMetadata): Promise<Log
       metadata: log,
     };
 
-    const [insertedLog] = await tx.insert(OrganizationLogsTable).values(logToInsert).returning();
+    const insertedLog = tx.insert(OrganizationLogsTable).values(logToInsert).returning().get();
+
     let returningFiles: AffectedFilesTableSchema[] = [];
     if (files && files.length > 0) {
       const filesToInsert = files.map((file) => ({
@@ -27,7 +28,7 @@ export async function saveLog(dbInstance: DbOrTx, log: LogMetadata): Promise<Log
         reason: file.reason,
       }));
 
-      returningFiles = await tx.insert(AffectedFilesTable).values(filesToInsert).returning();
+      returningFiles = tx.insert(AffectedFilesTable).values(filesToInsert).returning().all();
     }
 
     return { ...insertedLog, files: returningFiles };
@@ -113,7 +114,9 @@ export async function getLogs(dbInstance: DbOrTx, lastId?: number): Promise<DbRe
 
 export async function deleteLogById(dbInstance: DbOrTx, logId: number): Promise<DbResponse<void>> {
   try {
-    const { changes } = await dbInstance.delete(OrganizationLogsTable).where(eq(OrganizationLogsTable.id, logId));
+    const { changes } = await dbInstance
+      .delete(OrganizationLogsTable)
+      .where(eq(OrganizationLogsTable.id, logId));
     const isValid = changes > 0 ? true : false;
     const message = isValid ? "Log excluído com sucesso" : "Log não encontrado";
     return createResponse(isValid, message);

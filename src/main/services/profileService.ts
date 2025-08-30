@@ -27,47 +27,44 @@ export async function createFullProfile(db: DbOrTx, data: NewFullProfile): Promi
   }
 
   try {
-    const fullProfile = await db.transaction(async (tx) => {
-      const [insertedProfile] = await tx.insert(ProfileTable).values(newProfileData).returning();
+    const associatedFolders = await db.query.FolderTable.findMany({
+      where: inArray(
+        FolderTable.id,
+        folders.map((f) => f.id!)
+      ),
+    });
+
+    const associatedRules: FullRule[] = await Promise.all(
+      rules.map(async (r) => {
+        const rule = await db.query.RuleTable.findFirst({
+          where: eq(RuleTable.id, r.id!),
+          with: { conditionsTree: true, action: true },
+        });
+
+        return {
+          ...rule!,
+          conditionsTree: buildTreeFromDb(
+            rule!.conditionsTree,
+            rule!.conditionsTree.find((c) => c.parentGroupId === null)?.id
+          ),
+          action: rule!.action!,
+        };
+      })
+    );
+
+    const fullProfile = await db.transaction((tx) => {
+      const insertedProfile = tx.insert(ProfileTable).values(newProfileData).returning().get();
 
       const rulesWithProfileId = rules.map((r) => ({ ruleId: r.id!, profileId: insertedProfile.id }));
       const foldersWithProfileId = folders.map((f) => ({ folderId: f.id!, profileId: insertedProfile.id }));
 
       if (rulesWithProfileId.length > 0) {
-        await tx.insert(ProfileRulesTable).values(rulesWithProfileId);
+        tx.insert(ProfileRulesTable).values(rulesWithProfileId).run();
       }
 
       if (foldersWithProfileId.length > 0) {
-        await tx.insert(ProfileFoldersTable).values(foldersWithProfileId);
+        tx.insert(ProfileFoldersTable).values(foldersWithProfileId).run();
       }
-
-      const associatedFolders = await tx
-        .select()
-        .from(FolderTable)
-        .where(
-          inArray(
-            FolderTable.id,
-            folders.map((f) => f.id!)
-          )
-        );
-
-      const associatedRules: FullRule[] = await Promise.all(
-        rules.map(async (r) => {
-          const rule = await db.query.RuleTable.findFirst({
-            where: eq(RuleTable.id, r.id!),
-            with: { conditionsTree: true, action: true },
-          });
-
-          return {
-            ...rule!,
-            conditionsTree: buildTreeFromDb(
-              rule!.conditionsTree,
-              rule!.conditionsTree.find((c) => c.parentGroupId === null)?.id
-            ),
-            action: rule!.action!,
-          };
-        })
-      );
 
       const { id, name, description, iconId, isActive, isSystem } = insertedProfile;
 
@@ -233,11 +230,12 @@ export async function updateProfile(db: DbOrTx, data: FullProfile): Promise<DbRe
   if (!existentProfileData) return createResponse(false, "Perfil não encontrado!");
 
   try {
-    const response = await db.transaction(async (tx): Promise<DbResponse> => {
-      const updatedProfile = await tx
+    const response = await db.transaction((tx): DbResponse => {
+      const updatedProfile = tx
         .update(ProfileTable)
         .set({ name, description, iconId })
-        .where(eq(ProfileTable.id, id));
+        .where(eq(ProfileTable.id, id))
+        .run();
 
       const currentRulesIds = existentProfileData.profileRules.map((r) => r.rule.id);
       const currentFoldersIds = existentProfileData.profileFolders.map((r) => r.folder.id);
@@ -250,29 +248,31 @@ export async function updateProfile(db: DbOrTx, data: FullProfile): Promise<DbRe
       const foldersIdsToAdd = updatedFoldersIds.filter((id) => !currentFoldersIds.includes(id));
 
       if (rulesIdsToDelete.length > 0) {
-        await tx
-          .delete(ProfileRulesTable)
+        tx.delete(ProfileRulesTable)
           .where(
             and(eq(ProfileRulesTable.profileId, id), inArray(ProfileRulesTable.ruleId, rulesIdsToDelete))
-          );
+          )
+          .run();
       }
       if (foldersIdsToDelete.length > 0) {
-        await tx
-          .delete(ProfileFoldersTable)
+        tx.delete(ProfileFoldersTable)
           .where(
             and(
               eq(ProfileFoldersTable.profileId, id),
               inArray(ProfileFoldersTable.folderId, foldersIdsToDelete)
             )
-          );
+          )
+          .run();
       }
       if (rulesIdsToAdd.length > 0) {
-        await tx.insert(ProfileRulesTable).values(rulesIdsToAdd.map((r) => ({ ruleId: r, profileId: id })));
+        tx.insert(ProfileRulesTable)
+          .values(rulesIdsToAdd.map((r) => ({ ruleId: r, profileId: id })))
+          .run();
       }
       if (foldersIdsToAdd.length > 0) {
-        await tx
-          .insert(ProfileFoldersTable)
-          .values(foldersIdsToAdd.map((f) => ({ folderId: f, profileId: id })));
+        tx.insert(ProfileFoldersTable)
+          .values(foldersIdsToAdd.map((f) => ({ folderId: f, profileId: id })))
+          .run();
       }
 
       if (updatedProfile.changes > 0) return createResponse(true, "Perfil atualizado com sucesso!");

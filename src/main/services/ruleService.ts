@@ -61,7 +61,10 @@ export async function getRuleById(db: DbOrTx, ruleId: number): Promise<DbRespons
     isActive,
     isSystem,
     action: rule.action!,
-    conditionsTree: buildTreeFromDb(conditionsTree),
+    conditionsTree: buildTreeFromDb(
+      conditionsTree,
+      conditionsTree.find((r) => r.parentGroupId === null)?.id ?? undefined
+    ),
   };
 
   return createResponse(true, "Regra encontrada", fullRule);
@@ -77,11 +80,11 @@ export async function createFullRule(db: DbOrTx, data: NewFullRulePayload): Prom
   });
   if (exists) return createResponse(false, "Já existe uma regra com este nome");
 
-  return db.transaction(async (tx) => {
-    const [insertedRule] = await tx.insert(RuleTable).values(rule).returning();
-    await insertConditionTree(tx, conditionsTree, insertedRule.id, null);
-    await tx.insert(ActionTable).values({ ...action, ruleId: insertedRule.id });
-    return await getRuleById(db, insertedRule.id);
+  return db.transaction((tx) => {
+    const insertedRule = tx.insert(RuleTable).values(rule).returning().get();
+    insertConditionTree(tx, conditionsTree, insertedRule.id, null);
+    tx.insert(ActionTable).values({ ...action, ruleId: insertedRule.id });
+    return getRuleById(db, insertedRule.id);
   });
 }
 
