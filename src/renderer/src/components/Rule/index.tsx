@@ -32,6 +32,7 @@ const Rule = (rule: FullRule) => {
         message: "Deseja realmente excluir esta regra? Essa ação não pode ser desfeita.",
         confirmText: "Excluir",
         cancelText: "Cancelar",
+        cancelBtnColor: "primary",
       },
       async () => {
         await deleteRule(id);
