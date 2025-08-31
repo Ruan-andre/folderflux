@@ -28,7 +28,7 @@ export const useTourStore = create<TourState>((set, get) => ({
       useModalOverlay: true,
       exitOnEsc: false,
       defaultStepOptions: {
-        scrollTo: true,
+        scrollTo: false,
         cancelIcon: { enabled: true },
         canClickTarget: false,
         buttons: [tourButtons.back, tourButtons.next],
@@ -45,17 +45,48 @@ export const useTourStore = create<TourState>((set, get) => ({
     newTour.on("complete", () => localStorage.setItem("folderfluxTourCompleted", "true"));
     newTour.on("cancel", () => localStorage.setItem("folderfluxTourCompleted", "true"));
 
+    newTour.on("hide", ({ step }) => {
+      const handlerData = step._advanceOnHandler;
+      if (handlerData) {
+        handlerData.element.removeEventListener(handlerData.event, handlerData.handler);
+        delete step._advanceOnHandler;
+      }
+    });
+
     // Lógica de navegação para o tour avançado
     newTour.on("show", (event) => {
-      const { step, tour: thisTour } = event;
-      const { page } = step.options as CustomizedStepOptions;
+      const { step } = event;
+      const { page, advanceOn } = step.options as CustomizedStepOptions;
       if (page && window.location.pathname !== page) {
         navigate(page);
       }
-      if (step.id === "trigger-advanced-tour") {
-        thisTour.complete();
-        get().startTour("advanced");
-        return;
+
+      if (advanceOn) {
+        const targetElement = document.querySelector(advanceOn.selector);
+        if (targetElement && advanceOn.handler) {
+          targetElement.addEventListener(advanceOn.event, () => {
+            if (advanceOn.handler) advanceOn.handler(step.tour);
+          });
+        } else if (targetElement) {
+          const handler = () => {
+            setTimeout(() => {
+              get().tour?.next();
+            }, 300);
+          };
+          targetElement.addEventListener(advanceOn.event, handler);
+          step._advanceOnHandler = {
+            element: targetElement,
+            event: advanceOn.event,
+            handler,
+          };
+        }
+        step.on("hide", () => {
+          const handlerData = step._advanceOnHandler;
+          if (handlerData) {
+            handlerData.element.removeEventListener(handlerData.event, handlerData.handler);
+            delete step._advanceOnHandler;
+          }
+        });
       }
     });
 
