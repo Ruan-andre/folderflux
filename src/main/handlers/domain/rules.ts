@@ -21,9 +21,9 @@ export function registerRuleHandlers() {
     }
   });
 
-  ipcMain.handle("create-full-rule", async (_e, data) => {
+  ipcMain.handle("create-full-rule", async (_e, data, isTourActive) => {
     try {
-      return await createFullRule(db, data);
+      return await createFullRule(db, data, isTourActive);
     } catch (e) {
       return handleError(e, "Erro ao adicionar regra");
     }

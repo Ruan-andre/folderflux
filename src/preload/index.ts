@@ -37,8 +37,8 @@ const api = {
     getConditionTree: (ruleId: number): Promise<DbResponse<IConditionGroup>> =>
       ipcRenderer.invoke("get-condition-tree", ruleId),
 
-    createFullRule: (data: NewFullRulePayload): Promise<DbResponse<FullRule>> =>
-      ipcRenderer.invoke("create-full-rule", data),
+    createFullRule: (data: NewFullRulePayload, isTourActive?: boolean): Promise<DbResponse<FullRule>> =>
+      ipcRenderer.invoke("create-full-rule", data, isTourActive),
 
     updateConditionTree: (ruleId: number, newTree: IConditionGroup): Promise<DbResponse> =>
       ipcRenderer.invoke("update-condition-tree", ruleId, newTree),

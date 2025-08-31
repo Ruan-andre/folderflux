@@ -72,20 +72,31 @@ export async function getRuleById(db: DbOrTx, ruleId: number): Promise<DbRespons
 
 // --- CRIAÇÃO / ATUALIZAÇÃO / EXCLUSÃO ---
 
-export async function createFullRule(db: DbOrTx, data: NewFullRulePayload): Promise<DbResponse<FullRule>> {
+export async function createFullRule(
+  db: DbOrTx,
+  data: NewFullRulePayload,
+  isTourActive?: boolean
+): Promise<DbResponse<FullRule>> {
   const { rule, action, conditionsTree } = data;
 
   const exists = await db.query.RuleTable.findFirst({
     where: eq(RuleTable.name, rule.name),
   });
-  if (exists) return createResponse(false, "Já existe uma regra com este nome");
+  if (exists) {
+    if (isTourActive) {
+      rule.name = await getNewRuleName(db, rule.name);
+    } else return createResponse(false, "Já existe uma regra com este nome");
+  }
 
-  return db.transaction((tx) => {
+  const insertedRuleId = await db.transaction((tx) => {
     const insertedRule = tx.insert(RuleTable).values(rule).returning().get();
     insertConditionTree(tx, conditionsTree, insertedRule.id, null);
-    tx.insert(ActionTable).values({ ...action, ruleId: insertedRule.id });
-    return getRuleById(db, insertedRule.id);
+    tx.insert(ActionTable)
+      .values({ ...action, ruleId: insertedRule.id })
+      .run();
+    return insertedRule.id;
   });
+  return getRuleById(db, insertedRuleId);
 }
 
 export async function updateRule(db: DbOrTx, ruleUpdated: FullRule): Promise<DbResponse> {
@@ -266,14 +277,14 @@ export function buildTreeFromDb(nodes: ConditionTreeSchema[], explicitRootId?: n
 }
 
 // --- INSERT TREE ---
-
+// REFATORAR PARA REMOVAR O AWAIT
 async function insertConditionTree(
   tx: DbOrTx,
   group: IConditionGroup,
   ruleId: number,
   parentId: number | null
 ): Promise<void> {
-  const [insertedGroup] = await tx
+  const insertedGroup = await tx
     .insert(ConditionsTreeTable)
     .values({
       type: "group",
@@ -282,22 +293,26 @@ async function insertConditionTree(
       parentGroupId: parentId,
       displayOrder: group.displayOrder,
     })
-    .returning({ id: ConditionsTreeTable.id });
+    .returning({ id: ConditionsTreeTable.id })
+    .get();
 
   for (const child of group.children) {
     if (child.type === "group") {
       await insertConditionTree(tx, child, ruleId, insertedGroup.id);
     } else {
-      await tx.insert(ConditionsTreeTable).values({
-        type: "condition",
-        field: child.field,
-        fieldOperator: child.fieldOperator,
-        value: child.value,
-        value2: child.value2,
-        ruleId,
-        parentGroupId: insertedGroup.id,
-        displayOrder: child.displayOrder,
-      });
+      await tx
+        .insert(ConditionsTreeTable)
+        .values({
+          type: "condition",
+          field: child.field,
+          fieldOperator: child.fieldOperator,
+          value: child.value,
+          value2: child.value2,
+          ruleId,
+          parentGroupId: insertedGroup.id,
+          displayOrder: child.displayOrder,
+        })
+        .run();
     }
   }
 }

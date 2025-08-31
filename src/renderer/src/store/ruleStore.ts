@@ -5,7 +5,7 @@ import { FullRule, NewFullRulePayload } from "../../../shared/types/RuleWithDeta
 type RuleState = {
   rules: FullRule[];
   getRules: () => Promise<void>;
-  addRule: (data: NewFullRulePayload) => Promise<DbResponse<FullRule>>;
+  addRule: (data: NewFullRulePayload, isTourActive?: boolean) => Promise<DbResponse<FullRule>>;
   duplicateRule: (ruleId: number) => Promise<DbResponse>;
   updateRule: (ruleData: FullRule) => Promise<DbResponse>;
   deleteRule: (id: number) => Promise<void>;
@@ -22,8 +22,8 @@ export const useRuleStore = create<RuleState>((set) => ({
     }
   },
 
-  addRule: async (data): Promise<DbResponse<FullRule>> => {
-    const response = await window.api.rule.createFullRule(data);
+  addRule: async (data, isTourActive): Promise<DbResponse<FullRule>> => {
+    const response = await window.api.rule.createFullRule(data, isTourActive);
     if (response.status && response.items) {
       const newFullRule = response.items;
       set((state) => ({
