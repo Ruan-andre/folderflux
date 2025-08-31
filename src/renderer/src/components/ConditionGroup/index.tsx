@@ -48,6 +48,7 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
           >
             Se
             <GenericInput
+              id="group-and-or-select"
               name="andOr"
               select
               value={group.operator}
@@ -60,7 +61,7 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
               ]}
               inputSize="small"
               textFieldType="outlined"
-              onChange={handleOperatorChange}
+              onChangeInput={handleOperatorChange}
             />
             das condições a seguir forem verdadeiras:
           </Typography>
@@ -104,7 +105,11 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
         })}
       </CardContent>
       <CardActions>
-        <Button size="medium" onClick={() => onAddNode(group.id, "condition")}>
+        <Button
+          id={`add-condition-${group.id}`}
+          size="medium"
+          onClick={() => onAddNode(group.id, "condition")}
+        >
           + Adicionar Condição
         </Button>
         <Button size="medium" onClick={() => onAddNode(group.id, "group")}>

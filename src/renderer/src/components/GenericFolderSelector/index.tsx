@@ -9,7 +9,7 @@ type GenericFolderSelectorProps = {
   hideSearchButton?: boolean;
   sx: SxProps<Theme>;
   className?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 const GenericFolderSelector = ({
@@ -20,28 +20,29 @@ const GenericFolderSelector = ({
   hideSearchButton,
   sx,
   className,
-  onChange,
-}: GenericFolderSelectorProps) => {
+  onChangeInput,
+  ...rest
+}: GenericFolderSelectorProps & React.HtmlHTMLAttributes<HTMLElement>) => {
   const handleBrowse = async () => {
     const selectedPath = await window.api.dialog.selectDirectory();
-    if (selectedPath && onChange) {
+    if (selectedPath && onChangeInput) {
       const syntheticEvent = {
-        target: { value: selectedPath, name: "folderSelector" },
+        target: { value: selectedPath, name: "folderSelectorInput" },
       } as React.ChangeEvent<HTMLInputElement>;
 
-      onChange(syntheticEvent);
+      onChangeInput(syntheticEvent);
     }
   };
 
   return (
-    <Box display="flex" className={className} sx={sx} gap="1rem">
+    <Box display="flex" className={className} sx={sx} gap="1rem" {...rest}>
       <Box display="flex" gap={1} alignItems={"center"} justifyContent={"center"}>
         <Box flex={1}>
           <GenericInput
-            id="folderSelector"
-            name="folderSelector"
+            id="folderSelectorInput"
+            name="folderSelectorInput"
             value={value}
-            onChange={onChange}
+            onChangeInput={onChangeInput}
             label={inputLabel ?? ""}
             placeholder={placeholder ?? ""}
             inputSize="small"
@@ -50,6 +51,7 @@ const GenericFolderSelector = ({
         {!hideSearchButton && (
           <Box>
             <Button
+              id="folderSelectorButton"
               variant="outlined"
               onClick={handleBrowse}
               sx={{

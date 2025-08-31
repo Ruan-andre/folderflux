@@ -275,6 +275,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           }}
         >
           <ContentWrapper
+            id="profile-poup"
             sx={{ gap: "1.5rem", padding: "2rem" }}
             title={profileToEdit ? "Editar Perfil" : "Criar Novo Perfil"}
             titleTagType="h3"
@@ -288,7 +289,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <GenericInput
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChangeInput={(e) => setName(e.target.value)}
                 name="profileName"
                 placeholder="Ex: Trabalho, Celular, Casa"
                 label="Nome do Perfil"
@@ -299,7 +300,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
 
               <GenericInput
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChangeInput={(e) => setDescription(e.target.value)}
                 name="profileDescription"
                 label="Descrição"
                 placeholder="Descreva para que serve este perfil"

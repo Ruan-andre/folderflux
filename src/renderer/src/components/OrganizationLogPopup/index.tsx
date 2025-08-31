@@ -120,7 +120,7 @@ const OrganizationLogPopup = ({
             placeholder="Pesquisar"
             textFieldType="outlined"
             inputWidth={"40%"}
-            onChange={(e) => {
+            onChangeInput={(e) => {
               setTextSearch(e.target.value);
             }}
           />

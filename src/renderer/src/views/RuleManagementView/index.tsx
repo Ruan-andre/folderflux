@@ -60,10 +60,12 @@ const RuleManagementView = ({
             style: "contained",
             Action: () => openPopup("create"),
             text: "Adicionar Regra",
+            id: "btn-add-rule",
           }}
         >
           {rules && (
             <RuleTabs
+              id="rule-tabs"
               tabContents={rules}
               mode={mode}
               selectedRules={selectedRules}

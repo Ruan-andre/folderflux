@@ -54,7 +54,7 @@ const FolderPopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
         <ContentWrapper title="Editar pasta">
           <GenericInput
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChangeInput={(e) => setName(e.target.value)}
             name="folderName"
             placeholder="Digite o nome da pasta"
             required
@@ -62,7 +62,7 @@ const FolderPopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           />
           <GenericInput
             value={fullPath}
-            onChange={(e) => setFullPath(e.target.value)}
+            onChangeInput={(e) => setFullPath(e.target.value)}
             name="folderPath"
             placeholder="Digite o caminho completo da pasta"
             required

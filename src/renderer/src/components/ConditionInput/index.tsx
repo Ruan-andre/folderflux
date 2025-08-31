@@ -93,6 +93,7 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
   return (
     <Box display="inline-flex" alignItems="center" gap={1} mb={2} width={"100%"} flexWrap="wrap">
       <GenericInput
+        className="condition-field-select"
         name="field"
         select
         bgColor="default"
@@ -101,11 +102,12 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
         inputWidth={"23rem"}
         value={condition.field}
         selectOptions={fieldOptions}
-        onChange={(e) => handleChangeField(e.target.value as Field)}
+        onChangeInput={(e) => handleChangeField(e.target.value as Field)}
       />
 
       {/* Seletor de Operador */}
       <GenericInput
+        className="condition-operator-select"
         name="operator"
         select
         bgColor={"default"}
@@ -114,27 +116,29 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
         inputWidth={"13rem"}
         value={condition.fieldOperator}
         selectOptions={operatorOptions}
-        onChange={(e) => handleChange("fieldOperator", e.target.value)}
+        onChangeInput={(e) => handleChange("fieldOperator", e.target.value)}
       />
 
       {/* Inputs de Valor */}
       {showSecondValue ? (
         <Box display="flex" gap={1} flex={1}>
           <GenericInput
+            className="condition-value-1"
             name="value"
             fullWidth={false}
             inputWidth={"50%"}
             value={condition.value}
-            onChange={(e) => handleChange("value", e.target.value)}
+            onChangeInput={(e) => handleChange("value", e.target.value)}
             placeholder="De"
             type={typeOfGenericInput}
           />
           <GenericInput
+            className="condition-value-2"
             name="value2"
             inputWidth={"50%"}
             fullWidth={false}
             value={condition.value2 ?? ""}
-            onChange={(e) => handleChange("value2", e.target.value)}
+            onChangeInput={(e) => handleChange("value2", e.target.value)}
             placeholder="Até"
             type={typeOfGenericInput}
           />
@@ -142,10 +146,11 @@ const ConditionInput = ({ condition, onChange, onRemove }: ConditionInputProps) 
       ) : (
         <Box component={"span"}>
           <GenericInput
+            className="condition-value"
             name="value"
             value={condition.value}
             placeholder={"valor"}
-            onChange={(e) => handleChange("value", e.target.value)}
+            onChangeInput={(e) => handleChange("value", e.target.value)}
             type={typeOfGenericInput}
           />
         </Box>

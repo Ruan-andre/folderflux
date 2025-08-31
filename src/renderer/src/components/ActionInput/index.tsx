@@ -37,12 +37,12 @@ const ActionInput = ({ action, onChange }: ActionInputProps) => {
         selectOptions={options}
         label="Ação"
         value={action?.type ?? "move"}
-        onChange={(e) => handleChangeOption(e.target.value)}
+        onChangeInput={(e) => handleChangeOption(e.target.value)}
       />
       {action?.type !== "delete" && (
         <GenericFolderSelector
           sx={{ flexDirection: "column" }}
-          onChange={(e) => handleValueChange(e.target.value)}
+          onChangeInput={(e) => handleValueChange(e.target.value)}
           value={action?.value ?? ""}
           placeholder={action?.type === "rename" ? "Novo nome" : "Pasta de destino"}
           hideSearchButton={action?.type === "rename"}

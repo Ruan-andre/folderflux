@@ -19,6 +19,7 @@ import { ActionSchema, NewAction } from "~/src/db/schema";
 import { formHelper } from "../../functions/form";
 import { FullRule, NewFullRulePayload } from "~/src/shared/types/RuleWithDetails";
 import { ICondition, IConditionGroup } from "~/src/shared/types/ConditionsType";
+import { useTourStore } from "../../store/tourStore";
 
 // Estado inicial para a árvore de condições de uma nova regra
 const initialTreeState: IConditionGroup = {
@@ -29,6 +30,15 @@ const initialTreeState: IConditionGroup = {
   children: [],
 };
 const initialActionState: NewAction = { type: "move", value: "", ruleId: 0 };
+
+const tourCondition: ICondition = {
+  id: "0",
+  type: "condition",
+  displayOrder: 1,
+  fieldOperator: "contains",
+  value: "boleto",
+  field: "fileName",
+};
 
 const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const { showMessage } = useSnackbar();
@@ -43,6 +53,8 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const { name, setName, description, setDescription, reset: resetRuleForm } = useRuleForm();
   const { rootGroup, setRootGroup, conditionTreeHandlers } = useConditionTree(initialTreeState);
   const { action, setAction, reset: resetActionForm } = useActionForm();
+
+  const isTourActive = useTourStore((state) => state.isTourActive());
 
   const [initialData, setInitialData] = useState<{
     name: string;
@@ -89,13 +101,32 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
 
     const currentData = { name, description, rootGroup, action };
 
-    // Se nada mudou, apenas fecha o popup
-    if (isEqual(initialData, currentData)) {
-      showMessage("Nenhum dado foi alterado", "info");
-      closePopup();
-      return;
+    let rootGroupTour;
+    let actionTour;
+    if (rootGroup.children.length === 0 || !(rootGroup.children[0] as ICondition).value) {
+      rootGroupTour = JSON.parse(JSON.stringify(initialTreeState));
+      rootGroupTour.children = tourCondition;
+    }
+    if (!action || !action?.value) {
+      initialActionState.value = "BOLETOS";
+      actionTour = initialActionState;
     }
 
+    const currentDataTour = {
+      name: name ? name : "Organizador de Boletos(Tutorial)",
+      description,
+      rootGroup: rootGroupTour ?? rootGroup,
+      action: actionTour ?? action,
+    };
+
+    if (!isTourActive) {
+      // Se nada mudou, apenas fecha o popup
+      if (isEqual(initialData, currentData)) {
+        showMessage("Nenhum dado foi alterado", "info");
+        closePopup();
+        return;
+      }
+    }
     try {
       if (ruleToEdit) {
         // --- LÓGICA DE ATUALIZAÇÃO ---
@@ -116,7 +147,19 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           conditionsTree: rootGroup,
           action: action as NewAction,
         };
-        const response = await addRule(payload);
+
+        const payloadTour: NewFullRulePayload = {
+          rule: {
+            name: currentDataTour.name,
+            description: currentDataTour.description,
+            isActive: true,
+            isSystem: false,
+          },
+          conditionsTree: currentDataTour.rootGroup,
+          action: currentDataTour.action as NewAction,
+        };
+
+        const response = await addRule(isTourActive ? payloadTour : payload, isTourActive);
         if (response.status) {
           showMessage("Regra criada com sucesso!", "success");
         } else {
@@ -133,11 +176,14 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   };
 
   const validate = useCallback((): boolean => {
+    if (isTourActive) return true;
+
     if (!name.trim()) {
       showMessage("O nome da regra é obrigatório.", "error");
       formHelper.htmlInputFocus("ruleName", "red");
       return false;
     }
+
     if (rootGroup.children) {
       const conditions = rootGroup.children as ICondition[];
       const groups = rootGroup.children as IConditionGroup[];
@@ -161,7 +207,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       }
     }
     return true;
-  }, [action?.type, action?.value, name, rootGroup.children, showMessage]);
+  }, [action?.type, action?.value, isTourActive, name, rootGroup.children, showMessage]);
 
   if (!isOpen) return null;
 
@@ -185,6 +231,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       >
         <Box sx={{ flex: 1, overflowY: "auto" }}>
           <ContentWrapper
+            id="rule-popup"
             sx={{ gap: "1.5rem" }}
             title={ruleToEdit ? "Editar Regra" : "Criar Nova Regra"}
             titleTagType="h3"
@@ -198,7 +245,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 label="Nome da Regra"
                 placeholder="Ex: Organizador de boletos"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChangeInput={(e) => setName(e.target.value)}
                 required
                 maxLength={65}
               />
@@ -211,7 +258,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 maxLength={110}
                 rows={2}
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChangeInput={(e) => setDescription(e.target.value)}
               />
             </Box>
             <ConditionGroupComponent
@@ -238,7 +285,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
             >
               Cancelar
             </Button>
-            <Button variant="contained" onClick={handleSubmit}>
+            <Button id="btn-confirm-rule" variant="contained" onClick={handleSubmit}>
               {ruleToEdit ? "Salvar Alterações" : "Criar Regra"}
             </Button>
           </Stack>

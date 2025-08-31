@@ -57,10 +57,11 @@ const Rule = (rule: FullRule) => {
   const extensions = getExtensionsFromTree(conditionsTree).join(", ");
   return (
     <ContentWrapper
+      className="rule"
       sx={{ gap: "1rem", backgroundColor: theme.palette.mode === "dark" ? "#2A3040" : "#e6e6e6ff" }}
       title={name}
       titleTagType="h4"
-      switchBtn={{ Action: () => toggleActive(id), value: isActive }}
+      switchBtn={{ Action: () => toggleActive(id), value: isActive, id: `switch-rule-id-${id}` }}
     >
       <Typography sx={{ color: theme.palette.text.secondary, fontSize: theme.typography.subtitle1 }}>
         {description}

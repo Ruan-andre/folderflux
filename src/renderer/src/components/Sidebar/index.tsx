@@ -12,6 +12,7 @@ import Icon from "../../assets/icons";
 import logo from "../../assets/img/logo.svg";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTourStore } from "../../store/tourStore";
 
 const SidebarTitle = styled(Typography)(({ theme }) => ({
   fontSize: "1.4rem",
@@ -27,11 +28,16 @@ const StyledListItemText = styled(ListItemText)(() => ({
   },
 }));
 
-const SidebarButton = ({ text, children, to }: { text: string; children: React.ReactNode; to: string }) => {
+const SidebarButton = ({
+  text,
+  children,
+  to,
+  ...rest
+}: { text: string; children: React.ReactNode; to: string } & React.HtmlHTMLAttributes<HTMLElement>) => {
   const location = useLocation();
   const isActive = location.pathname.replaceAll("/", "") === to;
   return (
-    <ListItemButton component={Link} to={to || "#"} selected={isActive}>
+    <ListItemButton component={Link} to={to || "#"} selected={isActive} {...rest}>
       <ListItemIcon>{children}</ListItemIcon>
       <StyledListItemText primary={text} />
     </ListItemButton>
@@ -40,6 +46,7 @@ const SidebarButton = ({ text, children, to }: { text: string; children: React.R
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isTourActive } = useTourStore();
   const SidebarSection = styled(Box)(({ theme }) => ({
     marginTop: isOpen ? theme.spacing(5) : undefined,
   }));
@@ -64,7 +71,11 @@ const Sidebar = () => {
           },
         }}
         onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
+        onMouseLeave={() => {
+          if (!isTourActive()) {
+            setIsOpen(false);
+          }
+        }}
       >
         <Box
           component={"img"}
@@ -82,14 +93,14 @@ const Sidebar = () => {
               <Icon icon="fluent-color:home-16" width="30" height="30" />
             </SidebarButton>
 
-            <SidebarButton text="Regras" to="rules">
+            <SidebarButton id="rules" text="Regras" to="rules">
               <Icon icon="gala:settings" width="30" height="30" color="#00ceff" />
             </SidebarButton>
 
-            <SidebarButton text="Perfis" to="profiles">
+            <SidebarButton id="profiles" text="Perfis" to="profiles">
               <Icon icon="fluent-color:person-add-24" width="30" height="30" />
             </SidebarButton>
-            <SidebarButton text="Pastas" to="folders">
+            <SidebarButton id="folders" text="Pastas" to="folders">
               <Icon icon="fluent-emoji:file-folder" width="30" height="30" />
             </SidebarButton>
           </SidebarSection>
@@ -98,7 +109,7 @@ const Sidebar = () => {
             <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
               Ferramentas
             </SidebarTitle>
-            <SidebarButton text="Relatórios" to="report">
+            <SidebarButton id="report" text="Relatórios" to="report">
               <Icon icon="nimbus:stats" width="30" height="30" color="#e52e2e" />
             </SidebarButton>
           </SidebarSection>
@@ -106,15 +117,15 @@ const Sidebar = () => {
             <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
               Configurações
             </SidebarTitle>
-            <SidebarButton text="Preferências" to="settings">
+            <SidebarButton id="settings" text="Preferências" to="settings">
               <Icon icon="flat-color-icons:settings" width="30" height="30" />
             </SidebarButton>
 
-            <SidebarButton text="Sobre" to="about">
+            <SidebarButton id="about" text="Sobre" to="about">
               <Icon icon="flat-color-icons:about" width="30" height="30" />
             </SidebarButton>
 
-            <SidebarButton text="Ajuda" to="help">
+            <SidebarButton id="help" text="Ajuda" to="help">
               <Icon icon="noto:sos-button" width="30" height="30" />
             </SidebarButton>
           </SidebarSection>

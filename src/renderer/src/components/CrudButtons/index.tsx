@@ -1,4 +1,4 @@
-import { Button, useTheme } from "@mui/material";
+import { Box, Button, useTheme } from "@mui/material";
 
 type CrudButtonsProps = {
   id: number | string;
@@ -20,7 +20,7 @@ const CrudButtons = ({ id, status, onActivate, onEdit, onDuplicate, onDelete }: 
   }
 
   return (
-    <>
+    <Box id="crud-buttons" display="flex" gap={1}>
       {onActivate && (
         <Button
           id={id.toString()}
@@ -85,7 +85,7 @@ const CrudButtons = ({ id, status, onActivate, onEdit, onDuplicate, onDelete }: 
           Excluir
         </Button>
       )}
-    </>
+    </Box>
   );
 };
 

@@ -10,9 +10,16 @@ type RuleTabsProps = {
   mode: "page" | "selection";
   selectedRules: FullRule[];
   onSelectionChange: (rule: FullRule) => void;
+  children?: React.ReactNode;
 };
 
-const RuleTabs = ({ tabContents, mode, selectedRules, onSelectionChange }: RuleTabsProps) => {
+const RuleTabs = ({
+  tabContents,
+  mode,
+  selectedRules,
+  onSelectionChange,
+  ...rest
+}: RuleTabsProps & React.HtmlHTMLAttributes<HTMLElement>) => {
   const [tabIndex, setTabIndex] = useState(0);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -67,10 +74,11 @@ const RuleTabs = ({ tabContents, mode, selectedRules, onSelectionChange }: RuleT
   if (tabContents.length === 0) return null;
 
   return (
-    <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
+    <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 2 }} {...rest}>
       <Tabs value={tabIndex} onChange={handleTabChange}>
         {tabNames.map((label, index) => (
           <Tab
+            id="rule-tabs-filter"
             key={index}
             label={label}
             sx={{ fontSize: (theme) => theme.typography.subtitle1, textTransform: "none" }}

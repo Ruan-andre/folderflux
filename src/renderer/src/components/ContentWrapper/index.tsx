@@ -19,13 +19,13 @@ type ContentWrapperProps = {
   switchBtn?: {
     Action?: () => void;
     value?: boolean;
-  };
+  } & React.HtmlHTMLAttributes<HTMLElement>;
   commonBtn?: {
     Action?: () => void;
     style?: "outlined" | "contained" | "text";
     text?: string;
     color?: AlertColor;
-  };
+  } & React.HtmlHTMLAttributes<HTMLElement>;
   hr?: boolean;
   sx?: BoxProps["sx"];
   className?: string;
@@ -62,13 +62,15 @@ const ContentWrapper = ({
   commonBtn,
   hr,
   sx,
-}: ContentWrapperProps) => {
+  ...rest
+}: ContentWrapperProps & React.HTMLAttributes<HTMLElement>) => {
   const theme = useTheme();
 
   const renderHeaderControl = () => {
     if (commonBtn?.Action) {
       return (
         <ActionButton
+          id={commonBtn.id}
           variant={commonBtn.style || "contained"}
           onClick={commonBtn.Action}
           color={commonBtn.color ?? "primary"}
@@ -85,6 +87,7 @@ const ContentWrapper = ({
     if (switchBtn) {
       return (
         <CustomSwitch
+          id={switchBtn.id}
           title={switchBtn.value ? "Desativar" : "Ativar"}
           onClick={switchBtn.Action}
           checked={switchBtn.value}
@@ -97,7 +100,7 @@ const ContentWrapper = ({
   const headerControl = renderHeaderControl();
 
   return (
-    <Wrapper id={id} sx={sx}>
+    <Wrapper id={id} sx={sx} {...rest}>
       {(title || headerControl) && (
         <Stack spacing={1.5}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

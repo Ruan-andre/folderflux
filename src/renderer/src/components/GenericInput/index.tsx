@@ -32,7 +32,7 @@ type GenericInputProps = {
   select?: boolean;
   selectOptions?: SelectOption[];
   maxLength?: number;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   inputWidth?: number | string;
   margin?: string | number;
   textFieldType?: "outlined" | "standard" | "filled";
@@ -55,7 +55,7 @@ const GenericInput = ({
   helperText,
   error,
   value = "",
-  onChange,
+  onChangeInput: onChange,
   type,
   select,
   selectOptions = [],
@@ -66,7 +66,8 @@ const GenericInput = ({
   bgColor,
   sx,
   inputSx,
-}: GenericInputProps) => {
+  ...rest
+}: GenericInputProps & React.HtmlHTMLAttributes<HTMLElement>) => {
   const theme = useTheme();
   const remaining = maxLength ? maxLength - value.length : undefined;
 
@@ -87,6 +88,7 @@ const GenericInput = ({
       maxWidth="100%"
       margin={margin}
       sx={sx}
+      {...rest}
     >
       {/* Label personalizada */}
       {label && (
