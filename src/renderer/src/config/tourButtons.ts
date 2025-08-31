@@ -30,7 +30,6 @@ export const tourButtons = {
     text: "Iniciar Tutorial Avançado",
     action(this: Shepherd.Tour & TourState) {
       this._startAdvancedTour?.();
-      this.next();
     },
   } as Shepherd.StepOptionsButton,
 };
