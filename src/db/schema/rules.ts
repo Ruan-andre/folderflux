@@ -13,6 +13,7 @@ export const RuleTable = sqliteTable("rules", {
   description: text("description", { length: 255 }),
   isSystem: integer("is_system", { mode: "boolean" }).notNull().default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  fromTour: integer("from_tour", { mode: "boolean" }).default(false),
 });
 
 export const ruleRelations = relations(RuleTable, ({ many, one }) => ({
@@ -25,6 +26,5 @@ export type RuleSchema = typeof RuleTable.$inferSelect & {
   conditionsTree: ConditionTreeSchema[];
   action?: ActionSchema | null;
 };
-
 
 export type NewRule = typeof RuleTable.$inferInsert;

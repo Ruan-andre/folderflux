@@ -33,6 +33,7 @@ export const ConditionsTreeTable = sqliteTable("conditions_tree", {
   }),
   value: text("value"),
   value2: text("value2"),
+  fromTour: integer("from_tour", { mode: "boolean" }).default(false),
 });
 
 // Relações para a árvore

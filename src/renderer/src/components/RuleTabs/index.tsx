@@ -32,6 +32,7 @@ const RuleTabs = ({
     <Box key={rule.id} display="flex" alignItems="center" gap={1} width="100%">
       {mode === "selection" && (
         <Checkbox
+          className="chk-rule"
           checked={isSelected(rule.id)}
           onChange={() =>
             onSelectionChange({
@@ -42,6 +43,7 @@ const RuleTabs = ({
               isSystem: rule.isSystem,
               action: rule.action,
               conditionsTree: rule.conditionsTree,
+              fromTour: rule.fromTour,
             })
           }
         />

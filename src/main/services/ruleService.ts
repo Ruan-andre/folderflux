@@ -36,6 +36,7 @@ export async function getAllRules(db: DbOrTx): Promise<DbResponse<FullRule[]>> {
         rule.conditionsTree.find((r) => r.parentGroupId === null)?.id ?? undefined
       ),
       action: rule.action!,
+      fromTour: rule.fromTour,
     }))
     .sort((a, b) => b.id - a.id);
 
@@ -53,7 +54,7 @@ export async function getRuleById(db: DbOrTx, ruleId: number): Promise<DbRespons
 
   if (!rule) return createResponse(false, "Regra não encontrada");
 
-  const { id, name, description, isActive, isSystem, conditionsTree } = rule;
+  const { id, name, description, isActive, isSystem, conditionsTree, fromTour } = rule;
   const fullRule: FullRule = {
     id,
     name,
@@ -65,6 +66,7 @@ export async function getRuleById(db: DbOrTx, ruleId: number): Promise<DbRespons
       conditionsTree,
       conditionsTree.find((r) => r.parentGroupId === null)?.id ?? undefined
     ),
+    fromTour,
   };
 
   return createResponse(true, "Regra encontrada", fullRule);
@@ -173,6 +175,7 @@ export async function getSystemRules(db: DbOrTx): Promise<FullRule[]> {
         rule.conditionsTree.find((r) => r.parentGroupId === null)?.id ?? undefined
       ),
       action: rule.action!,
+      fromTour: rule.fromTour,
     }))
     .sort((a, b) => b.id - a.id);
 
