@@ -71,10 +71,20 @@ const SettingPage = () => {
         hr
         titleTagType="h3"
       >
-        <GenericListItems list={generalSettingsList} btnSwitch onToggle={handleToggle} isButton={false} />
+        <GenericListItems
+          list={generalSettingsList}
+          btnSwitch
+          onToggleSwitch={handleToggle}
+          isButton={false}
+        />
       </SettingWrapper>
       <SettingWrapper title="Aparência" hr titleTagType="h3">
-        <GenericListItems list={appearanceSettingsList} btnSwitch onToggle={handleToggle} isButton={false} />
+        <GenericListItems
+          list={appearanceSettingsList}
+          btnSwitch
+          onToggleSwitch={handleToggle}
+          isButton={false}
+        />
       </SettingWrapper>
     </ContentWrapper>
   );

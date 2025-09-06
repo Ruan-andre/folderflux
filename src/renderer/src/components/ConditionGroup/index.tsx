@@ -3,6 +3,7 @@ import ConditionInput from "../ConditionInput";
 import { ICondition, IConditionGroup } from "../../../../shared/types/ConditionsType";
 import GenericInput from "../GenericInput";
 import { memo, useCallback } from "react";
+import { useTourStore } from "../../store/tourStore";
 
 type ConditionGroupProps = {
   group: IConditionGroup;
@@ -17,6 +18,10 @@ type ConditionGroupProps = {
 };
 
 const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode }: ConditionGroupProps) => {
+  const tourNext = useTourStore((state) => state.tourNext);
+  const isTourActive = useTourStore((state) => state.isTourActive);
+  const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
+  
   const handleOperatorChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const effectiveParentId = parentId ?? "root";
@@ -25,6 +30,14 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
     [group.id, onUpdateNode, parentId]
   );
 
+  const handleOnAddCondition = () => {
+    onAddNode(group.id, "condition");
+    if (isTourActive() && getCurrentStepId() === "rule-form-add-condition-action") {
+      setTimeout(() => {
+        tourNext();
+      }, 100);
+    }
+  };
   return (
     <Card
       id="conditionsGroup"
@@ -105,11 +118,7 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
         })}
       </CardContent>
       <CardActions>
-        <Button
-          id={`add-condition-${group.id}`}
-          size="medium"
-          onClick={() => onAddNode(group.id, "condition")}
-        >
+        <Button id={`add-condition-${group.id}`} size="medium" onClick={handleOnAddCondition}>
           + Adicionar Condição
         </Button>
         <Button size="medium" onClick={() => onAddNode(group.id, "group")}>

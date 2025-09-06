@@ -45,9 +45,6 @@ const AboutPage = () => {
             correções. Futuramente, planejo oferecer recursos premium para usuários avançados, um modelo que
             ajuda a garantir a longevidade do software.
           </Typography>
-          <Typography fontSize={15}>
-            Ele é um projeto de código aberto, mantido com muito esforço e dedicação nas minhas horas vagas.
-          </Typography>
         </Box>
       </Box>
 
