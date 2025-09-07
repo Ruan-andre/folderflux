@@ -9,24 +9,46 @@ import { tourButtons } from "../config/tourButtons";
 
 export interface TourState {
   tour: Shepherd.Tour | null;
-  initializeTour: (navigate: NavigateFunction) => void;
+  isAudioEnabled: boolean;
+  toggleAudioEnabled: () => void;
+  initializeTour: (navigate: NavigateFunction, initialAudioState: boolean) => void;
   startTour: (type: "simple" | "advanced") => void;
   tourNext: () => void;
   getCurrentStepId: () => string | undefined;
   isTourActive: () => boolean;
-  _startAdvancedTour: () => void;
+  stopCurrentAudio: () => void;
+}
+
+function speak(text: string) {
+  window.api.audio.play(text);
 }
 
 export const useTourStore = create<TourState>((set, get) => ({
   tour: null,
+  isAudioEnabled: true,
+  stopCurrentAudio: () => {
+    window.api.audio.stop();
+  },
+  toggleAudioEnabled: () => {
+    const newState = !get().isAudioEnabled;
+    // TODO: Aqui você chamará a função para salvar 'newState' no seu banco de dados.
+    // Ex: window.api.settings.setAudioEnabled(newState);
+    set({ isAudioEnabled: newState });
 
-  initializeTour: (navigate) => {
+    // Se o áudio for desativado, para qualquer som que esteja tocando
+    if (!newState) {
+      window.api.audio.stop();
+    }
+  },
+  initializeTour: (navigate, initialAudioState) => {
     // Evita reinicializar
     if (get().tour) return;
 
+    set({ isAudioEnabled: initialAudioState });
+
     const newTour = new Shepherd.Tour({
       useModalOverlay: true,
-      exitOnEsc: false,
+      exitOnEsc: true,
       defaultStepOptions: {
         scrollTo: false,
         cancelIcon: { enabled: true },
@@ -36,59 +58,35 @@ export const useTourStore = create<TourState>((set, get) => ({
     });
 
     (newTour as Shepherd.Tour & TourState)._startAdvancedTour = () => {
-      setTimeout(() => {
-        get().startTour("advanced");
-      }, 150);
+      get().startTour("advanced");
     };
 
-    // Eventos principais
-    newTour.on("complete", () => localStorage.setItem("folderfluxTourCompleted", "true"));
-    newTour.on("cancel", () => localStorage.setItem("folderfluxTourCompleted", "true"));
-
-    newTour.on("hide", ({ step }) => {
-      const handlerData = step._advanceOnHandler;
-      if (handlerData) {
-        handlerData.element.removeEventListener(handlerData.event, handlerData.handler);
-        delete step._advanceOnHandler;
-      }
-    });
-
-    // Lógica de navegação para o tour avançado
-    newTour.on("show", (event) => {
+    newTour.on("show", async (event) => {
       const { step } = event;
-      const { page, advanceOn } = step.options as CustomizedStepOptions;
+      const { options } = step;
+      const { page } = options as CustomizedStepOptions;
+
       if (page && window.location.pathname !== page) {
         navigate(page);
+        return;
       }
 
-      if (advanceOn) {
-        const targetElement = document.querySelector(advanceOn.selector);
-        if (targetElement && advanceOn.handler) {
-          targetElement.addEventListener(advanceOn.event, () => {
-            if (advanceOn.handler) advanceOn.handler(step.tour);
-          });
-        } else if (targetElement) {
-          const handler = () => {
-            setTimeout(() => {
-              get().tour?.next();
-            }, 300);
-          };
-          targetElement.addEventListener(advanceOn.event, handler);
-          step._advanceOnHandler = {
-            element: targetElement,
-            event: advanceOn.event,
-            handler,
-          };
-        }
-        step.on("hide", () => {
-          const handlerData = step._advanceOnHandler;
-          if (handlerData) {
-            handlerData.element.removeEventListener(handlerData.event, handlerData.handler);
-            delete step._advanceOnHandler;
-          }
-        });
+      const textToSpeak = step.options.text
+        ? new DOMParser().parseFromString(step.options.text as string, "text/html").body.textContent || ""
+        : "";
+      if (textToSpeak && get().isAudioEnabled) {
+        get().stopCurrentAudio();
+        speak(textToSpeak);
       }
     });
+
+    const onTourEnd = () => {
+      get().stopCurrentAudio();
+    };
+
+    newTour.on("complete", onTourEnd);
+    newTour.on("cancel", onTourEnd);
+    newTour.on("hide", () => window.api.audio.stop());
 
     set({ tour: newTour });
   },
@@ -99,7 +97,7 @@ export const useTourStore = create<TourState>((set, get) => ({
       if (tour.isActive()) {
         tour.cancel();
       }
-      localStorage.removeItem("folderfluxTourCompleted");
+      // localStorage.removeItem("folderfluxTourCompleted");
       const steps = type === "simple" ? simpleTourSteps : advancedTourSteps;
       tour.steps = [];
       tour.addSteps(steps);
@@ -120,9 +118,5 @@ export const useTourStore = create<TourState>((set, get) => ({
   isTourActive: () => {
     return get().tour?.isActive() ?? false;
   },
-  _startAdvancedTour: () => {
-    console.log("iniciado");
-    // Ação interna que chama startTour, apenas para tipagem.
-    // A lógica real está anexada na instância do tour.
-  },
+  _startAdvancedTour: () => get().startTour("advanced"),
 }));
