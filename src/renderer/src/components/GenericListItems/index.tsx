@@ -21,7 +21,6 @@ import LabelTextWithTooltip from "../LabelTextWithTooltip";
 
 interface GenericListItemsProps {
   list: GenericListItemsType[] | undefined;
-  id?: string;
   mode?: "page" | "selection";
   btnEdit?: boolean;
   btnDelete?: boolean;
@@ -30,36 +29,36 @@ interface GenericListItemsProps {
   noGutters?: boolean;
   sx?: SxProps<Theme>;
   listItemSx?: SxProps<Theme>;
-  className?: string;
   selectedIds?: number[];
   lastItemRef?: RefObject<HTMLLIElement>;
+  listItemClass?: string;
   onClickEdit?: (id: number) => void;
   onClickDelete?: (id: number) => void;
   onClickListItem?: (id: number) => void;
-  onToggle?: (id: number) => void;
+  onToggleSwitch?: (id: number) => void;
   onSelectionChange?: (id: number) => void;
 }
 
 const GenericListItems = ({
   list,
-  id,
   mode = "page",
   isButton = true,
   noGutters,
   sx,
   listItemSx,
-  className,
   btnEdit,
   btnDelete,
   btnSwitch,
   selectedIds,
   lastItemRef,
+  listItemClass,
   onClickListItem,
   onClickDelete,
   onClickEdit,
   onSelectionChange,
-  onToggle,
-}: GenericListItemsProps) => {
+  onToggleSwitch,
+  ...rest
+}: GenericListItemsProps & React.HTMLAttributes<HTMLElement>) => {
   const theme = useTheme();
 
   if (!list || list.length === 0) return null;
@@ -83,17 +82,17 @@ const GenericListItems = ({
   }
   return (
     <List
-      id={id}
-      className={className}
       sx={{
         width: "100%",
         overflowY: "auto",
         overflowX: "hidden",
         ...sx,
       }}
+      {...rest}
     >
       {list.map((item, index) => (
         <ListItem
+          className={listItemClass}
           key={index}
           ref={index === list.length - 1 ? lastItemRef : null}
           sx={listItemSx}
@@ -102,12 +101,16 @@ const GenericListItems = ({
             (btnEdit || btnDelete) && (
               <Box style={{ display: "flex", gap: "1rem" }}>
                 {btnEdit && onClickEdit && (
-                  <IconButton onClick={() => onClickEdit(item.id)}>
+                  <IconButton className="btn-edit-item-list" onClick={() => onClickEdit(item.id)}>
                     <Icon icon="icon-park:edit-two" width="30" height="30" />
                   </IconButton>
                 )}
                 {btnDelete && onClickDelete && (
-                  <IconButton edge="end" onClick={() => onClickDelete(item.id)}>
+                  <IconButton
+                    className="btn-delete-item-list"
+                    edge="end"
+                    onClick={() => onClickDelete(item.id)}
+                  >
                     <Icon icon="material-icon-theme:folder-trash-open" width="30" height="30" />
                   </IconButton>
                 )}
@@ -166,10 +169,10 @@ const GenericListItems = ({
               />
             </>
           )}
-          {btnSwitch && onToggle && (
+          {btnSwitch && onToggleSwitch && (
             <CustomSwitch
               onClick={() => {
-                onToggle(item.id);
+                onToggleSwitch(item.id);
               }}
               checked={item.active}
             />
