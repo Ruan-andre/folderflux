@@ -19,8 +19,11 @@ import { defaultOrganization } from "./core/organizationService";
 import { registerWorkerHandlers } from "./handlers/workers";
 import { db } from "../db";
 import { registerEmitterHandlers } from "./handlers/emitter";
+import { registerAudioPlayerHandlers } from "./handlers/audio-player";
+import { registerTtsHandlers } from "./handlers/tts";
 
 let mainWindow: BrowserWindow | null = null;
+let audioWindow: BrowserWindow | null = null;
 
 function createWindow(): void {
   // Create the browser window.
@@ -65,6 +68,30 @@ function createWindow(): void {
   }
 }
 
+function createAudioWindow() {
+  audioWindow = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, "../preload/index.js"),
+      sandbox: false,
+      contextIsolation: true,
+    },
+  });
+
+  const rendererUrl = process.env["ELECTRON_RENDERER_URL"];
+  if (is.dev && rendererUrl) {
+    // A MÁGICA ACONTECE AQUI:
+    // Carregamos a URL principal, mas com um parâmetro para identificação.
+    audioWindow.loadURL(`${rendererUrl}/?view=audioPlayer`);
+  } else {
+    // Em produção, fazemos a mesma coisa.
+    audioWindow.loadFile(path.join(__dirname, "../renderer/index.html"), {
+      search: "view=audioPlayer",
+    });
+  }
+  // audioWindow.webContents.openDevTools();
+}
+
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
@@ -102,12 +129,18 @@ if (!gotTheLock) {
     });
 
     createWindow();
+    try {
+      createAudioWindow();
+    } catch (error) {
+      console.log(error);
+    }
 
     app.on("activate", function () {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
+
     registerRuleHandlers();
     registerDialogHandlers();
     registerProfileHandlers();
@@ -119,6 +152,8 @@ if (!gotTheLock) {
     registerWorkerHandlers();
     syncAppSettings(db);
     registerEmitterHandlers(mainWindow);
+    registerAudioPlayerHandlers(audioWindow);
+    registerTtsHandlers();
 
     await folderMonitorService.start(db);
     handleFolderPathArgument(process.argv);
