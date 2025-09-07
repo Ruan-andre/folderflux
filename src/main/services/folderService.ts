@@ -40,12 +40,13 @@ export async function getFolderById(db: DbOrTx, folderId: number): Promise<DbRes
   });
 
   if (folder) {
-    const { id, fullPath, name, profileFolders } = folder;
+    const { id, fullPath, name, profileFolders, fromTour } = folder;
     const fullFolder: FullFolder = {
       id,
       fullPath,
       name,
       profiles: profileFolders.map((p) => p.profile),
+      fromTour,
     };
     return createResponse(true, "Pasta encontrada com sucesso!", fullFolder);
   } else {

@@ -6,6 +6,7 @@ import { useProfilePopupStore } from "../../store/popupProfileStore";
 import { Box, Button, Stack, List, ListItem, Checkbox, ListItemText } from "@mui/material";
 import Profile from "../../components/Profile";
 import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
+import { useTourStore } from "../../store/tourStore";
 
 type ProfileManagementViewProps = {
   mode: "page" | "selection";
@@ -22,8 +23,10 @@ const ProfileManagementView = ({
 }: ProfileManagementViewProps) => {
   const { profiles, getProfiles } = useProfileStore();
   const { openPopup } = useProfilePopupStore();
-
   const [selectedProfiles, setSelectedProfiles] = useState<FullProfile[]>(initialSelectedProfiles);
+  const tourNext = useTourStore((state) => state.tourNext);
+  const isTourActive = useTourStore((state) => state.isTourActive);
+  const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
 
   const handleUpdateSuccess = async () => {
     await getProfiles();
@@ -50,19 +53,33 @@ const ProfileManagementView = ({
     }
   };
 
+  const handleAddProfile = () => {
+    openPopup("create");
+    if (isTourActive() && getCurrentStepId() === "add-profile-action") {
+      setTimeout(() => tourNext(), 100);
+    }
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "100%", overflow: "hidden" }}>
       <Box sx={{ overflowY: "auto" }}>
         <ContentWrapper
           title="Perfis de Organização"
           commonBtn={{
+            id: "btn-add-profile",
             style: "contained",
-            Action: () => openPopup("create"),
+            Action: handleAddProfile,
             text: "Criar Perfil",
           }}
         >
           {mode === "page" ? (
-            <Box display={"flex"} gap={"3rem 3rem"} flexWrap="wrap" justifyContent={"center"}>
+            <Box
+              id="profile-cards"
+              display={"flex"}
+              gap={"3rem 3rem"}
+              flexWrap="wrap"
+              justifyContent={"center"}
+            >
               {profiles.map((p) => (
                 <div
                   key={p.id}
@@ -81,6 +98,7 @@ const ProfileManagementView = ({
                     iconId={p.iconId}
                     isActive={p.isActive}
                     isSystem={p.isSystem}
+                    fromTour={p.fromTour}
                   />
                 </div>
               ))}

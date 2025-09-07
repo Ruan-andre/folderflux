@@ -6,6 +6,7 @@ import RulePopup from "../../components/RulePopup";
 import { useRulePopupStore } from "../../store/popupRuleStore";
 import { Box, Button, Stack } from "@mui/material";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
+import { useTourStore } from "../../store/tourStore";
 
 type RuleManagementViewProps = {
   mode: "page" | "selection";
@@ -22,6 +23,9 @@ const RuleManagementView = ({
 }: RuleManagementViewProps) => {
   const { rules, getRules } = useRuleStore();
   const { openPopup } = useRulePopupStore();
+  const tourNext = useTourStore((state) => state.tourNext);
+  const isTourActive = useTourStore((state) => state.isTourActive);
+  const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
 
   const [selectedRules, setSelectedRule] = useState<FullRule[]>(initialSelectedRules);
 
@@ -51,6 +55,15 @@ const RuleManagementView = ({
     }
   };
 
+  const handleAddRuleClick = () => {
+    if (isTourActive() && getCurrentStepId() === "add-rule-action") {
+      setTimeout(() => {
+        tourNext();
+      }, 150);
+    }
+    openPopup("create");
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "100%", overflow: "hidden" }}>
       <Box sx={{ overflowY: "auto" }}>
@@ -58,7 +71,7 @@ const RuleManagementView = ({
           title="Regras de Organização"
           commonBtn={{
             style: "contained",
-            Action: () => openPopup("create"),
+            Action: handleAddRuleClick,
             text: "Adicionar Regra",
             id: "btn-add-rule",
           }}
@@ -97,7 +110,7 @@ const RuleManagementView = ({
           >
             Cancelar
           </Button>
-          <Button variant="contained" onClick={handleSaveClick}>
+          <Button variant="contained" id="confirm-add-rule" onClick={handleSaveClick}>
             Confirmar Seleção
           </Button>
         </Stack>

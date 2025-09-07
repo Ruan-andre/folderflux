@@ -15,7 +15,11 @@ import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import { buildTreeFromDb } from "./ruleService";
 import { DbOrTx } from "~/src/db";
 
-export async function createFullProfile(db: DbOrTx, data: NewFullProfile): Promise<DbResponse<FullProfile>> {
+export async function createFullProfile(
+  db: DbOrTx,
+  data: NewFullProfile,
+  isTourActive?: boolean
+): Promise<DbResponse<FullProfile>> {
   const { folders, rules } = data;
   const newProfileData: NewProfile = data;
   const exists = await db.query.ProfileTable.findFirst({
@@ -23,7 +27,11 @@ export async function createFullProfile(db: DbOrTx, data: NewFullProfile): Promi
   });
 
   if (exists) {
-    return createResponse(false, "Já existe um perfil com este nome");
+    if (isTourActive) {
+      data.name = await getNewProfileName(db, exists.name);
+    } else {
+      return createResponse(false, "Já existe um perfil com este nome");
+    }
   }
 
   try {
@@ -66,7 +74,7 @@ export async function createFullProfile(db: DbOrTx, data: NewFullProfile): Promi
         tx.insert(ProfileFoldersTable).values(foldersWithProfileId).run();
       }
 
-      const { id, name, description, iconId, isActive, isSystem } = insertedProfile;
+      const { id, name, description, iconId, isActive, isSystem, fromTour } = insertedProfile;
 
       return {
         id,
@@ -77,6 +85,7 @@ export async function createFullProfile(db: DbOrTx, data: NewFullProfile): Promi
         isSystem,
         folders: associatedFolders,
         rules: associatedRules,
+        fromTour,
       };
     });
 
@@ -113,6 +122,7 @@ export async function getAllProfiles(db: DbOrTx): Promise<DbResponse<FullProfile
       isSystem: p.isSystem,
       folders: p.profileFolders.map((pf) => pf.folder),
       rules: fullRules,
+      fromTour: p.fromTour,
     };
   });
 
@@ -128,7 +138,8 @@ export async function getProfileById(db: DbOrTx, profileId: number): Promise<DbR
     },
   });
   if (profile) {
-    const { id, name, description, iconId, isActive, isSystem, profileFolders, profileRules } = profile;
+    const { id, name, description, iconId, isActive, isSystem, profileFolders, profileRules, fromTour } =
+      profile;
     const fullRules: FullRule[] = profileRules.map((pr) => ({
       ...pr.rule,
       conditionsTree: buildTreeFromDb(
@@ -146,6 +157,7 @@ export async function getProfileById(db: DbOrTx, profileId: number): Promise<DbR
       isSystem,
       folders: profileFolders.map((pf) => pf.folder),
       rules: fullRules,
+      fromTour,
     };
     return createResponse(true, "Sucesso ao buscar o perfil.", fullProfile);
   } else {
@@ -207,6 +219,7 @@ export async function duplicateProfile(
     ...profileToDuplicate,
     id: undefined,
     name: await getNewProfileName(db, profileToDuplicate.name),
+    isSystem: false,
   };
   return createFullProfile(db, newProfile);
 }

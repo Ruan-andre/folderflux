@@ -5,7 +5,7 @@ import { FullProfile, NewFullProfile } from "../../../shared/types/ProfileWithDe
 type ProfileState = {
   profiles: FullProfile[];
   getProfiles: () => Promise<void>;
-  addProfile: (data: NewFullProfile) => Promise<DbResponse<FullProfile>>;
+  addProfile: (data: NewFullProfile, isTourActive?: boolean) => Promise<DbResponse<FullProfile>>;
   duplicateProfile: (profile: FullProfile) => Promise<DbResponse<FullProfile>>;
   updateProfile: (profile: FullProfile) => Promise<DbResponse>;
   deleteProfile: (id: number) => Promise<DbResponse>;
@@ -22,8 +22,8 @@ export const useProfileStore = create<ProfileState>((set) => ({
     }
   },
 
-  addProfile: async (data): Promise<DbResponse<FullProfile>> => {
-    const response = await window.api.profile.createFullProfile(data);
+  addProfile: async (data, isTourActive): Promise<DbResponse<FullProfile>> => {
+    const response = await window.api.profile.createFullProfile(data, isTourActive);
     if (response.status && response.items) {
       const newFullProfile = response.items;
       set((state) => ({

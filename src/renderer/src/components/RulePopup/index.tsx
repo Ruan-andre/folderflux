@@ -53,7 +53,8 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const { name, setName, description, setDescription, reset: resetRuleForm } = useRuleForm();
   const { rootGroup, setRootGroup, conditionTreeHandlers } = useConditionTree(initialTreeState);
   const { action, setAction, reset: resetActionForm } = useActionForm();
-
+  const tourNext = useTourStore((state) => state.tourNext);
+  const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
   const isTourActive = useTourStore((state) => state.isTourActive());
 
   const [initialData, setInitialData] = useState<{
@@ -97,7 +98,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
 
   const handleSubmit = async () => {
     // Validação
-    if (!validate()) return;
+    if (!isTourActive && !validate()) return;
 
     const currentData = { name, description, rootGroup, action };
 
@@ -117,6 +118,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       description,
       rootGroup: rootGroupTour ?? rootGroup,
       action: actionTour ?? action,
+      fromTour: true,
     };
 
     if (!isTourActive) {
@@ -169,6 +171,11 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       }
       onUpdateSuccess();
       closePopup();
+      if (isTourActive && getCurrentStepId() === "rule-form-save-action") {
+        setTimeout(() => {
+          tourNext();
+        }, 100);
+      }
     } catch (error) {
       const e = error as { message: string };
       showMessage(e.message, "error");
@@ -176,8 +183,6 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   };
 
   const validate = useCallback((): boolean => {
-    if (isTourActive) return true;
-
     if (!name.trim()) {
       showMessage("O nome da regra é obrigatório.", "error");
       formHelper.htmlInputFocus("ruleName", "red");
@@ -207,7 +212,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       }
     }
     return true;
-  }, [action?.type, action?.value, isTourActive, name, rootGroup.children, showMessage]);
+  }, [action?.type, action?.value, name, rootGroup.children, showMessage]);
 
   if (!isOpen) return null;
 

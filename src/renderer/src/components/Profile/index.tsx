@@ -18,6 +18,7 @@ const Profile = ({
   folders,
   rules,
   isSystem,
+  fromTour,
 }: FullProfile) => {
   const { showMessage } = useSnackbar();
   const { showConfirm } = useConfirmDialog();
@@ -33,6 +34,7 @@ const Profile = ({
     folders,
     rules,
     isSystem,
+    fromTour,
   };
 
   const handleDeleteProfile = async (e: React.MouseEvent<Element, MouseEvent>) => {
@@ -70,13 +72,14 @@ const Profile = ({
     flexDirection: "column",
     width: "37rem",
     height: "23.5rem",
-    gap: "1rem",
     border: "1px solid rgba(255, 255, 255, 0.1)",
     borderRadius: 8,
+    justifyContent: "space-between",
   }));
 
   return (
     <ProfileCard
+      className="profile-card"
       title={name}
       icon={<Icon icon={iconId} width="30" height="30" />}
       iconSx={{
@@ -84,13 +87,7 @@ const Profile = ({
           theme.palette.mode === "dark" ? "#323e5fff" : theme.palette.primary.light,
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1.5rem",
-        }}
-      >
+      <Box display={"flex"} flexDirection={"column"} gap={2}>
         <LabelTextWithTooltip
           tooltipText={description!}
           text={description!}
@@ -102,43 +99,43 @@ const Profile = ({
           })}
         />
 
-        <Box display={"flex"} gap={2}>
-          {rules.length > 0 && (
-            <Box>
-              <Typography component={"span"} variant="h5" color="primary.main">
-                {rules?.length}{" "}
-              </Typography>
-              {rules?.length > 1 ? "Regras" : "Regra"}
-            </Box>
-          )}
-          {folders?.length > 0 && (
-            <Box>
-              <Typography component={"span"} variant="h5" color="primary.main">
-                {folders.length}{" "}
-              </Typography>
-              {folders.length > 1 ? "Pastas" : "Pasta"}
-            </Box>
-          )}
-        </Box>
-        <Box display={"flex"} gap={1}>
-          <CrudButtons
-            id={id}
-            onActivate={(e) => {
-              e.stopPropagation();
-              handleToggleStatus(id);
-            }}
-            onDelete={isSystem ? undefined : handleDeleteProfile}
-            onDuplicate={(e) => {
-              e.stopPropagation();
-              handleDuplicateProfile(profileToEdit);
-            }}
-            onEdit={(e) => {
-              e.stopPropagation();
-              openPopup("edit", profileToEdit);
-            }}
-            status={isActive}
-          />
-        </Box>
+        {(rules.length > 0 || folders.length > 0) && (
+          <Box display={"flex"} gap={2}>
+            {rules.length > 0 && (
+              <Box>
+                <Typography component={"span"} variant="h5" color="primary.main">
+                  {rules?.length}{" "}
+                </Typography>
+                {rules?.length > 1 ? "Regras" : "Regra"}
+              </Box>
+            )}
+            {folders?.length > 0 && (
+              <Box>
+                <Typography component={"span"} variant="h5" color="primary.main">
+                  {folders.length}{" "}
+                </Typography>
+                {folders.length > 1 ? "Pastas" : "Pasta"}
+              </Box>
+            )}
+          </Box>
+        )}
+        <CrudButtons
+          id={id}
+          onActivate={(e) => {
+            e.stopPropagation();
+            handleToggleStatus(id);
+          }}
+          onDelete={isSystem ? undefined : handleDeleteProfile}
+          onDuplicate={(e) => {
+            e.stopPropagation();
+            handleDuplicateProfile(profileToEdit);
+          }}
+          onEdit={(e) => {
+            e.stopPropagation();
+            openPopup("edit", profileToEdit);
+          }}
+          status={isActive}
+        />
       </Box>
     </ProfileCard>
   );

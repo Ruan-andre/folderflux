@@ -24,6 +24,7 @@ import ProfileManagementView from "../ProfileManagementView";
 import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
 import Loading from "../../components/Loading";
 import { useTourStore } from "../../store/tourStore";
+import { waitForElement } from "../../functions/waitForElement";
 
 const HomePage = () => {
   const { showMessage } = useSnackbar();
@@ -46,15 +47,10 @@ const HomePage = () => {
   const deleteLog = useLogStore((state) => state.deleteLog);
   const addSavedLogFromBD = useLogStore((state) => state.addSavedLogFromBD);
   const [isDonationPopupOpen, setIsDonationPopupOpen] = useState(false);
-  const { startTour, tourNext, isTourActive, getCurrentStepId, initializeTour } = useTourStore();
-
-  useEffect(() => {
-    initializeTour(navigate);
-    // const tourHasBeenSeen = localStorage.getItem("folderfluxTourCompleted");
-    // if (!tourHasBeenSeen) {
-    //   setTimeout(() => startTour("simple"), 500);
-    // }
-  }, [initializeTour, navigate]);
+  const startTour = useTourStore((state) => state.startTour);
+  const tourNext = useTourStore((state) => state.tourNext);
+  const isTourActive = useTourStore((state) => state.isTourActive);
+  const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
 
   useEffect(() => {
     async function fetchData() {
@@ -84,16 +80,26 @@ const HomePage = () => {
     setLastLogId(nextId);
   });
 
-  const handleHowToUse = () => {
-    showConfirm(
-      {
-        title: "Escolha uma opção",
-        confirmText: "Tutorial Guiado",
-        confirmBtnColor: "success",
-      },
-      () => startTour("simple"),
-      [{ text: "Tutorial em Vídeo", action: () => {}, thirdButtonColor: "info" }]
-    );
+  const handleHowToUse = async () => {
+    // showConfirm(
+    //   {
+    //     title: "Escolha uma opção",
+    //     confirmText: "Tutorial Guiado",
+    //     confirmBtnColor: "success",
+    //   },
+    //   () => {
+    // try {
+    // Espere o alvo do primeiro passo (#how-to-use-card) estar no DOM
+    await waitForElement("#how-to-use-card");
+
+    // SÓ ENTÃO inicie o tour. Agora é 100% seguro.
+    startTour("simple");
+    //   } catch (error) {
+    //     console.error("Não foi possível iniciar o tour:", error);
+    //   }
+    // },
+    // [{ text: "Tutorial em Vídeo", action: () => {}, thirdButtonColor: "info" }]
+    // );
   };
 
   async function handleActionWithLoading<T>(
@@ -155,7 +161,7 @@ const HomePage = () => {
       }
       setSelectedLog(logMetadata);
       setIsDetailsOpen(true);
-      if (isTourActive() && getCurrentStepId() === "recent-activity-list") {
+      if (isTourActive() && getCurrentStepId() === "click-log-item") {
         setTimeout(() => {
           tourNext();
         }, 250);
@@ -304,10 +310,12 @@ const HomePage = () => {
     borderRadius: 8,
     border: theme.palette.mode === "light" ? "1px solid #e8e4e0" : "none",
   }));
+
   return (
     <ContentWrapper sx={{ minHeight: "95vh", display: "flex", justifyContent: "flex-start" }} id="home-page">
       <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
         <HomePageCard
+          id="force-verification-card"
           title="Forçar Verificação"
           subtitle="Verifica todas as pastas monitoradas imediatamente"
           icon={<Icon icon="vscode-icons:file-type-syncpack" width="45" height="45" />}
@@ -315,6 +323,7 @@ const HomePage = () => {
           iconSx={{ backgroundColor: "transparent" }}
         />
         <HomePageCard
+          id="profile-status-card"
           title="Status dos Perfis"
           subtitle={profilesLegend}
           icon={<Icon icon="fluent-color:person-16" width="45" height="45" />}
@@ -332,6 +341,7 @@ const HomePage = () => {
         />
 
         <HomePageCard
+          id="donation-card"
           title="Ajudar o projeto"
           subtitle="Doe qualquer quantia para ajudar o avanço do projeto"
           icon={<Icon icon="streamline-ultimate-color:cash-payment-coin-dollar" width="45" height="45" />}

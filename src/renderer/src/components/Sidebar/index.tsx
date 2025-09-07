@@ -46,11 +46,41 @@ const SidebarButton = ({
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isTourActive } = useTourStore();
+  const tourNext = useTourStore((state) => state.tourNext);
+  const isTourActive = useTourStore((state) => state.isTourActive);
+  const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
+  const stopCurrentAudio = useTourStore((state) => state.stopCurrentAudio);
   const SidebarSection = styled(Box)(({ theme }) => ({
     marginTop: isOpen ? theme.spacing(5) : undefined,
   }));
 
+  const handleTransitionEnd = () => {
+    // Verifica se a transição que acabou foi a de ABERTURA e se o tour está no passo certo
+    if (isOpen && isTourActive() && getCurrentStepId() === "sidebar-menu") {
+      // Avança o tour somente DEPOIS que a animação terminou
+      tourNext();
+    }
+  };
+
+  const handleMenuClick = async (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    if (!isTourActive()) return;
+
+    const menuId = e.currentTarget.id;
+    const currentStepId = getCurrentStepId();
+    const menuIdList = new Set<string>().add("rules");
+    const stepList = new Set<string>().add("sidebar-menu-rules-click");
+    stepList.add("navigate-to-profiles");
+    stepList.add("navigate-to-home");
+    menuIdList.add("profiles");
+    menuIdList.add("home");
+
+    if (stepList.has(currentStepId ?? "") && menuIdList.has(menuId)) {
+      stopCurrentAudio();
+      setTimeout(() => {
+        tourNext();
+      }, 150);
+    }
+  };
   const widthMenu = isOpen ? "245px" : "75px";
   return (
     <>
@@ -60,7 +90,7 @@ const Sidebar = () => {
         variant="permanent"
         sx={{
           width: widthMenu,
-          transition: "0.4s",
+          transition: "width 0.4s",
           "& .MuiDrawer-paper": {
             width: widthMenu,
             overflowX: "hidden",
@@ -76,6 +106,7 @@ const Sidebar = () => {
             setIsOpen(false);
           }
         }}
+        onTransitionEnd={handleTransitionEnd}
       >
         <Box
           component={"img"}
@@ -89,15 +120,15 @@ const Sidebar = () => {
             <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
               Organização
             </SidebarTitle>
-            <SidebarButton text="Início" to="/">
+            <SidebarButton id="home" text="Início" to="/" onClick={handleMenuClick}>
               <Icon icon="fluent-color:home-16" width="30" height="30" />
             </SidebarButton>
 
-            <SidebarButton id="rules" text="Regras" to="rules">
+            <SidebarButton id="rules" text="Regras" to="rules" onClick={handleMenuClick}>
               <Icon icon="gala:settings" width="30" height="30" color="#00ceff" />
             </SidebarButton>
 
-            <SidebarButton id="profiles" text="Perfis" to="profiles">
+            <SidebarButton id="profiles" text="Perfis" to="profiles" onClick={handleMenuClick}>
               <Icon icon="fluent-color:person-add-24" width="30" height="30" />
             </SidebarButton>
             <SidebarButton id="folders" text="Pastas" to="folders">
@@ -117,7 +148,7 @@ const Sidebar = () => {
             <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
               Configurações
             </SidebarTitle>
-            <SidebarButton id="settings" text="Preferências" to="settings">
+            <SidebarButton id="settings" text="Configurações" to="settings">
               <Icon icon="flat-color-icons:settings" width="30" height="30" />
             </SidebarButton>
 

@@ -18,6 +18,8 @@ import CommonIcons from "../../types/CommonIconsType";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import { formHelper } from "../../functions/form";
 import normalizeSafe from "../../functions/normalizeSafe";
+import { useTourStore } from "../../store/tourStore";
+import { useRuleStore } from "../../store/ruleStore";
 
 const GenericList = styled(GenericListItems)({
   maxHeight: "15rem",
@@ -25,6 +27,7 @@ const GenericList = styled(GenericListItems)({
     fontSize: "1.5rem",
   },
 });
+
 const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const theme = useTheme();
   const { showMessage } = useSnackbar();
@@ -60,6 +63,10 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const [isRuleSelectorOpen, setIsRuleSelectorOpen] = useState(false);
   const [isFolderSelectorOpen, setIsFolderSelectorOpen] = useState(false);
   const [foldersIdToUnwatch, setFolderIdToUnwatch] = useState<Set<number>>(new Set());
+  const isTourActive = useTourStore((state) => state.isTourActive());
+  const tourNext = useTourStore((state) => state.tourNext);
+  const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
+  const rules = useRuleStore((state) => state.rules);
 
   useEffect(() => {
     async function fetchData() {
@@ -163,7 +170,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   };
 
   const handleSubmit = useCallback(async () => {
-    if (!validateForm()) return;
+    if (!isTourActive && !validateForm()) return;
 
     const currentData = {
       id,
@@ -175,8 +182,42 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       isSystem,
     };
 
+    const currentDataTour = {
+      id,
+      name,
+      description,
+      icon,
+      associatedFolders,
+      associatedRules,
+      isSystem,
+      fromTour: true,
+    };
+
+    if (isTourActive) {
+      if (!name) currentDataTour.name = "Perfil (TUTORIAL)";
+      if (associatedFolders.length === 0) {
+        const responseFolders = await window.api.folder.getAllFolders();
+        if (responseFolders.items) {
+          const folder = responseFolders.items.find((x) => x.name === "tutorial-example" || x.id === 1);
+          if (folder)
+            currentDataTour.associatedFolders = [
+              {
+                id: folder.id,
+                name: folder.name,
+                fullPath: folder.fullPath,
+                fromTour: true,
+              },
+            ];
+        }
+      }
+      if (associatedRules.length === 0) {
+        const rule = rules.find((r) => r.name.includes("Tutorial") || r.id === 1);
+        if (rule) currentDataTour.associatedRules = [rule];
+      }
+    }
+
     // Não faz nada se os dados não mudaram
-    if (isEqual(normalizeSafe(initialData), normalizeSafe(currentData))) {
+    if (!isTourActive && isEqual(normalizeSafe(initialData), normalizeSafe(currentData))) {
       showMessage("Nenhuma alteração efetuada.", "info");
       closePopup();
       return;
@@ -226,7 +267,16 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           isActive: true,
           iconId: CommonIcons.find((x) => x.icon === currentData.icon)?.icon ?? "",
         };
-        const response = await addProfile(newProfile);
+        const newProfileTour: NewFullProfile = {
+          name: currentDataTour.name,
+          description: currentDataTour.description,
+          folders: currentDataTour.associatedFolders,
+          rules: currentDataTour.associatedRules,
+          isActive: true,
+          iconId: CommonIcons.find((x) => x.icon === currentDataTour.icon)?.icon ?? "",
+        };
+
+        const response = await addProfile(isTourActive ? newProfileTour : newProfile, isTourActive);
         showMessage(response.message, response.status ? "success" : "error");
         if (response.status && response.items) {
           closePopup();
@@ -239,6 +289,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       showMessage(e.message, "error");
     }
   }, [
+    isTourActive,
     validateForm,
     id,
     name,
@@ -248,6 +299,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     associatedRules,
     isSystem,
     initialData,
+    rules,
     showMessage,
     closePopup,
     profileToEdit,
@@ -257,6 +309,23 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     addProfile,
   ]);
 
+  const handleManageFolders = () => {
+    setIsFolderSelectorOpen(true);
+    if (isTourActive && getCurrentStepId() === "profile-form-manage-folders-action") {
+      setTimeout(() => {
+        tourNext();
+      }, 100);
+    }
+  };
+
+  const handleManageRules = () => {
+    setIsRuleSelectorOpen(true);
+    if (isTourActive && getCurrentStepId() === "profile-form-manage-rules-action") {
+      setTimeout(() => {
+        tourNext();
+      }, 100);
+    }
+  };
   if (!isOpen) return null;
 
   return (
@@ -319,13 +388,19 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
             </Box>
 
             <ContentWrapper
+              id="folder-management"
               title="Pastas"
               sx={{ gap: "0.5rem" }}
-              commonBtn={{ text: "Gerenciar Pastas", Action: () => setIsFolderSelectorOpen(true) }}
+              commonBtn={{
+                text: "Gerenciar Pastas",
+                Action: handleManageFolders,
+                id: "folder-management-button",
+              }}
               titleTagType="h4"
               hr
             >
               <GenericList
+                id="rule-management"
                 mode="page"
                 btnDelete
                 listItemSx={{ padding: "2px 0px" }}
@@ -341,7 +416,8 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
               title="Regras"
               commonBtn={{
                 text: "Gerenciar Regras",
-                Action: isSystem ? undefined : () => setIsRuleSelectorOpen(true),
+                Action: isSystem ? undefined : handleManageRules,
+                id: "rule-management-button",
               }}
               titleTagType="h4"
               hr
@@ -373,6 +449,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 </Button>
 
                 <Button
+                  id="confirm-profile"
                   variant="contained"
                   sx={{
                     fontSize: 12,

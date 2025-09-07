@@ -9,6 +9,7 @@ import { Box, Button, Stack } from "@mui/material";
 import { useFolderPopupStore } from "../../store/popupFolderStore";
 import FolderPopup from "../../components/FolderPopup";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
+import { useTourStore } from "../../store/tourStore";
 
 type FolderManagementViewProps = {
   mode: "page" | "selection";
@@ -28,6 +29,8 @@ const FolderManagementView = ({
   const [folders, setFolders] = useState<GenericListItemsType[]>();
   const [selectedFolders, setSelectedFolders] = useState<FolderSchema[]>(initialSelectedFolders);
   const { showConfirm } = useConfirmDialog();
+  const isTourActive = useTourStore((state) => state.isTourActive());
+  const tourNext = useTourStore((state) => state.tourNext);
 
   useEffect(() => {
     refreshFolders();
@@ -52,6 +55,7 @@ const FolderManagementView = ({
       const listFolders: NewFolder[] = paths?.map((p) => ({
         name: p.substring(p.lastIndexOf("\\") + 1),
         fullPath: p,
+        fromTour: isTourActive ? true : false,
       }));
       await window.api.folder.addFolders(listFolders);
       if (mode === "selection" && listFolders.length > 0) {
@@ -63,6 +67,11 @@ const FolderManagementView = ({
       }
       showMessage("Pasta adicionada com sucesso", "success");
       refreshFolders();
+      if (isTourActive) {
+        setTimeout(() => {
+          tourNext();
+        }, 200);
+      }
     }
   };
 
@@ -96,6 +105,7 @@ const FolderManagementView = ({
         id: folderToEdit.id,
         name: folderToEdit.title,
         fullPath: folderToEdit.subtitle || "",
+        fromTour: false,
       };
       openPopup("edit", folderSchema);
     }
@@ -123,10 +133,12 @@ const FolderManagementView = ({
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       <Box sx={{ flex: 1, overflowY: "auto" }}>
         <ContentWrapper
+          id="folder-management"
           title="Gerenciar Pastas"
-          commonBtn={{ Action: handleAddFolder, text: "Adicionar Pastas" }}
+          commonBtn={{ Action: handleAddFolder, text: "Adicionar Pastas", id: "add-folder-button" }}
         >
           <GenericListItems
+            listItemClass="list-item-folder"
             mode={mode}
             selectedIds={selectedFolders.map((f) => f.id)}
             btnEdit
@@ -164,7 +176,7 @@ const FolderManagementView = ({
           >
             Cancelar
           </Button>
-          <Button variant="contained" onClick={handleSaveClick}>
+          <Button id="confirm-add-folder" variant="contained" onClick={handleSaveClick}>
             Confirmar Seleção
           </Button>
         </Stack>

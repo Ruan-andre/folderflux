@@ -48,9 +48,9 @@ export function registerProfileHandlers() {
     }
   });
 
-  ipcMain.handle("create-full-profile", async (_e, data) => {
+  ipcMain.handle("create-full-profile", async (_e, data, isTourActive) => {
     try {
-      return await createFullProfile(db, data);
+      return await createFullProfile(db, data, isTourActive);
     } catch (e) {
       return handleError(e, "Erro ao adicionar perfil");
     }
