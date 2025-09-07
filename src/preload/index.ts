@@ -30,6 +30,22 @@ const api = {
       ipcRenderer.removeListener("log-added", listener);
     };
   },
+  tts: {
+    generate: (text: string) => ipcRenderer.invoke("generate-tts", text),
+  },
+  audio: {
+    play: (text: string) => ipcRenderer.send("request-play-audio", text),
+    stop: () => ipcRenderer.send("request-stop-audio"),
+  },
+  onPlayAudio: (callback: (event: IpcRendererEvent, text: string) => void) => {
+    ipcRenderer.on("play-audio", callback);
+    // Retorna uma função de limpeza para remover o listener
+    return () => ipcRenderer.removeListener("play-audio", callback);
+  },
+  onStopAudio: (callback: () => void) => {
+    ipcRenderer.on("stop-audio", callback);
+    return () => ipcRenderer.removeListener("stop-audio", callback);
+  },
 
   rule: {
     getAllRules: (): Promise<DbResponse<FullRule[]>> => ipcRenderer.invoke("get-all-rules-with-details"),
@@ -56,8 +72,8 @@ const api = {
     getAllProfiles: (): Promise<DbResponse<FullProfile[]>> =>
       ipcRenderer.invoke("get-all-profiles-with-details"),
 
-    createFullProfile: (data: NewFullProfile): Promise<DbResponse<FullProfile>> =>
-      ipcRenderer.invoke("create-full-profile", data),
+    createFullProfile: (data: NewFullProfile, isTourActive?: boolean): Promise<DbResponse<FullProfile>> =>
+      ipcRenderer.invoke("create-full-profile", data, isTourActive),
 
     getProfileById: (profileId: number): Promise<DbResponse<FullProfile>> =>
       ipcRenderer.invoke("get-profile-by-id", profileId),
