@@ -185,6 +185,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     text: "Precisa de suporte ou quer reportar um problema? Acesse aqui.",
     attachTo: { element: "#help", on: "right" },
   },
+
   {
     id: "sidebar-menu-rules-click",
     title: "Vamos Criar uma Regra",
@@ -192,10 +193,14 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     attachTo: { element: "#rules", on: "right" },
     buttons: [tourButtons.back],
     canClickTarget: true,
+    advanceOn: {
+      event: "click",
+      selector: "#rules",
+    },
   },
-
   {
     id: "rule-tabs",
+    page: "/rules",
     title: "Painel de Regras",
     text: "Este painel mostra todas as regras disponíveis, separadas entre as predefinidas e as que você criar.",
     attachTo: { element: "#rule-tabs", on: "bottom" },
@@ -237,7 +242,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
   {
     id: "rule-form-intro",
     title: "Formulário de Regra",
-    text: "Este é o formulário para criar, ou editar uma regra.",
+    text: "Este é o formulário para criar ou editar uma regra.",
     attachTo: { element: "#rule-popup", on: "auto" },
     classes: "tour-step-wide",
   },
@@ -346,9 +351,14 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     attachTo: { element: "#profiles", on: "right" },
     canClickTarget: true,
     buttons: [tourButtons.back],
+    advanceOn: {
+      event: "click",
+      selector: "#profiles",
+    },
   },
   {
     id: "profiles-page-intro",
+    page: "/profiles",
     title: "Gerenciador de Perfis",
     text: "Este é um card de perfil. Vamos criar um novo para este tutorial.",
     attachTo: { element: ".profile-card", on: "bottom" },
@@ -583,10 +593,15 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     attachTo: { element: "#home", on: "right" },
     buttons: [tourButtons.back],
     canClickTarget: true,
+    advanceOn: {
+      event: "click",
+      selector: "#home",
+    },
   },
 
   {
     title: "Card Forçar Verificação",
+    page: "/",
     text: `Agora com perfis, regras e pastas configurados,
      ao clicar neste card a organização será forçada a ser executada. Lembrando que não é necessário efetuar este procedimento sempre
      que desejar organizar os arquivos, pois o FolderFlux estará sempre observando as pastas adicionadas aos perfis para organizá-las. 🫡`,
@@ -594,12 +609,12 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
   },
   {
     title: "Card Forçar Verificação",
-    text: `Este card mostrará o status dos perfis, ao clicar nele, você será redirecionado para a página de perfis que vimos anteriormente.`,
+    text: `Este card mostrará o status dos perfis. Ao clicar nele, você será redirecionado para a página de perfis que vimos anteriormente.`,
     attachTo: { element: "#profile-status-card", on: "bottom" },
   },
   {
     title: "Card Forçar Verificação",
-    text: `Ao clicar neste card, você verá informações sobre como doar para ajudar o desenvolvimento do projeto.`,
+    text: `Ao clicar neste card você verá informações sobre como doar para ajudar o desenvolvimento do projeto.`,
     attachTo: { element: "#donation-card", on: "bottom" },
   },
   {
