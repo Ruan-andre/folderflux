@@ -90,15 +90,17 @@ export async function createFullRule(
     } else return createResponse(false, "Já existe uma regra com este nome");
   }
 
-  const insertedRuleId = await db.transaction((tx) => {
-    const insertedRule = tx.insert(RuleTable).values(rule).returning().get();
-    insertConditionTree(tx, conditionsTree, insertedRule.id, null);
+  const newRuleId = db.transaction((tx) => {
+    const insertedRule = tx.insert(RuleTable).values(rule).returning({ id: RuleTable.id }).get();
     tx.insert(ActionTable)
       .values({ ...action, ruleId: insertedRule.id })
       .run();
+
+    insertConditionTreeSync(tx, conditionsTree, insertedRule.id, null);
     return insertedRule.id;
   });
-  return getRuleById(db, insertedRuleId);
+
+  return getRuleById(db, newRuleId);
 }
 
 export async function updateRule(db: DbOrTx, ruleUpdated: FullRule): Promise<DbResponse> {
@@ -187,8 +189,6 @@ export async function getSystemRulesCount(db: DbOrTx): Promise<number> {
 
   return result[0].count;
 }
-
-// --- BUILD TREE ---
 
 export function buildTreeFromDb(nodes: ConditionTreeSchema[], explicitRootId?: number): IConditionGroup {
   if (!nodes || nodes.length === 0) {
@@ -279,15 +279,13 @@ export function buildTreeFromDb(nodes: ConditionTreeSchema[], explicitRootId?: n
   return buildGroup(rootNode.id);
 }
 
-// --- INSERT TREE ---
-// REFATORAR PARA REMOVAR O AWAIT
-async function insertConditionTree(
-  tx: DbOrTx,
+function insertConditionTreeSync(
+  tx: DbOrTx, 
   group: IConditionGroup,
   ruleId: number,
   parentId: number | null
-): Promise<void> {
-  const insertedGroup = await tx
+): void {
+  const insertedGroup = tx
     .insert(ConditionsTreeTable)
     .values({
       type: "group",
@@ -301,10 +299,10 @@ async function insertConditionTree(
 
   for (const child of group.children) {
     if (child.type === "group") {
-      await insertConditionTree(tx, child, ruleId, insertedGroup.id);
+      // Chamada recursiva síncrona
+      insertConditionTreeSync(tx, child, ruleId, insertedGroup.id);
     } else {
-      await tx
-        .insert(ConditionsTreeTable)
+      tx.insert(ConditionsTreeTable)
         .values({
           type: "condition",
           field: child.field,
@@ -322,7 +320,7 @@ async function insertConditionTree(
 
 async function updateConditionTree(db: DbOrTx, ruleId: number, newTree: IConditionGroup): Promise<void> {
   await db.delete(ConditionsTreeTable).where(eq(ConditionsTreeTable.ruleId, ruleId));
-  await insertConditionTree(db, newTree, ruleId, null);
+  insertConditionTreeSync(db, newTree, ruleId, null);
 }
 
 async function updateActionRule(db: DbOrTx, action: ActionSchema): Promise<void> {
