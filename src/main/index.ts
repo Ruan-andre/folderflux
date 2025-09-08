@@ -21,6 +21,7 @@ import { db } from "../db";
 import { registerEmitterHandlers } from "./handlers/emitter";
 import { registerAudioPlayerHandlers } from "./handlers/audio-player";
 import { registerTtsHandlers } from "./handlers/tts";
+import { registerTourHandlers } from "./handlers/domain/tour";
 
 let mainWindow: BrowserWindow | null = null;
 let audioWindow: BrowserWindow | null = null;
@@ -150,6 +151,7 @@ if (!gotTheLock) {
     registerEmitterHandlers(mainWindow);
     registerAudioPlayerHandlers(audioWindow);
     registerTtsHandlers();
+    registerTourHandlers();
 
     await folderMonitorService.start(db);
     handleFolderPathArgument(process.argv);
