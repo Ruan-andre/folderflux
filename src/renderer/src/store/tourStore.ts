@@ -1,9 +1,7 @@
-// Em: src/store/tourStore.ts
 import { create } from "zustand";
 import Shepherd from "shepherd.js";
 import { NavigateFunction } from "react-router-dom";
 
-// Importe os passos que acabamos de criar
 import { simpleTourSteps, advancedTourSteps, CustomizedStepOptions } from "../config/tourSteps";
 import { tourButtons } from "../config/tourButtons";
 
@@ -35,7 +33,6 @@ export const useTourStore = create<TourState>((set, get) => ({
     // Ex: window.api.settings.setAudioEnabled(newState);
     set({ isAudioEnabled: newState });
 
-    // Se o áudio for desativado, para qualquer som que esteja tocando
     if (!newState) {
       window.api.audio.stop();
     }

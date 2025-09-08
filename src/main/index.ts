@@ -26,7 +26,6 @@ let mainWindow: BrowserWindow | null = null;
 let audioWindow: BrowserWindow | null = null;
 
 function createWindow(): void {
-  // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 880,
@@ -80,11 +79,8 @@ function createAudioWindow() {
 
   const rendererUrl = process.env["ELECTRON_RENDERER_URL"];
   if (is.dev && rendererUrl) {
-    // A MÁGICA ACONTECE AQUI:
-    // Carregamos a URL principal, mas com um parâmetro para identificação.
     audioWindow.loadURL(`${rendererUrl}/?view=audioPlayer`);
   } else {
-    // Em produção, fazemos a mesma coisa.
     audioWindow.loadFile(path.join(__dirname, "../renderer/index.html"), {
       search: "view=audioPlayer",
     });

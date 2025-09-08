@@ -1,5 +1,3 @@
-// Em: src/main/services/ttsService.ts
-
 import { app } from "electron";
 import path from "path";
 import fs from "fs";
@@ -53,28 +51,19 @@ export function textToSpeech(text: string): Promise<Buffer> {
 
     const args = ["--model", modelPath, "--output_file", outputPath];
 
-    const piperProcess = execFile(
-      piperExePath,
-      args,
-      // A MÁGICA ACONTECE AQUI: Definimos o CWD
-      { cwd: piperDir },
-      async (error, stdout, stderr) => {
-        if (error) {
-          console.error("Erro ao executar o Piper:", stderr);
-          return reject(error);
-        }
-        try {
-          // Após gerar o arquivo, leia-o como um Buffer
-          const audioBuffer = await fs.promises.readFile(outputPath);
-          // Opcional: delete o arquivo temporário depois de ler
-          await fs.promises.unlink(outputPath);
-          // Resolva a Promise com os dados brutos
-          resolve(audioBuffer);
-        } catch (readError) {
-          reject(readError);
-        }
+    const piperProcess = execFile(piperExePath, args, { cwd: piperDir }, async (error, stdout, stderr) => {
+      if (error) {
+        console.error("Erro ao executar o Piper:", stderr);
+        return reject(error);
       }
-    );
+      try {
+        const audioBuffer = await fs.promises.readFile(outputPath);
+        await fs.promises.unlink(outputPath);
+        resolve(audioBuffer);
+      } catch (readError) {
+        reject(readError);
+      }
+    });
 
     if (piperProcess.stdin) {
       const sanitizedText = sanitizeText(text);

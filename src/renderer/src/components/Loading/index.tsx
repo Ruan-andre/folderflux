@@ -2,7 +2,6 @@ import * as React from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Backdrop, Stack, Typography } from "@mui/material";
 
-// From https://github.com/mui/material-ui/issues/9496#issuecomment-959408221
 const Loading = ({ isLoading }: { isLoading: boolean }) => {
   return (
     <Backdrop

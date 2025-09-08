@@ -14,14 +14,12 @@ const __dirname = path.dirname(__filename);
 const dbPath = path.join(app.getPath("userData"), "FolderFlux.db");
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
-// Exporte uma função para obter o caminho
 export function getDbPath() {
   return dbPath;
 }
 
 const sqlite = new Database(dbPath);
 sqlite.pragma("auto_vacuum = FULL");
-// Instância do Drizzle
 export const db: BetterSQLite3Database<typeof schema> = drizzle(sqlite, { schema });
 
 export type DbInstance = typeof db;

@@ -1,10 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-// Componentes principais
 import App from "./App";
 
-// Seus imports de CSS e Providers
 import "./assets/css/globals.css";
 import "shepherd.js/dist/css/shepherd.css";
 import "./assets/css/tour.css";
@@ -24,7 +22,6 @@ const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get("view") === "audioPlayer") {
   root.render(<AudioPlayer />);
 } else {
-
   root.render(
     <StrictMode>
       <ThemeProvider>

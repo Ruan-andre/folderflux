@@ -1,5 +1,3 @@
-// Em: src/main/workers/taskWorker.ts
-
 import { parentPort, workerData } from "worker_threads";
 import Database from "better-sqlite3";
 import { drizzle, BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
@@ -22,7 +20,7 @@ parentPort?.on(
     task: string;
     payload?: { rules?: FullRule[]; profiles?: FullProfile[]; paths?: string[] };
   }) => {
-    const { task /*payload*/ } = message;
+    const { task } = message;
     const { dbPath } = workerData;
 
     const sqlite = new Database(dbPath);
@@ -62,11 +60,6 @@ parentPort?.on(
         case "processAll":
           response = await RuleEngine.processAll(localDb, reportLogProgress);
           break;
-
-        // Adicione mais casos para outras tarefas aqui
-        // case "outraTarefaPesada":
-        //   response = await outraTarefaPesada(localDb, payload);
-        //   break;
 
         default:
           throw new Error(`Tarefa desconhecida no worker: ${task}`);

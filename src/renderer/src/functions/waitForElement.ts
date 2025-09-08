@@ -1,5 +1,3 @@
-// Em: src/renderer/src/hooks/waitForElement.ts
-
 /**
  * Espera um elemento aparecer no DOM usando MutationObserver.
  * @param selector O seletor CSS do elemento a ser esperado.
@@ -28,7 +26,6 @@ export function waitForElement(selector: string, timeout = 5000): Promise<Elemen
       subtree: true,
     });
 
-    // Define um tempo limite para evitar loops infinitos
     setTimeout(() => {
       observer.disconnect();
       reject(new Error(`Tempo esgotado esperando pelo seletor: ${selector}`));

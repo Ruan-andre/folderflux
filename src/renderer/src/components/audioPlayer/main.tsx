@@ -32,7 +32,6 @@ const AudioPlayer = () => {
         newAudio.play().catch((e) => console.error("Erro ao tocar áudio gerado:", e));
 
         newAudio.onended = () => {
-          // Apenas limpa, não precisa parar pois já terminou.
           if (currentAudioRef.current === newAudio) {
             URL.revokeObjectURL(url);
             currentAudioRef.current = null;
@@ -41,12 +40,10 @@ const AudioPlayer = () => {
       }
     });
 
-    // O 'stop' agora usa nossa função centralizada
     const cleanupStop = window.api.onStopAudio(() => {
       stopAndClearAudio();
     });
 
-    // Garante a limpeza final quando o componente é desmontado
     return () => {
       cleanupPlay();
       cleanupStop();

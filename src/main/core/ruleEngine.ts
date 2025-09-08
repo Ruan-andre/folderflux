@@ -51,13 +51,11 @@ export default class RuleEngine {
         return fileDate >= new Date(value) && fileDate <= new Date(value2);
       },
       higherThan: (fileValue, value) => {
-        //A comparação é feita somente pelos dias (números inteiros)
         if (!fileValue || !value) return false;
         const diffDays = RuleEngine.DiffDays(fileValue);
         return diffDays > parseInt(value);
       },
       lowerThan: (fileValue, value) => {
-        //A comparação é feita somente pelos dias (números inteiros)
         if (!fileValue || !value) return false;
         const diffDays = RuleEngine.DiffDays(fileValue);
         return diffDays < parseInt(value);
@@ -70,13 +68,11 @@ export default class RuleEngine {
         return fileDate >= new Date(value) && fileDate <= new Date(value2);
       },
       higherThan: (fileValue, value) => {
-        //A comparação é feita somente pelos dias (números inteiros)
         if (!fileValue || !value) return false;
         const diffDays = RuleEngine.DiffDays(fileValue);
         return diffDays > parseInt(value);
       },
       lowerThan: (fileValue, value) => {
-        //A comparação é feita somente pelos dias (números inteiros)
         if (!fileValue || !value) return false;
         const diffDays = RuleEngine.DiffDays(fileValue);
         return diffDays < parseInt(value);
@@ -198,7 +194,6 @@ export default class RuleEngine {
   }
 
   private async run(db: DbOrTx): Promise<DbResponse<number>> {
-    // 1. Encontrar todos os arquivos que correspondem às regras
     await this.findMatchingFiles();
 
     if (this.operationsToExecute.length === 0) {
@@ -263,8 +258,6 @@ export default class RuleEngine {
       }
     });
   }
-
-  // --- MÉTODOS AUXILIARES PRIVADOS (antigas funções) ---
 
   private evaluateConditionTree(file: FileInfo, group: IConditionGroup): boolean {
     const results: boolean[] = group.children.map((child) => {

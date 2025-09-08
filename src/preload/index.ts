@@ -39,7 +39,6 @@ const api = {
   },
   onPlayAudio: (callback: (event: IpcRendererEvent, text: string) => void) => {
     ipcRenderer.on("play-audio", callback);
-    // Retorna uma função de limpeza para remover o listener
     return () => ipcRenderer.removeListener("play-audio", callback);
   },
   onStopAudio: (callback: () => void) => {

@@ -1,4 +1,3 @@
-// Em src/main/index.ts
 import { ipcMain } from "electron";
 import path from "path";
 import { Worker } from "worker_threads";

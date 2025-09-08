@@ -1,5 +1,3 @@
-// Em: src/config/tourSteps.ts
-
 import { StepOptions } from "shepherd.js";
 import { tourButtons } from "./tourButtons";
 

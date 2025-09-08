@@ -92,7 +92,7 @@ const HomePage = () => {
     // Espere o alvo do primeiro passo (#how-to-use-card) estar no DOM
     await waitForElement("#how-to-use-card");
 
-    // SÓ ENTÃO inicie o tour. Agora é 100% seguro.
+   
     startTour("simple");
     //   } catch (error) {
     //     console.error("Não foi possível iniciar o tour:", error);
