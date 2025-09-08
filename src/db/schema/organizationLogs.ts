@@ -13,6 +13,7 @@ export const OrganizationLogsTable = sqliteTable("organization_logs", {
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(strftime('%s', 'now') * 1000)`),
+  fromTour: integer("from_tour", { mode: "boolean" }).default(false),
 });
 
 export const AffectedFilesTable = sqliteTable("affected_files", {
