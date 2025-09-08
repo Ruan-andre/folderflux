@@ -1,5 +1,3 @@
-// Em: src/renderer/src/components/TourController.tsx
-
 import { useCallback, useEffect } from "react";
 import { useTourStore } from "../../store/tourStore";
 import { createRoot, Root } from "react-dom/client";
