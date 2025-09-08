@@ -106,7 +106,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     let actionTour;
     if (rootGroup.children.length === 0 || !(rootGroup.children[0] as ICondition).value) {
       rootGroupTour = JSON.parse(JSON.stringify(initialTreeState));
-      rootGroupTour.children = tourCondition;
+      rootGroupTour.children = [tourCondition];
     }
     if (!action || !action?.value) {
       initialActionState.value = "BOLETOS";
@@ -156,6 +156,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
             description: currentDataTour.description,
             isActive: true,
             isSystem: false,
+            fromTour: true,
           },
           conditionsTree: currentDataTour.rootGroup,
           action: currentDataTour.action as NewAction,
