@@ -124,6 +124,10 @@ export async function deleteRule(db: DbOrTx, id: number): Promise<DbResponse> {
   return createResponse(true, "Regra excluída");
 }
 
+export async function deleteRulesFromTour(db: DbOrTx) {
+  await db.delete(RuleTable).where(eq(RuleTable.fromTour, true));
+}
+
 export async function duplicateRule(db: DbOrTx, ruleIdToDuplicate: number): Promise<DbResponse<FullRule>> {
   const originalRuleResponse = await getRuleById(db, ruleIdToDuplicate);
   if (!originalRuleResponse.status || !originalRuleResponse.items) {
@@ -280,7 +284,7 @@ export function buildTreeFromDb(nodes: ConditionTreeSchema[], explicitRootId?: n
 }
 
 function insertConditionTreeSync(
-  tx: DbOrTx, 
+  tx: DbOrTx,
   group: IConditionGroup,
   ruleId: number,
   parentId: number | null

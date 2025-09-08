@@ -211,6 +211,10 @@ export async function deleteProfile(db: DbOrTx, profileId: number): Promise<DbRe
   }
 }
 
+export async function deleteProfilesFromTour(db: DbOrTx) {
+  await db.delete(ProfileTable).where(eq(ProfileTable.fromTour, true));
+}
+
 export async function duplicateProfile(
   db: DbOrTx,
   profileToDuplicate: FullProfile

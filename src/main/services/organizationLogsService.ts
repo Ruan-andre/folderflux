@@ -6,7 +6,11 @@ import { desc } from "drizzle-orm/sql/expressions/select";
 import { eq, lt } from "drizzle-orm/sql/expressions/conditions";
 import { DbOrTx } from "~/src/db";
 
-export async function saveLog(dbInstance: DbOrTx, log: LogMetadata): Promise<LogMetadata> {
+export async function saveLog(
+  dbInstance: DbOrTx,
+  log: LogMetadata,
+  fromTour?: boolean
+): Promise<LogMetadata> {
   const { id, metadata, files, createdAt } = await dbInstance.transaction((tx) => {
     //Para salvar na tabela de arquivos
     const files = log.files;
@@ -15,6 +19,7 @@ export async function saveLog(dbInstance: DbOrTx, log: LogMetadata): Promise<Log
     const logToInsert = {
       type: log.type,
       metadata: log,
+      fromTour: fromTour ?? false,
     };
 
     const insertedLog = tx.insert(OrganizationLogsTable).values(logToInsert).returning().get();
