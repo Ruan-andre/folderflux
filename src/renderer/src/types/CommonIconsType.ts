@@ -1,5 +1,14 @@
 type IconOption = {
-  value: "home" | "briefcase" | "smartphone" | "music" | "camera" | "folder" | "folder-error" | "clean";
+  value:
+    | "home"
+    | "briefcase"
+    | "smartphone"
+    | "music"
+    | "camera"
+    | "folder"
+    | "folder-error"
+    | "clean"
+    | "setting";
   icon: string;
 };
 
@@ -13,6 +22,7 @@ const CommonIcons: IconOption[] = [
   { value: "folder", icon: "fluent-emoji:file-folder" },
   { value: "folder-error", icon: "material-icon-theme:folder-error-open" },
   { value: "clean", icon: "streamline-plump-color:clean-broom-wipe-flat" },
+  { value: "setting", icon: "flat-color-icons:settings" },
 ];
 
 export default CommonIcons;
