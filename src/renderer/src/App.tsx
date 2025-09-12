@@ -1,10 +1,11 @@
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, HashRouter, RouteObject, useNavigate } from "react-router-dom";
-import { useTourStore } from "./store/tourStore"; 
+import { useTourStore } from "./store/tourStore";
 
 import MainLayout from "./components/layout/MainLayout";
 import Loading from "./components/Loading";
 import { useTourSync } from "./hooks/tourSync";
+import { useUpdateStore } from "./store/updateStore";
 
 const HomePage = lazy(() => import("./views/HomePage"));
 const RulePage = lazy(() => import("./views/RulePage"));
@@ -45,6 +46,16 @@ function GlobalTourManager() {
 }
 
 function App() {
+  const setUpdateAvailable = useUpdateStore((state) => state.setUpdateAvailable);
+
+  useEffect(() => {
+  
+    const cleanup = window.api.ElectronUpdater.onUpdateDownloaded(() => {
+      setUpdateAvailable(true);
+    });
+
+    return cleanup;
+  }, [setUpdateAvailable]);
   return (
     <AppRouter>
       <TourInitializer />

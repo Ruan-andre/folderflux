@@ -46,6 +46,12 @@ const api = {
     return () => ipcRenderer.removeListener("stop-audio", callback);
   },
 
+  tour: {
+    deleteData: async () => {
+      await ipcRenderer.invoke("delete-data-from-tour");
+      await ipcRenderer.invoke("move-data-from-tour");
+    },
+  },
   rule: {
     getAllRules: (): Promise<DbResponse<FullRule[]>> => ipcRenderer.invoke("get-all-rules-with-details"),
 
@@ -115,8 +121,8 @@ const api = {
   },
   organization: {
     organizeAll: async (): Promise<DbResponse<number>> => await ipcRenderer.invoke("worker:processAll"),
-    defaultOrganization: async (paths: string[]): Promise<DbResponse<number>> =>
-      ipcRenderer.invoke("worker:defaultOrganization", paths),
+    defaultOrganization: async (paths: string[], isTourActive?: boolean): Promise<DbResponse<number>> =>
+      ipcRenderer.invoke("worker:defaultOrganization", paths, isTourActive),
     organizeWithSelectedRules: async (rules: FullRule[], paths: string[]): Promise<DbResponse<number>> =>
       ipcRenderer.invoke("worker:organizeWithSelectedRules", rules, paths),
     organizeWithSelectedProfiles: async (
@@ -126,6 +132,7 @@ const api = {
       ipcRenderer.invoke("worker:organizeWithSelectedProfiles", profiles, paths),
     getLogs: async (lastId?: number): Promise<DbResponse<LogMetadata[]>> =>
       ipcRenderer.invoke("get-logs", lastId),
+    getLogsFromTourCount: (): Promise<number> => ipcRenderer.invoke("get-logs-from-tour-count"),
     deleteLogById: async (logId: number): Promise<DbResponse<void>> =>
       ipcRenderer.invoke("delete-log-by-id", logId),
     deleteAllLogs: async (): Promise<DbResponse<void>> => ipcRenderer.invoke("worker:deleteAllLogs"),
@@ -140,6 +147,21 @@ const api = {
 
     stopMonitoringProfileFolders: (profileId: number) =>
       ipcRenderer.invoke("unwatch-profile-folders", profileId),
+  },
+  ElectronStore: {
+    get: (key: string) => ipcRenderer.invoke("electron-store-get", key),
+    set: (key: string, value: string) => ipcRenderer.invoke("electron-store-set", key, value),
+  },
+  ElectronUpdater: {
+    onUpdateDownloaded: (callback: () => void) => {
+      const listener = (event: IpcRendererEvent, ...args: any[]) =>
+         callback();
+      ipcRenderer.on("update-downloaded", listener);
+      return () => {
+        ipcRenderer.removeListener("update-downloaded", listener);
+      };
+    },
+    installUpdate: () => ipcRenderer.send("install-update"),
   },
 };
 // Use `contextBridge` APIs to expose Electron APIs to

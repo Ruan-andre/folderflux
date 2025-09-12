@@ -1,10 +1,13 @@
-# electron-builder.yml - Atualizar
 appId: com.folderflux.app
 productName: FolderFlux
+compression: maximum
 directories:
   buildResources: build
-  output: dist
+  output: release
 files:
+  - out/**
+  - resources/**
+  - public/**
   - "!**/.vscode/*"
   - "!src/*"
   - "!electron.vite.config.{js,ts,mjs,cjs}"
@@ -12,8 +15,17 @@ files:
   - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
   - "!{tsconfig.json}"
   - "!{drizzle.config.ts}"
+  - "!**/*.map" # Exclui arquivos de mapa de source
+  - "!**/test*/**" # Exclui pastas de teste
+  - "!**/*.md" # Exclui arquivos markdown
+  - "!**/Thumbs.db"
+  - "!**/.DS_Store"
+  - "!**/example*/**"
 asarUnpack:
-  - resources/**
+  - "resources/**"
+extraResources:
+  - from: public
+    to: .
 win:
   executableName: FolderFlux
   target:
@@ -45,6 +57,6 @@ linux:
   synopsis: "${description}"
   category: Utility
   maintainer: "André Ruan <ruan.fullstack@gmail.com>"
-# publish:
-#   provider: github
-#   releaseType: release
+publish:
+  provider: github
+  releaseType: release
