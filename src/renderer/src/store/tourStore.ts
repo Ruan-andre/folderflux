@@ -8,6 +8,8 @@ import { tourButtons } from "../config/tourButtons";
 export interface TourState {
   tour: Shepherd.Tour | null;
   isAudioEnabled: boolean;
+  isFinished: boolean;
+  typeTour?: "simple" | "advanced";
   toggleAudioEnabled: () => void;
   initializeTour: (navigate: NavigateFunction, initialAudioState: boolean) => void;
   startTour: (type: "simple" | "advanced") => void;
@@ -24,15 +26,13 @@ function speak(text: string) {
 export const useTourStore = create<TourState>((set, get) => ({
   tour: null,
   isAudioEnabled: true,
+  isFinished: false,
   stopCurrentAudio: () => {
     window.api.audio.stop();
   },
   toggleAudioEnabled: () => {
     const newState = !get().isAudioEnabled;
-    // TODO: Aqui você chamará a função para salvar 'newState' no seu banco de dados.
-    // Ex: window.api.settings.setAudioEnabled(newState);
     set({ isAudioEnabled: newState });
-
     if (!newState) {
       window.api.audio.stop();
     }
@@ -45,6 +45,7 @@ export const useTourStore = create<TourState>((set, get) => ({
 
     const newTour = new Shepherd.Tour({
       useModalOverlay: true,
+      keyboardNavigation: false,
       exitOnEsc: true,
       defaultStepOptions: {
         scrollTo: false,
@@ -77,8 +78,18 @@ export const useTourStore = create<TourState>((set, get) => ({
       }
     });
 
-    const onTourEnd = () => {
+    const onTourEnd = async (event: Shepherd.EventOptions) => {
       get().stopCurrentAudio();
+      if (event.index) {
+        if (
+          (event.tour.steps.length >= 60 && event.index >= 27 && get().typeTour === "advanced") ||
+          (event.tour.steps.length >= 13 && event.index >= 7 && get().typeTour === "simple")
+        )
+          await window.api.tour.deleteData();
+      }
+
+      set({ isFinished: true });
+      navigate("/");
     };
 
     newTour.on("complete", onTourEnd);
@@ -99,6 +110,7 @@ export const useTourStore = create<TourState>((set, get) => ({
       tour.steps = [];
       tour.addSteps(steps);
       setTimeout(() => {
+        set({ isFinished: false, typeTour: type });
         tour.start();
       }, 150);
     }
