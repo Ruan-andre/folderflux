@@ -66,6 +66,7 @@ const SettingPage = () => {
   return (
     <ContentWrapper title="Configurações">
       <SettingWrapper
+        id="general-settings"
         sx={{ boxShadow: "none", gap: "1rem", padding: "1rem" }}
         title="Geral"
         hr
@@ -78,7 +79,7 @@ const SettingPage = () => {
           isButton={false}
         />
       </SettingWrapper>
-      <SettingWrapper title="Aparência" hr titleTagType="h3">
+      <SettingWrapper id="appearance-settings" title="Aparência" hr titleTagType="h3">
         <GenericListItems
           list={appearanceSettingsList}
           btnSwitch
