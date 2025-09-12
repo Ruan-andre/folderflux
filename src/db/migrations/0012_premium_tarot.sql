@@ -1,0 +1,1 @@
+ALTER TABLE `organization_logs` ADD `from_tour` integer DEFAULT false;
