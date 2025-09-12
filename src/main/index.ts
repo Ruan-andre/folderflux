@@ -66,7 +66,7 @@ function createWindow(): void {
 
   mainWindow.on("ready-to-show", async () => {
     mainWindow?.show();
-    autoUpdater.forceDevUpdateConfig = true;
+    // autoUpdater.forceDevUpdateConfig = true; -- apenas para testar o electron-updater em dev
     try {
       await autoUpdater.checkForUpdates();
     } catch (error) {
