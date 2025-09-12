@@ -83,24 +83,24 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           isSystem: profileToEdit.isSystem,
         };
 
-        const foldersForGenericList: GenericListItemsType[] = folders.map((f) => ({
+        const folderList: GenericListItemsType[] = folders.map((f) => ({
           id: f.id!,
           title: f.name,
           subtitle: f.fullPath,
-          icon: "fluent-emoji:file-folder",
+          icon: CommonIcons.find((i) => i.value === "folder")?.icon,
         }));
 
-        const rulesForGenericList: GenericListItemsType[] = rules.map((r) => ({
+        const rulesList: GenericListItemsType[] = rules.map((r) => ({
           id: r.id!,
           title: r.name ?? undefined,
           subtitle: r.description ?? undefined,
-          icon: "flat-color-icons:settings",
+          icon: CommonIcons.find((i) => i.value === "setting")?.icon,
         }));
 
         reset(formData as Partial<ProfileFormData>);
         setInitialData(JSON.parse(JSON.stringify(formData))); // Cópia profunda para comparação
-        setFoldersForGenericList(foldersForGenericList);
-        setRulesForGenericList(rulesForGenericList);
+        setFoldersForGenericList(folderList);
+        setRulesForGenericList(rulesList);
       } else {
         // MODO CRIAÇÃO: Reseta para o estado inicial/vazio
         const emptyData = {
@@ -141,7 +141,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     const rulesGenericList = selectedRules.map((r) => ({
       id: r.id,
       title: r.name,
-      icon: "flat-color-icons:settings",
+      icon: CommonIcons.find((i) => i.value === "setting")?.icon,
     }));
     setRulesForGenericList(rulesGenericList);
     setIsRuleSelectorOpen(false);
@@ -164,6 +164,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       id: sf.id,
       title: sf.name,
       subtitle: sf.fullPath,
+      icon: CommonIcons.find((i) => i.value === "folder")?.icon,
     }));
     setFoldersForGenericList(selectedFoldersForGenericList);
     setIsFolderSelectorOpen(false);
@@ -274,6 +275,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           rules: currentDataTour.associatedRules,
           isActive: true,
           iconId: CommonIcons.find((x) => x.icon === currentDataTour.icon)?.icon ?? "",
+          fromTour: true,
         };
 
         const response = await addProfile(isTourActive ? newProfileTour : newProfile, isTourActive);
