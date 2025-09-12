@@ -1,7 +1,7 @@
 # FolderFlux
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Ruan-andre/folderflux)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Ruan-andre/folderflux/publish.yml)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Ruan-andre/folderflux/.github/workflows/publish.yml)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Ruan-andre/folderflux)
 
 FolderFlux é um aplicativo desktop moderno para organização automática de arquivos, com regras inteligentes e perfis personalizáveis. Desenvolvido com Electron, React, TypeScript, Material-UI e banco de dados SQLite via Drizzle ORM.
