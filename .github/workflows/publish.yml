@@ -36,6 +36,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install FPM (for Linux packaging)
+        if: runner.os == 'Linux'
+        run: sudo gem install fpm
+
       - name: Build and Publish
         run: pnpm run ${{ matrix.script }}
         env:
