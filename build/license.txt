@@ -1,0 +1,62 @@
+﻿TERMOS DE USO E POLÍTICA DE PRIVACIDADE DO FOLDERFLUX
+=====================================================
+
+Ao baixar, instalar ou usar o FolderFlux ("o Software"), você concorda com todos os termos descritos neste documento.
+
+--------------------
+TERMOS DE USO
+--------------------
+
+Última atualização: 12 de setembro de 2025
+
+1. Licença de Software:
+   O Software é licenciado sob a Licença MIT, uma cópia da qual está incluída no repositório do projeto. A licença permite o uso, cópia, modificação e distribuição do software, sujeito às condições nela descritas.
+
+2. Isenção de Garantia:
+   O Software é fornecido "COMO ESTÁ", SEM QUALQUER TIPO DE GARANTIA, EXPRESSA OU IMPLÍCITA, INCLUINDO, MAS NÃO SE LIMITANDO A, GARANTIAS DE COMERCIALIZAÇÃO, ADEQUAÇÃO A UM FIM ESPECÍFICO E NÃO INFRAÇÃO.
+
+3. Limitação de Responsabilidade:
+   EM NENHUMA CIRCUNSTÂNCIA O AUTOR OU DETENTOR DOS DIREITOS AUTORAIS SERÁ RESPONSÁVEL POR QUALQUER REIVINDICAÇÃO, DANOS OU OUTRA RESPONSABILIDADE, SEJA EM AÇÃO DE CONTRATO, DELITO OU DE OUTRA FORMA, DECORRENTES DE, FORA DE OU EM CONEXÃO COM O SOFTWARE OU O USO OU OUTRAS NEGOCIAÇÕES NO SOFTWARE. O uso do Software é por sua conta e risco.
+
+4. Uso Aceitável:
+   Você concorda em не usar o Software para quaisquer fins ilegais ou proibidos por estes termos.
+
+5. Modelo Open-Core e Funcionalidades Premium:
+   O núcleo do Software é, e continuará sendo, gratuito e de código aberto sob a Licença MIT. No entanto, o autor se reserva o direito de desenvolver e oferecer funcionalidades adicionais, módulos, ou versões "Pro" como produtos pagos no futuro. A aquisição de tais produtos será opcional.
+
+Estes termos podem ser alterados a qualquer momento. É sua responsabilidade verificar periodicamente as atualizações.
+
+-------------------------
+POLÍTICA DE PRIVACIDADE
+-------------------------
+
+Última atualização: 12 de setembro de 2025
+
+O FolderFlux foi projetado com sua privacidade em mente.
+
+Coleta e Uso de Dados
+----------------------
+
+1. Dados do Usuário:
+   O Software не coleta, armazena ou transmite nenhuma informação pessoal identificável ou dados dos seus arquivos. Toda a organização de arquivos e o processamento de regras ocorrem inteiramente na sua máquina local. Seus arquivos nunca saem do seu computador.
+
+2. Verificação de Atualizações:
+   Para manter o software atualizado, o FolderFlux se conecta periodicamente aos servidores do GitHub para verificar se há uma nova versão disponível. Este processo pode enviar informações técnicas padrão para o GitHub, como seu endereço IP, versão do sistema operacional e versão do aplicativo, conforme as políticas de privacidade do próprio GitHub. Nenhuma informação pessoal é enviada intencionalmente por nós durante este processo.
+
+3. Dados de Doação:
+   Se você optar por fazer uma doação através de plataformas de terceiros como Ko-fi ou PIX, seus dados serão processados por essas plataformas de acordo com suas respectivas políticas de privacidade. O FolderFlux не tem acesso às suas informações financeiras.
+
+4. Inicialização Automática (Auto-Launch):
+   O FolderFlux oferece a opção de iniciar junto com o sistema operacional. Se ativada, esta funcionalidade modifica as configurações necessárias do sistema (ex: Registro do Windows) para permitir a inicialização automática. Esta opção pode ser desativada a qualquer momento nas configurações do Software.
+
+5. Logs de Atividade:
+   Para fins de relatório e depuração, o Software mantém um registro (log) das operações de organização de arquivos que ele realiza. Estes logs são armazenados localmente no seu computador, na pasta de dados do aplicativo, e не são transmitidos para nenhum servidor externo.
+
+Seus Direitos
+-------------
+Como не coletamos dados pessoais, não há dados para acessar, alterar ou excluir.
+
+Contato
+-------
+Se tiver alguma dúvida sobre estes Termos ou a Política de Privacidade, entre em contato:
+[André Ruan / ruan.fullstack@gmail.com]
