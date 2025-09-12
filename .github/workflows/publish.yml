@@ -1,0 +1,42 @@
+name: Publish Release FolderFlux
+
+on:
+  push:
+    tags:
+      - "v*" # Roda sempre que uma tag começando com 'v' (ex: v1.0.1) for enviada
+
+jobs:
+  publish:
+    name: Build and Publish
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            script: publish:win
+          - os: ubuntu-latest
+            script: publish:linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.15.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and Publish
+        run: pnpm run ${{ matrix.script }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
