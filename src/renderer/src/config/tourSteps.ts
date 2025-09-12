@@ -28,15 +28,14 @@ export const simpleTourSteps: CustomizedStepOptions[] = [
     title: "Demonstração Rápida",
     text: `
       <div style="text-align: center;">
-        <p>Veja no vídeo como selecionar uma pasta e escolher uma opção.</p>
-        <video width="100%" controls autoPlay muted loop style="border-radius: 8px;">
-          <source src="/videos/tutorial.mp4" type="video/mp4" />
-          Seu navegador não suporta o elemento de vídeo.
+        <p>Clique no vídeo e veja como selecionar uma pasta e escolher uma opção.</p>
+        <video width="100%" controls style="border-radius: 8px;">
+          <source src="tutorial-media/video-tutorial-1.mp4" type="video/mp4" />
         </video>
       </div>
     `,
-    attachTo: { element: "#folder-drop-zone", on: "top" },
-    classes: "tour-step-wide",
+    // attachTo: { element: "#folder-drop-zone", on: "auto" },
+    classes: "tour-step-extra-wide-video",
     buttons: [tourButtons.back, tourButtons.next],
   },
   // Step 4: Interativo - Clicar no Dropzone
@@ -54,6 +53,7 @@ export const simpleTourSteps: CustomizedStepOptions[] = [
     title: "Escolha uma Ação",
     text: "Excelente! Aqui você verá a lista de pastas que selecionou.",
     attachTo: { element: "#confirm-dialog-content-text", on: "top" },
+    buttons: [tourButtons.next],
   },
   // Step 6: Apresenta o Diálogo de Confirmação
   {
@@ -120,7 +120,6 @@ export const simpleTourSteps: CustomizedStepOptions[] = [
   },
 ];
 
-// Placeholder para seu futuro tutorial avançado
 export const advancedTourSteps: CustomizedStepOptions[] = [
   {
     id: "start-advanced",
@@ -132,7 +131,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     id: "sidebar-menu",
     title: "Menu de Navegação",
     text: `Passe o mouse sobre a barra de ícones à esquerda para expandir o menu principal.`,
-    attachTo: { element: ".sidebar-home", on: "right" },
+    attachTo: { element: ".sidebar > div", on: "right" },
     buttons: [],
     canClickTarget: true,
   },
@@ -566,17 +565,27 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     id: "settings-page-intro",
     page: "/settings",
     title: "Configurações Globais",
-    text: `<div style="text-align: center;">
-             <p>Nesta tela você gerencia as configurações gerais do aplicativo. Veja o vídeo para uma demonstração rápida.</p>
-             <video width="100%" controls autoPlay muted loop style="border-radius: 8px;">
-               <source src="/videos/tutorial.mp4" type="video/mp4" />
-               Seu navegador não suporta o elemento de vídeo.
-             </video>
-           </div>`,
+    text: "Nesta tela você gerencia as configurações gerais do aplicativo.",
     attachTo: { element: "main", on: "auto" },
-    classes: "tour-step-wide",
   },
 
+  {
+    title: "Inicialização com o Sistema",
+    text: "Ao marcar esta opção, o FolderFlux iniciará automaticamente sempre que você ligar seu computador. Assim, suas pastas estarão sempre organizadas sem que você precise se preocupar em abrir o programa manualmente.",
+    attachTo: { element: "#general-settings > ul > li:nth-child(1)", on: "bottom" },
+    classes: "tour-step-wide",
+  },
+  {
+    title: "Monitoramento em Tempo Real",
+    text: "Habilitando esta função, o FolderFlux ficará de olho nas pastas que você adicionou aos perfis. Sempre que um novo arquivo chegar, ele será organizado imediatamente, sem que você precise fazer nada.",
+    attachTo: { element: "#general-settings > ul > li:nth-child(2)", on: "bottom" },
+    classes: "tour-step-wide",
+  },
+  {
+    title: "Tema do Aplicativo",
+    text: "Aqui você pode escolher o visual do FolderFlux. Selecione entre o tema claro, escuro ou deixe que ele siga o tema do seu sistema operacional.",
+    attachTo: { element: "#appearance-settings > ul > li:nth-child(1)", on: "bottom" },
+  },
   {
     id: "help-menu-intro",
     title: "Precisa de Ajuda?",
