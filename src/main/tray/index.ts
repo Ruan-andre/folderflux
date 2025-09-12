@@ -1,9 +1,13 @@
-import { Menu, Tray, nativeImage, BrowserWindow, dialog } from "electron";
+import { Menu, Tray, nativeImage, BrowserWindow, dialog, app } from "electron";
 import path from "path";
 import { runTaskInWorker } from "../handlers/workers";
+import { setQuitting } from "..";
 
 export function createTray(window: BrowserWindow) {
-  const appIcon = path.join(__dirname, "resources", "icon.png");
+  const appIcon = app.isPackaged
+    ? path.join(process.resourcesPath, "icon.png") // Em produção
+    : path.join(app.getAppPath(), "public", "icon.png");
+
   const icon = nativeImage.createFromPath(appIcon);
 
   const tray = new Tray(icon);
@@ -28,11 +32,18 @@ export function createTray(window: BrowserWindow) {
         }
       },
     },
-    { label: "Sair", enabled: true, click: () => window.destroy() },
+    {
+      label: "Sair",
+      enabled: true,
+      click: () => {
+        setQuitting(true);
+        app.quit();
+      },
+    },
   ]);
 
   tray.setToolTip("O FolderFlux está sendo executado em segundo plano");
-  tray.addListener("click", () => tray.popUpContextMenu());
+  tray.addListener("click", () => window.show());
   tray.addListener("right-click", () => tray.popUpContextMenu());
   tray.setContextMenu(menu);
 }
