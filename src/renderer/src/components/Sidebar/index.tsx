@@ -7,51 +7,108 @@ import {
   ListItemText,
   ListItemButton,
   ListItemIcon,
+  keyframes,
+  Divider,
 } from "@mui/material";
 import Icon from "../../assets/icons";
 import logo from "../../assets/img/logo.svg";
-import { useState } from "react";
+import { Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTourStore } from "../../store/tourStore";
+import { useUpdateStore } from "../../store/updateStore";
+import { useSidebarStore } from "../../store/sidebarStore";
+
+const sidebarSections = [
+  {
+    title: "Organização",
+    items: [
+      { id: "home", text: "Início", to: "/", iconName: "fluent-color:home-16" },
+      { id: "rules", text: "Regras", to: "rules", iconName: "gala:settings", iconColor: "#00ceff" },
+      { id: "profiles", text: "Perfis", to: "profiles", iconName: "fluent-color:person-add-24" },
+      { id: "folders", text: "Pastas", to: "folders", iconName: "fluent-emoji:file-folder" },
+    ],
+  },
+  {
+    title: "Ferramentas",
+    items: [
+      { id: "report", text: "Relatórios", to: "report", iconName: "nimbus:stats", iconColor: "#e52e2e" },
+    ],
+  },
+  {
+    title: "Configurações",
+    items: [
+      { id: "settings", text: "Configurações", to: "settings", iconName: "flat-color-icons:settings" },
+      { id: "about", text: "Sobre", to: "about", iconName: "flat-color-icons:about" },
+      { id: "help", text: "Ajuda", to: "help", iconName: "noto:sos-button" },
+    ],
+  },
+];
 
 const SidebarTitle = styled(Typography)(({ theme }) => ({
   fontSize: "1.4rem",
   textTransform: "uppercase",
   color: theme.palette.text.secondary,
-  marginBottom: theme.spacing(1),
   fontWeight: 600,
+  paddingLeft: theme.spacing(2),
 }));
 
-const StyledListItemText = styled(ListItemText)(() => ({
+const StyledListItemText = styled(ListItemText)({
   "& .MuiListItemText-primary": {
     fontSize: "1.8rem",
   },
+});
+
+const pulseAnimation = keyframes`
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+  }
+`;
+
+const UpdateButton = styled(ListItemButton)(({ theme }) => ({
+  marginTop: "auto",
+  backgroundColor: "#2ecc71",
+  color: "white",
+  "&:hover": {
+    backgroundColor: "#27ae60",
+  },
+  animation: `${pulseAnimation} 2s infinite`,
+  borderRadius: theme.shape.borderRadius,
 }));
 
-const SidebarButton = ({
-  text,
-  children,
-  to,
-  ...rest
-}: { text: string; children: React.ReactNode; to: string } & React.HtmlHTMLAttributes<HTMLElement>) => {
+interface SidebarButtonProps {
+  id: string;
+  text: string;
+  to: string;
+  iconName: string;
+  iconColor?: string;
+}
+
+const SidebarButton = ({ id, text, to, iconName, iconColor }: SidebarButtonProps) => {
   const location = useLocation();
-  const isActive = location.pathname.replaceAll("/", "") === to;
+  const isActive = to === "/" ? location.pathname === "/" : location.pathname.includes(to);
+
   return (
-    <ListItemButton component={Link} to={to || "#"} selected={isActive} {...rest}>
-      <ListItemIcon>{children}</ListItemIcon>
+    <ListItemButton component={Link} to={to} selected={isActive} id={id}>
+      <ListItemIcon>
+        <Icon icon={iconName} width="30" height="30" color={iconColor} />
+      </ListItemIcon>
       <StyledListItemText primary={text} />
     </ListItemButton>
   );
 };
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const tourNext = useTourStore((state) => state.tourNext);
-  const isTourActive = useTourStore((state) => state.isTourActive);
-  const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
-  const SidebarSection = styled(Box)(({ theme }) => ({
-    marginTop: isOpen ? theme.spacing(5) : undefined,
-  }));
+  const isOpen = useSidebarStore((state) => state.isOpen);
+  const setIsOpen = useSidebarStore((state) => state.setIsOpen);
+  const { tourNext, isTourActive, getCurrentStepId } = useTourStore();
+  const isUpdateAvailable = useUpdateStore((state) => state.isUpdateAvailable);
+  const setUpdateAvailable = useUpdateStore((state) => state.setUpdateAvailable);
 
   const handleTransitionEnd = () => {
     if (isOpen && isTourActive() && getCurrentStepId() === "sidebar-menu") {
@@ -59,88 +116,80 @@ const Sidebar = () => {
     }
   };
 
-  const widthMenu = isOpen ? "245px" : "75px";
+  const widthMenu = isOpen ? "245px" : "80px";
+
   return (
-    <>
-      <Drawer
-        className="sidebar-home"
-        open
-        variant="permanent"
-        sx={{
+    <Drawer
+      className="sidebar"
+      variant="permanent"
+      sx={{
+        width: widthMenu,
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
           width: widthMenu,
-          transition: "width 0.4s",
-          "& .MuiDrawer-paper": {
-            width: widthMenu,
-            overflowX: "hidden",
-            backgroundColor: (theme) => theme.palette.background.paper,
-            color: (theme) => theme.palette.text.primary,
-            padding: "10px",
-            transition: "0.4s",
-          },
+          overflowX: "hidden",
+          padding: "10px",
+          transition: "width 0.1s ease-in-out",
+          display: "flex",
+          flexDirection: "column",
+        },
+      }}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => !isTourActive() && setIsOpen(false)}
+      onTransitionEnd={handleTransitionEnd}
+    >
+      <Box
+        component="img"
+        src={logo}
+        alt="Logo"
+        sx={{
+          objectFit: "contain",
+          maxHeight: isOpen ? 150 : 0,
+          minHeight: 0,
+          opacity: isOpen ? 1 : 0,
+          transition: "max-height 0.4s ease-in-out, opacity 0.2s ease-in-out",
+          mb: isOpen ? 2 : 0,
         }}
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => {
-          if (!isTourActive()) {
-            setIsOpen(false);
-          }
-        }}
-        onTransitionEnd={handleTransitionEnd}
-      >
-        <Box
-          component={"img"}
-          src={logo}
-          alt="Logo"
-          sx={{ maxHeight: 150, objectFit: "contain" }}
-          hidden={isOpen ? false : true}
-        />
-        <List>
-          <SidebarSection>
-            <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
-              Organização
+      />
+
+      <List sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+        {sidebarSections.map((section, index) => (
+          <Fragment key={section.title}>
+            {index > 0 && (
+              <Divider
+                sx={{
+                  mt: isOpen ? 2 : 1,
+                  mb: isOpen ? 2 : 1,
+                  mx: 1,
+                  borderColor: "rgba(255, 255, 255, 0.12)",
+                }}
+              />
+            )}
+
+            <SidebarTitle sx={{ opacity: isOpen ? 1 : 0, transition: "opacity 0.2s" }}>
+              {section.title}
             </SidebarTitle>
-            <SidebarButton id="home" text="Início" to="/">
-              <Icon icon="fluent-color:home-16" width="30" height="30" />
-            </SidebarButton>
 
-            <SidebarButton id="rules" text="Regras" to="rules">
-              <Icon icon="gala:settings" width="30" height="30" color="#00ceff" />
-            </SidebarButton>
+            {section.items.map((item) => (
+              <SidebarButton {...item} key={item.id} />
+            ))}
+          </Fragment>
+        ))}
 
-            <SidebarButton id="profiles" text="Perfis" to="profiles">
-              <Icon icon="fluent-color:person-add-24" width="30" height="30" />
-            </SidebarButton>
-            <SidebarButton id="folders" text="Pastas" to="folders">
-              <Icon icon="fluent-emoji:file-folder" width="30" height="30" />
-            </SidebarButton>
-          </SidebarSection>
-
-          <SidebarSection>
-            <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
-              Ferramentas
-            </SidebarTitle>
-            <SidebarButton id="report" text="Relatórios" to="report">
-              <Icon icon="nimbus:stats" width="30" height="30" color="#e52e2e" />
-            </SidebarButton>
-          </SidebarSection>
-          <SidebarSection>
-            <SidebarTitle sx={{ display: isOpen ? "block" : "none" }} variant="h6">
-              Configurações
-            </SidebarTitle>
-            <SidebarButton id="settings" text="Configurações" to="settings">
-              <Icon icon="flat-color-icons:settings" width="30" height="30" />
-            </SidebarButton>
-
-            <SidebarButton id="about" text="Sobre" to="about">
-              <Icon icon="flat-color-icons:about" width="30" height="30" />
-            </SidebarButton>
-
-            <SidebarButton id="help" text="Ajuda" to="help">
-              <Icon icon="noto:sos-button" width="30" height="30" />
-            </SidebarButton>
-          </SidebarSection>
-        </List>
-      </Drawer>
-    </>
+        {isUpdateAvailable && (
+          <UpdateButton
+            onClick={() => {
+              window.api.ElectronUpdater.installUpdate();
+            }}
+          >
+            <ListItemIcon>
+              <Icon icon="line-md:downloading-loop" width="30" height="30" color="white" />
+            </ListItemIcon>
+            <StyledListItemText primary="Atualizar" />
+          </UpdateButton>
+        )}
+      </List>
+    </Drawer>
   );
 };
 
