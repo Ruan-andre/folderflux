@@ -19,11 +19,11 @@ export function registerDialogHandlers() {
     if (win) {
       let tutorialDir;
       if (isTutorialPath) {
-        const resourcesPath = app.isPackaged
-          ? process.resourcesPath // Em produção, aponta para a pasta 'resources'
-          : app.getAppPath(); // Em desenvolvimento, aponta para a raiz do projeto
+        const publicPath = app.isPackaged
+          ? path.join(process.resourcesPath)
+          : path.join(app.getAppPath(), "public");
 
-        tutorialDir = path.join(resourcesPath, "resources", "tutorial-example");
+        tutorialDir = path.join(publicPath, "tutorial-example");
       }
 
       const result = await dialog.showOpenDialog(win, {
