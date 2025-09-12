@@ -4,9 +4,11 @@ import { createRoot, Root } from "react-dom/client";
 import React from "react";
 import Shepherd from "shepherd.js";
 import TourAudioButton from "../TourAudioButton";
+import { waitForElement } from "../../functions/waitForElement";
 
 export const TourController = () => {
   const tour = useTourStore((state) => state.tour);
+  const startTour = useTourStore((state) => state.startTour);
 
   const handleShow = useCallback(({ step }: { step: Shepherd.Step }) => {
     setTimeout(() => {
@@ -37,14 +39,26 @@ export const TourController = () => {
     }
   }, []);
 
+  const FirstTimeTourManager = useCallback(async () => {
+    const tourHasBeenExecuted = await window.api.ElectronStore.get("tourHasBeenExecuted");
+    if (tourHasBeenExecuted === undefined || tourHasBeenExecuted === "false") {
+      await waitForElement("#how-to-use-card");
+      startTour("simple");
+      await window.api.ElectronStore.set("tourHasBeenExecuted", "true");
+    }
+
+    return null;
+  }, [startTour]);
+
   useEffect(() => {
     if (!tour) return;
     tour.on("show", handleShow);
     tour.on("hide", handleHide);
+    FirstTimeTourManager();
     return () => {
       tour.off("show", handleShow);
       tour.off("hide", handleHide);
     };
-  }, [handleHide, handleShow, tour]);
+  }, [FirstTimeTourManager, handleHide, handleShow, tour]);
   return null;
 };
