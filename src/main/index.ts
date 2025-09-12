@@ -26,6 +26,7 @@ import { registerTtsHandlers } from "./handlers/tts";
 import { registerTourHandlers } from "./handlers/domain/tour";
 import { registerElectronStoreHandlers } from "./handlers/electronStore";
 import { registerElectronUpdaterHandlers } from "./handlers/electron-updater";
+import fs from "fs";
 
 log.transports.file.level = "info";
 autoUpdater.logger = log;
@@ -35,6 +36,29 @@ autoUpdater.autoDownload = true;
 let mainWindow: BrowserWindow | null = null;
 let audioWindow: BrowserWindow | null = null;
 let isQuitting = false;
+
+function setupTutorialFiles() {
+  if (!app.isPackaged) {
+    return;
+  }
+
+  const destPath = path.join(app.getPath("userData"), "tutorial-examples");
+
+  if (fs.existsSync(destPath)) {
+    console.log("Pasta de tutorial já existe. Pulando cópia.");
+    return;
+  }
+
+  const sourcePath = path.join(process.resourcesPath, "tutorial-examples");
+
+  if (fs.existsSync(sourcePath)) {
+    try {
+      fs.cpSync(sourcePath, destPath, { recursive: true });
+    } catch (err) {
+      console.error("Falha ao copiar a pasta de tutorial:", err);
+    }
+  }
+}
 
 export function setQuitting(value: boolean) {
   isQuitting = value;
@@ -138,6 +162,11 @@ if (!gotTheLock) {
     // Set app user model id for windows
     electronApp.setAppUserModelId("com.electron");
 
+    try {
+      setupTutorialFiles();
+    } catch (error) {
+      console.error("Erro ao configurar arquivos de tutorial:", error);
+    }
     try {
       await runMigrations();
     } catch (error) {
