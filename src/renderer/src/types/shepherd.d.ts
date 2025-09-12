@@ -18,4 +18,8 @@ declare module "shepherd.js" {
     // Guarda a referência da raiz do React para limpeza (unmount)
     _reactRoot?: Root;
   }
+
+  interface EventOptions {
+    index?: number;
+  }
 }
