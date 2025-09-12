@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography } from "@mui/material";
 import Icon from "../../../assets/icons";
 import PIX_QR_CODE_IMAGE from "./qrcodpix.png";
-// --- TIPOS ---
+
 interface PixDonationDialogProps {
   open: boolean;
   onClose: () => void;

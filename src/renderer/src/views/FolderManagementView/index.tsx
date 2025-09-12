@@ -100,7 +100,6 @@ const FolderManagementView = ({
   const handleEditFolder = (folderId: number) => {
     const folderToEdit = folders?.find((f) => f.id === folderId);
     if (folderToEdit) {
-      // Converte para FolderSchema antes de passar
       const folderSchema: FolderSchema = {
         id: folderToEdit.id,
         name: folderToEdit.title,
