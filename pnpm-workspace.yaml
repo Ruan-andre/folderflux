@@ -1,0 +1,7 @@
+ignoredBuiltDependencies:
+  - '@scarf/scarf'
+
+onlyBuiltDependencies:
+  - better-sqlite3
+  - electron
+  - esbuild
