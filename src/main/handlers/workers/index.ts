@@ -9,7 +9,7 @@ import { mainProcessEmitter } from "../../emitter/mainProcessEmitter";
 
 export function runTaskInWorker(
   task: string,
-  payload?: { rules?: FullRule[]; profiles?: FullProfile[]; paths?: string[] }
+  payload?: { rules?: FullRule[]; profiles?: FullProfile[]; paths?: string[]; isTourActive?: boolean }
 ): Promise<DbResponse> {
   return new Promise((resolve, reject) => {
     const workerPath = path.resolve(__dirname, "taskWorker.js");
@@ -49,8 +49,8 @@ export function registerWorkerHandlers() {
     return runTaskInWorker("processAll");
   });
 
-  ipcMain.handle("worker:defaultOrganization", (_e, paths) => {
-    return runTaskInWorker("defaultOrganization", { paths });
+  ipcMain.handle("worker:defaultOrganization", (_e, paths, isTourActive) => {
+    return runTaskInWorker("defaultOrganization", { paths, isTourActive });
   });
 
   ipcMain.handle("worker:organizeWithSelectedRules", (_e, rules, paths) => {
