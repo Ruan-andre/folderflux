@@ -1,4 +1,6 @@
 import { app, shell, BrowserWindow } from "electron";
+import { autoUpdater } from "electron-updater";
+import log from "electron-log";
 import path, { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { runMigrations } from "../db";
@@ -14,7 +16,7 @@ import { registerOrganizationHandlers } from "./handlers/domain/organization";
 import { registerChokidarHandlers } from "./handlers/system/chokidar";
 import { folderMonitorService } from "./core/folderMonitorService";
 import { createTray } from "./tray";
-import { syncAppSettings } from "./services/settingsService";
+import { syncAppSettings } from "./services/domain/settingsService";
 import { defaultOrganization } from "./core/organizationService";
 import { registerWorkerHandlers } from "./handlers/workers";
 import { db } from "../db";
@@ -22,16 +24,35 @@ import { registerEmitterHandlers } from "./handlers/emitter";
 import { registerAudioPlayerHandlers } from "./handlers/audio-player";
 import { registerTtsHandlers } from "./handlers/tts";
 import { registerTourHandlers } from "./handlers/domain/tour";
+import { registerElectronStoreHandlers } from "./handlers/electronStore";
+import { registerElectronUpdaterHandlers } from "./handlers/electron-updater";
+
+log.transports.file.level = "info";
+autoUpdater.logger = log;
+
+autoUpdater.autoDownload = true;
 
 let mainWindow: BrowserWindow | null = null;
 let audioWindow: BrowserWindow | null = null;
+let isQuitting = false;
+
+export function setQuitting(value: boolean) {
+  isQuitting = value;
+}
+
+export function getQuitting() {
+  return isQuitting;
+}
 
 function createWindow(): void {
+  const favicon = app.isPackaged
+    ? path.join(process.resourcesPath, "favicon.ico") // Em produção
+    : path.join(app.getAppPath(), "public", "favicon.ico");
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 880,
     show: false,
-    icon: join(__dirname, "resources", "favicon.ico"),
+    icon: favicon,
 
     autoHideMenuBar: true,
     // ...(process.platform === 'linux' ? { icon } : {}),
@@ -43,8 +64,14 @@ function createWindow(): void {
     },
   });
 
-  mainWindow.on("ready-to-show", () => {
+  mainWindow.on("ready-to-show", async () => {
     mainWindow?.show();
+    autoUpdater.forceDevUpdateConfig = true;
+    try {
+      await autoUpdater.checkForUpdates();
+    } catch (error) {
+      console.log("Erro ao verificar atualizações:", error);
+    }
   });
 
   createTray(mainWindow);
@@ -55,8 +82,10 @@ function createWindow(): void {
   });
 
   mainWindow.on("close", (event) => {
-    event.preventDefault();
-    mainWindow?.hide();
+    if (!getQuitting()) {
+      event.preventDefault();
+      mainWindow?.hide();
+    }
   });
 
   // HMR for renderer base on electron-vite cli.
@@ -138,6 +167,7 @@ if (!gotTheLock) {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
 
+    registerElectronStoreHandlers();
     registerRuleHandlers();
     registerDialogHandlers();
     registerProfileHandlers();
@@ -152,6 +182,7 @@ if (!gotTheLock) {
     registerAudioPlayerHandlers(audioWindow);
     registerTtsHandlers();
     registerTourHandlers();
+    registerElectronUpdaterHandlers(autoUpdater, mainWindow, log);
 
     await folderMonitorService.start(db);
     handleFolderPathArgument(process.argv);
@@ -169,10 +200,9 @@ if (!gotTheLock) {
       defaultOrganization(db, [folderPath]);
     }
   }
-  // Quit when all windows are closed, except on macOS. There, it's common
-  // for applications and their menu bar to stay active until the user quits
-  // explicitly with Cmd + Q.
-
-  // In this file you can include the rest of your app's specific main process
-  // code. You can also put them in separate files and require them here.
+  app.on("quit", () => {
+    if (process.platform !== "darwin") {
+      app.quit();
+    }
+  });
 }
