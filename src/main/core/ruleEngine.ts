@@ -2,7 +2,7 @@ import path from "path";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import FileInfo from "~/src/shared/types/FileInfo";
 import { ICondition, IConditionGroup } from "~/src/shared/types/ConditionsType";
-import { copyFile, deleteFile, getFilesInfo, moveFile } from "../services/fileService";
+import { copyFile, deleteFile, getFilesInfo, moveFile } from "../services/system/fileService";
 import {
   OrganizationMetadata,
   CleanupMetadata,
@@ -10,10 +10,10 @@ import {
   LogMetadata,
   LogTypes,
 } from "~/src/shared/types/LogMetaDataType";
-import { saveLog } from "../services/organizationLogsService";
+import { saveLog } from "../services/domain/organizationLogsService";
 import { createResponse } from "../../db/functions";
 import { DbResponse } from "~/src/shared/types/DbResponse";
-import { getAllProfiles } from "../services/profileService";
+import { getAllProfiles } from "../services/domain/profileService";
 import { DbOrTx } from "~/src/db";
 
 type FileValue = string | number | Date | null;
@@ -123,18 +123,21 @@ export default class RuleEngine {
   private logs: ReturnType<typeof this.initiateLogs>;
   private onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void;
   private operationsToExecute: { file: FileInfo; rule: FullRule }[] = [];
+  private isTourActive: boolean | undefined;
 
   // O construtor é privado para forçar o uso do método estático `process`.
   private constructor(
     rules: FullRule[],
     folderPaths: string[],
     profileName?: string,
-    onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void
+    onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void,
+    isTourActive?: boolean
   ) {
     this.rules = rules;
     this.folderPaths = folderPaths;
     this.logs = this.initiateLogs(profileName);
     this.onLogAdded = onLogAdded;
+    this.isTourActive = isTourActive;
   }
 
   public static async process(
@@ -142,9 +145,10 @@ export default class RuleEngine {
     rules: FullRule[],
     folderPaths: string[],
     profileName?: string,
-    onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void
+    onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void,
+    isTourActive?: boolean
   ): Promise<DbResponse<number>> {
-    const engineInstance = new RuleEngine(rules, folderPaths, profileName, onLogAdded);
+    const engineInstance = new RuleEngine(rules, folderPaths, profileName, onLogAdded, isTourActive);
     return await engineInstance.run(db);
   }
 
@@ -153,10 +157,18 @@ export default class RuleEngine {
     onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void
   ): Promise<DbResponse<number>> {
     try {
-      const profiles = (await getAllProfiles(db)).items?.filter((p) => p.isActive);
+      const profiles = (await getAllProfiles(db)).items;
 
       if (!profiles || profiles.length === 0) {
         return createResponse(true, "Nenhum perfil encontrado.", 0);
+      }
+
+      if (profiles.every((p) => !p.isActive)) {
+        return createResponse(true, "Nenhum perfil está ativo.", 0);
+      }
+
+      if (profiles.every((p) => p.folders.length === 0)) {
+        return createResponse(true, "Não há nenhuma pasta sendo monitorada.", 0);
       }
 
       const results = await Promise.all(
@@ -308,17 +320,17 @@ export default class RuleEngine {
     if (organization.files && organization.files.length > 0) {
       organization.filesAffected = organization.files.length;
       organization.description = `${organization.filesAffected} arquivos movidos, copiados ou renomeados ${organization.description}`;
-      promises.push({ type: "organization", promise: saveLog(db, organization) });
+      promises.push({ type: "organization", promise: saveLog(db, organization, this.isTourActive) });
     }
     if (cleanup.files && cleanup.files.length > 0) {
       cleanup.filesAffected = cleanup.files.length;
       cleanup.spaceFreedMB = parseFloat((cleanup.spaceFreedMB / (1024 * 1024)).toFixed(2));
       cleanup.description = `${cleanup.filesAffected} ${cleanup.description} (${cleanup.spaceFreedMB} MB liberados)`;
-      promises.push({ type: "cleanup", promise: saveLog(db, cleanup) });
+      promises.push({ type: "cleanup", promise: saveLog(db, cleanup, this.isTourActive) });
     }
     if (error.files && error.files.length > 0) {
       error.description += ` (${error.files.length} arquivo${this.isPlural(error.files.length)})`;
-      promises.push({ type: "error", promise: saveLog(db, error) });
+      promises.push({ type: "error", promise: saveLog(db, error, this.isTourActive) });
     }
 
     if (promises.length === 0) return;
