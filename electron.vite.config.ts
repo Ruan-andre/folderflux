@@ -17,7 +17,6 @@ export default defineConfig({
       externalizeDepsPlugin(),
       viteStaticCopy({
         targets: [
-          { src: "resources/*", dest: "resources" },
           { src: "src/db/**/*", dest: "db/" },
           { src: "src/shared/**/*", dest: "shared/" },
         ],
@@ -50,5 +49,6 @@ export default defineConfig({
       },
     },
     plugins: [react()],
+    publicDir: resolve(rootDir, "public"),
   },
 });
