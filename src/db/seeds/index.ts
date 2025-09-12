@@ -1,6 +1,6 @@
-import { createFullProfile, getSystemProfilesCount } from "../../main/services/profileService";
-import { createFullRule, getSystemRules, getSystemRulesCount } from "../../main/services/ruleService";
-import { createSettings, getSystemSettingsCount } from "../../main/services/settingsService";
+import { createFullProfile, getSystemProfilesCount } from "../../main/services/domain/profileService";
+import { createFullRule, getSystemRules, getSystemRulesCount } from "../../main/services/domain/ruleService";
+import { createSettings, getSystemSettingsCount } from "../../main/services/domain/settingsService";
 import { allRuleSeeds } from "./rulesSeeds";
 import { profileSeed_allRules } from "./profilesSeeds";
 import { settingSeed } from "./settingsSeed";

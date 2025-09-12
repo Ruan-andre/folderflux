@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import { getSettings, toggleSettingActive } from "../../services/settingsService";
+import { getSettings, toggleSettingActive } from "../../services/domain/settingsService";
 import { SettingsSchema } from "../../../db/schema";
 import { db } from "../../../db";
 

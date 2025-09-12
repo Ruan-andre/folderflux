@@ -6,7 +6,7 @@ import {
   updateRule,
   toggleRuleActive,
   duplicateRule,
-} from "../../services/ruleService";
+} from "../../services/domain/ruleService";
 import { DbResponse } from "~/src/shared/types/DbResponse";
 import { handleError } from "../../../db/functions";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";

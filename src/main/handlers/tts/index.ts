@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import { textToSpeech } from "../../services/ttsService";
+import { textToSpeech } from "../../services/tts/ttsService";
 
 export function registerTtsHandlers() {
   ipcMain.handle("generate-tts", async (_event, text: string) => {

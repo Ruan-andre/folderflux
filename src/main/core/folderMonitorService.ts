@@ -1,9 +1,13 @@
 import chokidar, { FSWatcher } from "chokidar";
 import RuleEngine from "./ruleEngine";
-import { getSettingByType } from "../services/settingsService";
-import { getAllProfiles, getCountProfilesWithFolder, getProfileById } from "../services/profileService";
+import { getSettingByType } from "../services/domain/settingsService";
+import {
+  getAllProfiles,
+  getCountProfilesWithFolder,
+  getProfileById,
+} from "../services/domain/profileService";
 import path from "path";
-import { getStats } from "../services/fileService";
+import { getStats } from "../services/system/fileService";
 import { DbOrTx } from "~/src/db";
 import { mainProcessEmitter } from "../emitter/mainProcessEmitter";
 import { LogMetadata } from "~/src/shared/types/LogMetaDataType";

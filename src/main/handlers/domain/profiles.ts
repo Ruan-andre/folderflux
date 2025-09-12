@@ -11,7 +11,7 @@ import {
   toggleProfileStatus,
   updateProfile,
   getProfilesActiveInactiveCount,
-} from "../../services/profileService";
+} from "../../services/domain/profileService";
 import { handleError } from "../../../db/functions";
 import { db } from "../../../db";
 

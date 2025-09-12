@@ -5,7 +5,7 @@ import {
   getAllFolders,
   getFolderById,
   updateFolder,
-} from "../../services/folderService";
+} from "../../services/domain/folderService";
 import { DbResponse } from "~/src/shared/types/DbResponse";
 import { FolderSchema } from "../../../db/schema";
 import { createResponse, handleError } from "../../../db/functions";

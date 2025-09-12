@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import { getFilesInfo, getStats, isDirectory, moveFile } from "../../services/fileService";
+import { getFilesInfo, getStats, isDirectory, moveFile } from "../../services/system/fileService";
 
 export function registerFileHandlers() {
   ipcMain.handle("fs:get-files-info", async (_e, path: string) => {
@@ -17,6 +17,4 @@ export function registerFileHandlers() {
   ipcMain.handle("fs:get-stats", async (event, paths: string[]) => {
     return await getStats(paths);
   });
-
-  
 }

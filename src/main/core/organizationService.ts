@@ -1,5 +1,5 @@
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
-import { getSystemProfile } from "../services/profileService";
+import { getSystemProfile } from "../services/domain/profileService";
 import RuleEngine from "./ruleEngine";
 import { DbOrTx } from "../../db";
 import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
@@ -8,12 +8,13 @@ import { LogMetadata } from "~/src/shared/types/LogMetaDataType";
 export async function defaultOrganization(
   db: DbOrTx,
   paths: string[],
-  onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void
+  onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void,
+  isTourActive?: boolean
 ) {
   const defaultProfile = await getSystemProfile(db);
   if (defaultProfile) {
     const rules: FullRule[] = defaultProfile.rules.filter((r) => r.isActive) as FullRule[];
-    return RuleEngine.process(db, rules, paths, defaultProfile.name, onLogAdded);
+    return RuleEngine.process(db, rules, paths, defaultProfile.name, onLogAdded, isTourActive);
   } else throw "Perfil padrão não encontrado";
 }
 
