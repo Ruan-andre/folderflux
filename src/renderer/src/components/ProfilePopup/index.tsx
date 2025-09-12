@@ -199,7 +199,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       if (associatedFolders.length === 0) {
         const responseFolders = await window.api.folder.getAllFolders();
         if (responseFolders.items) {
-          const folder = responseFolders.items.find((x) => x.name === "tutorial-example" || x.id === 1);
+          const folder = responseFolders.items.find((x) => x.name === "tutorial-examples" || x.id === 1);
           if (folder)
             currentDataTour.associatedFolders = [
               {

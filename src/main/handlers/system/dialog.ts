@@ -23,7 +23,7 @@ export function registerDialogHandlers() {
           ? path.join(process.resourcesPath)
           : path.join(app.getAppPath(), "public");
 
-        tutorialDir = path.join(publicPath, "tutorial-example");
+        tutorialDir = path.join(publicPath, "tutorial-examples");
       }
 
       const result = await dialog.showOpenDialog(win, {
