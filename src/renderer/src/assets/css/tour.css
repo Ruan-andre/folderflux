@@ -24,8 +24,15 @@
   border: 1.5px solid var(--border-color);
   max-width: 370px;
   font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-  animation: modalFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: visible;
+}
+
+.shepherd-element:not(.shepherd-centered) {
+  animation: modalFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shepherd-element.shepherd-centered {
+  animation: none !important;
 }
 
 @keyframes modalFadeIn {
@@ -211,15 +218,17 @@
 
 /* Classe para um modal de tour mais largo */
 .tour-step-wide {
-  max-width: 600px; /* Defina a largura máxima desejada aqui */
+  max-width: 600px;
 }
 
-/* Opcional: para modais ainda maiores, se precisar */
 .tour-step-extra-wide {
   max-width: 800px;
 }
 
-/* Opcional: para modais com altura específica */
+.tour-step-extra-wide-video {
+  max-width: 80vw;
+}
+
 .tour-step-tall {
   min-height: 500px;
 }
