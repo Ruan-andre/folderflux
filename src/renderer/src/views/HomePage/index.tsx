@@ -15,7 +15,7 @@ import { AlertColor } from "@mui/material";
 import GenericCard from "../../components/GenericCard";
 import Icon from "../../assets/icons";
 import { LogMetadata } from "~/src/shared/types/LogMetaDataType";
-import { useIntersectionObserver } from "../../hooks/intersectionObserverHook"; // ✅ IMPORTADO
+import { useIntersectionObserver } from "../../hooks/intersectionObserverHook";
 import { PathStats } from "~/src/shared/types/pathStatsType";
 import { useLogStore } from "../../store/logStore";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +24,6 @@ import ProfileManagementView from "../ProfileManagementView";
 import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
 import Loading from "../../components/Loading";
 import { useTourStore } from "../../store/tourStore";
-import { waitForElement } from "../../functions/waitForElement";
 
 const HomePage = () => {
   const { showMessage } = useSnackbar();
@@ -63,7 +62,6 @@ const HomePage = () => {
         }
       }, false);
     }
-
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getLogs, lastLogId]);
@@ -81,25 +79,29 @@ const HomePage = () => {
   });
 
   const handleHowToUse = async () => {
-    // showConfirm(
-    //   {
-    //     title: "Escolha uma opção",
-    //     confirmText: "Tutorial Guiado",
-    //     confirmBtnColor: "success",
-    //   },
-    //   () => {
-    // try {
-    // Espere o alvo do primeiro passo (#how-to-use-card) estar no DOM
-    await waitForElement("#how-to-use-card");
-
-   
-    startTour("simple");
-    //   } catch (error) {
-    //     console.error("Não foi possível iniciar o tour:", error);
-    //   }
-    // },
-    // [{ text: "Tutorial em Vídeo", action: () => {}, thirdButtonColor: "info" }]
-    // );
+    showConfirm(
+      {
+        title: "Escolha uma opção",
+        confirmText: "Tutorial Simples",
+        confirmBtnColor: "success",
+      },
+      async () => {
+        try {
+          startTour("simple");
+        } catch (error) {
+          console.error("Não foi possível iniciar o tour:", error);
+        }
+      },
+      [
+        {
+          text: "Tutorial Avançado",
+          action: () => {
+            startTour("advanced");
+          },
+          thirdButtonColor: "error",
+        },
+      ]
+    );
   };
 
   async function handleActionWithLoading<T>(
@@ -198,7 +200,6 @@ const HomePage = () => {
         );
         if (response.items && response.items > 0) {
           setLastLogId(undefined);
-          // getLogs();
         }
         return response;
       }, true);
@@ -230,7 +231,7 @@ const HomePage = () => {
     return `Organizar ${folders.length} pasta(s):\n${folderNames}`;
   }
   const handleDefaultOrganization = async (paths: string[]) => {
-    handleActionWithLoading(() => window.api.organization.defaultOrganization(paths), true);
+    handleActionWithLoading(() => window.api.organization.defaultOrganization(paths, isTourActive()), true);
     if (isTourActive() && getCurrentStepId() === "click-default-profile") {
       tourNext();
     }
