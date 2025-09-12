@@ -20,7 +20,7 @@ export function registerDialogHandlers() {
       let tutorialDir;
       if (isTutorialPath) {
         const publicPath = app.isPackaged
-          ? path.join(process.resourcesPath)
+          ? path.join(app.getPath("userData"))
           : path.join(app.getAppPath(), "public");
 
         tutorialDir = path.join(publicPath, "tutorial-examples");
