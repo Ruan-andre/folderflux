@@ -50,21 +50,23 @@ const HomePage = () => {
   const tourNext = useTourStore((state) => state.tourNext);
   const isTourActive = useTourStore((state) => state.isTourActive);
   const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
+  const isTourFinished = useTourStore((state) => state.isFinished);
 
   useEffect(() => {
     async function fetchData() {
-      if (isLoading || !hasMore) return;
+      const logsFromTourCount = await window.api.organization.getLogsFromTourCount();
+
+      if ((isLoading || !hasMore) && !isTourFinished) return;
 
       handleActionWithLoading(async () => {
         const newLogsCount = await getLogs(lastLogId);
-        if (newLogsCount && newLogsCount < 10) {
+        if (newLogsCount !== undefined && newLogsCount < 10 && logsFromTourCount === 0) {
           setHasMore(false);
         }
       }, false);
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getLogs, lastLogId]);
+  }, [getLogs, lastLogId, isTourFinished]);
 
   useEffect(() => {
     handleSubTitleProfiles();
