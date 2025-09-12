@@ -3,7 +3,7 @@ import Database from "better-sqlite3";
 import { drizzle, BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import * as schema from "../../db/schema";
 
-import { deleteAllLogs } from "../services/organizationLogsService";
+import { deleteAllLogs } from "../services/domain/organizationLogsService";
 import RuleEngine from "../core/ruleEngine";
 import { FullRule } from "~/src/shared/types/RuleWithDetails";
 import {
@@ -18,7 +18,7 @@ parentPort?.on(
   "message",
   async (message: {
     task: string;
-    payload?: { rules?: FullRule[]; profiles?: FullProfile[]; paths?: string[] };
+    payload?: { rules?: FullRule[]; profiles?: FullProfile[]; paths?: string[]; isTourActive?: boolean };
   }) => {
     const { task } = message;
     const { dbPath } = workerData;
@@ -35,7 +35,12 @@ parentPort?.on(
       };
       switch (task) {
         case "defaultOrganization":
-          response = await defaultOrganization(localDb, message.payload?.paths || [], reportLogProgress);
+          response = await defaultOrganization(
+            localDb,
+            message.payload?.paths || [],
+            reportLogProgress,
+            message.payload?.isTourActive
+          );
           break;
         case "organizeWithSelectedProfiles":
           response = await organizeWithSelectedProfiles(
