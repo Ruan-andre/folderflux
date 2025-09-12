@@ -43,6 +43,7 @@ nsis:
   include: build/installer.nsh
   oneClick: false
   allowToChangeInstallationDirectory: true
+  license: build/license.txt
 mac:
   target: dmg
   category: public.app-category.productivity
@@ -51,9 +52,6 @@ linux:
   target:
     - AppImage
     - deb
-    - rpm
-    - freebsd
-    - pacman
   synopsis: "${description}"
   category: Utility
   maintainer: "André Ruan <ruan.fullstack@gmail.com>"
