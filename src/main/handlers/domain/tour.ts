@@ -20,7 +20,7 @@ export function registerTourHandlers() {
       ? path.join(process.resourcesPath)
       : path.join(app.getAppPath(), "public");
 
-    const pathTutorialExamples = path.join(publicPath, "tutorial-example");
+    const pathTutorialExamples = path.join(publicPath, "tutorial-examples");
     const pathDocumentos = path.join(pathTutorialExamples, "DOCUMENTOS");
     const pathImagens = path.join(pathTutorialExamples, "IMAGENS");
     const pathVideos = path.join(pathTutorialExamples, "VÍDEOS");
