@@ -15,13 +15,15 @@ export const settingSeed: NewSettings[] = [
     isActive: true,
     type: "realTime",
   },
-  {
-    title: "Notificações",
-    description: "Exibir notificações quando arquivos forem organizados",
-    category: "general",
-    isActive: false, // por padrão false porque penso que como o app ficará rodando em segundo plano, pode haver uma chuva de notificações se ocorrer muitas organizações
-    type: "notifications",
-  },
+
+  // AINDA ESTOU PENSANDO SOBRE ESSA FEATURE
+  // {
+  //   title: "Notificações",
+  //   description: "Exibir notificações quando arquivos forem organizados",
+  //   category: "general",
+  //   isActive: false, // por padrão false porque penso que como o app ficará rodando em segundo plano, pode haver uma chuva de notificações se ocorrer muitas organizações
+  //   type: "notifications",
+  // },
   {
     title: "Tema escuro",
     description: "Se ativado, o sistema ficará no modo escuro, do contrário, ficará com o tema claro.",
