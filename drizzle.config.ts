@@ -6,7 +6,7 @@ export default {
   out: "./src/db/migrations",
   dialect: "sqlite",
   dbCredentials: {
-    url: path.resolve(__dirname, "./src/db/database.db"), // Caminho absoluto
+    url: path.resolve(__dirname, "./src/db/database.db"),
   },
   verbose: true,
   strict: true,
