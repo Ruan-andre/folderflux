@@ -45,8 +45,10 @@ function setupTutorialFiles() {
   const destPath = path.join(app.getPath("userData"), "tutorial-examples");
 
   if (fs.existsSync(destPath)) {
-    console.log("Pasta de tutorial já existe. Pulando cópia.");
-    return;
+    console.log(
+      "Pasta de tutorial já existe. Apagando e copiando tudo novamente por precaução, processo rápido."
+    );
+    fs.unlinkSync(destPath);
   }
 
   const sourcePath = path.join(process.resourcesPath, "tutorial-examples");
