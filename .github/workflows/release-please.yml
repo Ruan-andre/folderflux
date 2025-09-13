@@ -1,0 +1,18 @@
+# Nome do workflow
+name: Create Release PR
+
+# Gatilho: Roda sempre que um commit for enviado para o branch 'main'
+on:
+  push:
+    branches:
+      - main
+
+# Tarefa (Job)
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          release-type: node
