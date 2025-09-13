@@ -23,7 +23,7 @@ export function registerElectronUpdaterHandlers(
 
     if (releaseNotes.includes("[critical]")) {
       log.info("Critical update detected. Forcing restart.");
-      autoUpdater.quitAndInstall();
+      autoUpdater.quitAndInstall(true, true);
     } else {
       log.info("Standard update. Notifying user to install.");
       mainWindow?.webContents.send("update-downloaded");
@@ -39,6 +39,6 @@ export function registerElectronUpdaterHandlers(
   });
 
   ipcMain.on("install-update", () => {
-    autoUpdater.quitAndInstall();
+    autoUpdater.quitAndInstall(true, true);
   });
 }
