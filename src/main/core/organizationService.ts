@@ -4,6 +4,7 @@ import RuleEngine from "./ruleEngine";
 import { DbOrTx } from "../../db";
 import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
 import { LogMetadata } from "~/src/shared/types/LogMetaDataType";
+import { createResponse } from "../../db/functions";
 
 export async function defaultOrganization(
   db: DbOrTx,
@@ -12,8 +13,14 @@ export async function defaultOrganization(
   isTourActive?: boolean
 ) {
   const defaultProfile = await getSystemProfile(db);
+
   if (defaultProfile) {
     const rules: FullRule[] = defaultProfile.rules.filter((r) => r.isActive) as FullRule[];
+
+    if (rules.length === 0) {
+      return createResponse(false, "Nenhuma regra ativa no perfil padrão.", 0);
+    }
+
     return RuleEngine.process(db, rules, paths, defaultProfile.name, onLogAdded, isTourActive);
   } else throw "Perfil padrão não encontrado";
 }
