@@ -16,7 +16,7 @@ export function registerTourHandlers() {
   });
 
   ipcMain.handle("move-data-from-tour", async () => {
-    const publicPath = app.isPackaged ? path.join(process.resourcesPath) : path.join(app.getPath("userData"));
+    const publicPath = app.isPackaged ? app.getPath("userData") : path.join(app.getAppPath(), "public");
 
     const pathTutorialExamples = path.join(publicPath, "tutorial-examples");
     const pathDocumentos = path.join(pathTutorialExamples, "DOCUMENTOS");
