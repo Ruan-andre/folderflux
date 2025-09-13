@@ -101,7 +101,6 @@ export const simpleTourSteps: CustomizedStepOptions[] = [
     title: "Pesquisa Rápida",
     text: "Se a lista for longa, use este campo para pesquisar um arquivo específico.",
     attachTo: { element: "#details-search", on: "top" },
-    classes: "tour-step-wide",
   },
   {
     id: "close-organization-log",
@@ -111,6 +110,19 @@ export const simpleTourSteps: CustomizedStepOptions[] = [
     buttons: [tourButtons.back],
     canClickTarget: true,
   },
+
+  {
+    title: "Modo rápido",
+    text: `<div style="text-align: center;">
+              <p>Todos os passos que vimos anteriormente, podem ser executados em um único clique, usando o botão de organização rápida conforme o vídeo abaixo.</p>
+              <video width="100%" autoplay loop controls style="border-radius: 8px;">
+                <source src="tutorial-media/video-tutorial-2.mp4" type="video/mp4" />
+              </video>
+            </div>`,
+    classes: "tour-step-extra-wide-video",
+    buttons: [tourButtons.next],
+  },
+
   {
     id: "simple-tour-complete",
     title: "Tutorial Básico Concluído",
