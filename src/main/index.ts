@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from "electron";
+import { app, shell, BrowserWindow, globalShortcut, Menu, ipcMain } from "electron";
 import { autoUpdater } from "electron-updater";
 import log from "electron-log";
 import path, { join } from "path";
@@ -68,6 +68,15 @@ export function setQuitting(value: boolean) {
 
 export function getQuitting() {
   return isQuitting;
+}
+
+function registerShortcuts() {
+  globalShortcut.register("CommandOrControl+R", () => {
+    mainWindow?.reload();
+  });
+  globalShortcut.register("F5", () => {
+    mainWindow?.reload();
+  });
 }
 
 function createWindow(): void {
@@ -176,8 +185,13 @@ if (!gotTheLock) {
       app.quit();
       return;
     }
-    seedDatabase(db);
+    await seedDatabase(db);
 
+    if (app.isPackaged) {
+      Menu.setApplicationMenu(null);
+    }
+
+    registerShortcuts();
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.
     // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -198,6 +212,9 @@ if (!gotTheLock) {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
 
+    ipcMain.handle("app:is-packaged", () => {
+      return app.isPackaged;
+    });
     registerElectronStoreHandlers();
     registerRuleHandlers();
     registerDialogHandlers();
@@ -208,7 +225,7 @@ if (!gotTheLock) {
     registerFileHandlers();
     registerChokidarHandlers();
     registerWorkerHandlers();
-    syncAppSettings(db);
+    await syncAppSettings(db);
     registerEmitterHandlers(mainWindow);
     registerAudioPlayerHandlers(audioWindow);
     registerTtsHandlers();
