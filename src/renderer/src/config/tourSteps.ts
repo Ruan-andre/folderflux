@@ -213,7 +213,6 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     title: "Painel de Regras",
     text: "Este painel mostra todas as regras disponíveis, separadas entre as predefinidas e as que você criar.",
     attachTo: { element: "#rule-tabs", on: "bottom" },
-    scrollTo: true,
   },
   {
     id: "rule-tabs-filter",
@@ -253,6 +252,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     title: "Formulário de Regra",
     text: "Este é o formulário para criar ou editar uma regra.",
     attachTo: { element: "#rule-popup", on: "auto" },
+    buttons: [tourButtons.next],
     classes: "tour-step-wide",
   },
 

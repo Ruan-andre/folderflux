@@ -37,15 +37,16 @@ export const useTourStore = create<TourState>((set, get) => ({
       window.api.audio.stop();
     }
   },
-  initializeTour: (navigate, initialAudioState) => {
+  initializeTour: async (navigate, initialAudioState) => {
     // Evita reinicializar
     if (get().tour) return;
+    const appIsPackeged = await window.api.app.isPackaged();
 
     set({ isAudioEnabled: initialAudioState });
 
     const newTour = new Shepherd.Tour({
       useModalOverlay: true,
-      keyboardNavigation: false,
+      keyboardNavigation: !appIsPackeged,
       exitOnEsc: true,
       defaultStepOptions: {
         scrollTo: false,
@@ -64,7 +65,14 @@ export const useTourStore = create<TourState>((set, get) => ({
       const { options } = step;
       const { page } = options as CustomizedStepOptions;
 
-      if (page && window.location.pathname !== page) {
+      // Usa appIsPackeged para decidir se compara pelo hash (produção) ou pathname (dev)
+      let currentRoute = "";
+      if (appIsPackeged) {
+        currentRoute = window.location.hash.replace(/^#/, "");
+      } else {
+        currentRoute = window.location.pathname;
+      }
+      if (page && currentRoute !== page) {
         navigate(page);
         return;
       }

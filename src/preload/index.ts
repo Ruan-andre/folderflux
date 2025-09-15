@@ -30,6 +30,9 @@ const api = {
       ipcRenderer.removeListener("log-added", listener);
     };
   },
+  app: {
+    isPackaged: (): Promise<boolean> => ipcRenderer.invoke("app:is-packaged"),
+  },
   tts: {
     generate: (text: string) => ipcRenderer.invoke("generate-tts", text),
   },
@@ -154,8 +157,7 @@ const api = {
   },
   ElectronUpdater: {
     onUpdateDownloaded: (callback: () => void) => {
-      const listener = (event: IpcRendererEvent, ...args: any[]) =>
-         callback();
+      const listener = (event: IpcRendererEvent, ...args: any[]) => callback();
       ipcRenderer.on("update-downloaded", listener);
       return () => {
         ipcRenderer.removeListener("update-downloaded", listener);
