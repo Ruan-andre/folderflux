@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/Ruan-andre/folderflux/compare/v1.1.0...v1.2.0) (2025-09-15)
+
+
+### Features
+
+* adiciona suporte a atalhos de teclado e manipulação de menu para versão empacotada ([449a6ae](https://github.com/Ruan-andre/folderflux/commit/449a6ae14990646bd00bf9519b5123337a857e0c))
+* adiciona suporte para verificar se o aplicativo está empacotado e ajusta a navegação do tour ([ea0b803](https://github.com/Ruan-andre/folderflux/commit/ea0b803aeb62b3050c5dc73f966614bae4030e8e))
+
+
+### Bug Fixes
+
+* corrige o caminho de recursos para a versão empacotada ([30f7f37](https://github.com/Ruan-andre/folderflux/commit/30f7f37e13644a0c66fdd21f3138913ecaf364df))
+
 ## [1.1.0](https://github.com/Ruan-andre/folderflux/compare/v1.0.0...v1.1.0) (2025-09-13)
 
 
