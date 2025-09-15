@@ -36,7 +36,7 @@ function sanitizeText(text: string): string {
 export function textToSpeech(text: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const resourcesPath = app.isPackaged
-      ? path.join(process.resourcesPath, "app.asar.unpacked", "resources")
+      ? path.join(process.resourcesPath,)
       : path.join(app.getAppPath(), "resources");
 
     const piperDir = path.join(resourcesPath, "piper");
