@@ -6,8 +6,10 @@ directories:
   output: release
 files:
   - out/**
-  - resources/**
-  - public/**
+  - "!**/out/main/db/migrations/**"
+  - "!**/out/main/db/meta/**"
+  - "!**/out/main/db/*.json"
+  - "!**/out/main/db/*.sql"
   - "!**/.vscode/*"
   - "!src/*"
   - "!electron.vite.config.{js,ts,mjs,cjs}"
@@ -21,11 +23,17 @@ files:
   - "!**/Thumbs.db"
   - "!**/.DS_Store"
   - "!**/example*/**"
-asarUnpack:
-  - "resources/**"
 extraResources:
   - from: public
     to: .
+    filter:
+      - "!tutorial-media/**"
+  - from: resources/piper
+    to: piper
+  - from: resources/tts-model
+    to: tts-model
+  - from: src/db/migrations
+    to: db/migrations
 win:
   executableName: FolderFlux
   target:
