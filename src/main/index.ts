@@ -70,13 +70,25 @@ export function getQuitting() {
   return isQuitting;
 }
 
-function registerShortcuts() {
-  globalShortcut.register("CommandOrControl+R", () => {
-    mainWindow?.reload();
-  });
-  globalShortcut.register("F5", () => {
-    mainWindow?.reload();
-  });
+function registerShortcuts(win: BrowserWindow | null) {
+  if (!win) return;
+  const register = () => {
+    globalShortcut.register("CommandOrControl+R", () => {
+      win.reload();
+    });
+    globalShortcut.register("F5", () => {
+      win.reload();
+    });
+  };
+  const unregister = () => {
+    globalShortcut.unregister("CommandOrControl+R");
+    globalShortcut.unregister("F5");
+  };
+  win.on("show", register);
+  win.on("focus", register);
+  win.on("hide", unregister);
+  win.on("minimize", unregister);
+  win.on("close", unregister);
 }
 
 function createWindow(): void {
@@ -191,7 +203,7 @@ if (!gotTheLock) {
       Menu.setApplicationMenu(null);
     }
 
-    registerShortcuts();
+  registerShortcuts(mainWindow);
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.
     // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
