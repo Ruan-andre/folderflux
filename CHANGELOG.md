@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/Ruan-andre/folderflux/compare/v1.2.0...v1.2.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* Corrige o registro de atalhos de teclado para recarregar a janela somente quando o FolderFlux estiver com a janela principal aberta ([e87ed7c](https://github.com/Ruan-andre/folderflux/commit/e87ed7cb5038971a3657f9b341ac37124546b9c3))
+
 ## [1.2.0](https://github.com/Ruan-andre/folderflux/compare/v1.1.0...v1.2.0) (2025-09-15)
 
 
