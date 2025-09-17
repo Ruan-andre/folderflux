@@ -1,8 +1,8 @@
 import { BrowserWindow, ipcMain } from "electron";
 import { MainLogger } from "electron-log";
 import { AppUpdater } from "electron-updater";
-import { getSettingStatusByType } from "../../services/domain/settingsService";
-import { db } from "../../../db";
+import { getSettingStatusByType } from "../../../services/domain/settingsService";
+import { db } from "../../../../db";
 
 export function registerElectronUpdaterHandlers(
   autoUpdater: AppUpdater,
