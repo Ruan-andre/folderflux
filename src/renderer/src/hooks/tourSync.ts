@@ -27,7 +27,7 @@ export const useTourSync = () => {
           await waitForElement(elementSelector);
           setTimeout(() => {
             tour.show(currentStep.id, true);
-          }, 0);
+          }, 500); 
         } catch (error) {
           console.warn(
             `Tour não encontrou o alvo '${elementSelector}' na página ${location.pathname}.`,

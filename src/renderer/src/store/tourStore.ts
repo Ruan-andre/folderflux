@@ -97,7 +97,9 @@ export const useTourStore = create<TourState>((set, get) => ({
       }
 
       set({ isFinished: true });
-      navigate("/");
+      setTimeout(() => {
+        navigate("/");
+      }, 150);
     };
 
     newTour.on("complete", onTourEnd);
@@ -117,8 +119,8 @@ export const useTourStore = create<TourState>((set, get) => ({
       const steps = type === "simple" ? simpleTourSteps : advancedTourSteps;
       tour.steps = [];
       tour.addSteps(steps);
+      set({ isFinished: false, typeTour: type });
       setTimeout(() => {
-        set({ isFinished: false, typeTour: type });
         tour.start();
       }, 150);
     }
