@@ -108,7 +108,6 @@ const Sidebar = () => {
   const setIsOpen = useSidebarStore((state) => state.setIsOpen);
   const { tourNext, isTourActive, getCurrentStepId } = useTourStore();
   const isUpdateAvailable = useUpdateStore((state) => state.isUpdateAvailable);
-  const setUpdateAvailable = useUpdateStore((state) => state.setUpdateAvailable);
 
   const handleTransitionEnd = () => {
     if (isOpen && isTourActive() && getCurrentStepId() === "sidebar-menu") {

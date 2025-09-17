@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import Icon from "../../assets/icons";
 import ContentWrapper from "../../components/ContentWrapper";
 import { Box, Divider, Stack, Typography, Link } from "@mui/material";
@@ -8,10 +9,25 @@ const openExternal = (url: string) => {
 };
 
 const AboutPage = () => {
+  // Obtém a versão do app via preload (exposta pelo Electron)
+  const [version, setVersion] = useState<string>("");
+  useEffect(() => {
+    if (window.api?.app?.getVersion) {
+      window.api.app.getVersion().then((v: string) => {
+        if (typeof v === "string") setVersion(v);
+      });
+    }
+  }, []);
+
   return (
     <ContentWrapper title="Sobre" sx={{ gap: "3.5rem", padding: "3rem" }}>
-      <Stack direction="row" spacing={4} justifyContent="center" alignItems="center">
+      <Stack direction="column" spacing={1} justifyContent="center" alignItems="center">
         <Box component={"img"} alt="FolderFlux Logo" src={logoImg} sx={{ height: 180 }} />
+        {version && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Versão: {version}
+          </Typography>
+        )}
       </Stack>
 
       <Box>

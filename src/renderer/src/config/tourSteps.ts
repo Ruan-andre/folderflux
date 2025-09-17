@@ -579,6 +579,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     title: "Configurações Globais",
     text: "Nesta tela você gerencia as configurações gerais do aplicativo.",
     attachTo: { element: "main", on: "auto" },
+    buttons: [tourButtons.next],
   },
 
   {
@@ -592,6 +593,12 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     text: "Habilitando esta função, o FolderFlux ficará de olho nas pastas que você adicionou aos perfis. Sempre que um novo arquivo chegar, ele será organizado imediatamente, sem que você precise fazer nada.",
     attachTo: { element: "#general-settings > ul > li:nth-child(2)", on: "bottom" },
     classes: "tour-step-wide",
+  },
+
+  {
+    title: "Atualização Automática",
+    text: "Ao habilitar esta opção, o FolderFlux aplicará automaticamente as atualizações mais recentes assim que você iniciar o programa.",
+    attachTo: { element: "#general-settings > ul > li:nth-child(3)", on: "bottom" },
   },
   {
     title: "Tema do Aplicativo",

@@ -32,6 +32,7 @@ const api = {
   },
   app: {
     isPackaged: (): Promise<boolean> => ipcRenderer.invoke("app:is-packaged"),
+    getVersion: (): Promise<string> => ipcRenderer.invoke("app:get-version"),
   },
   tts: {
     generate: (text: string) => ipcRenderer.invoke("generate-tts", text),
