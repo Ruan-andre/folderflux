@@ -19,6 +19,7 @@ export default defineConfig({
         targets: [
           { src: "src/db/**/*", dest: "db/" },
           { src: "src/shared/**/*", dest: "shared/" },
+          { src: "dev-app-update.yml", dest: "." },
         ],
       }),
     ],
