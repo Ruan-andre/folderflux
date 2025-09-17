@@ -42,6 +42,38 @@ let audioWindow: BrowserWindow | null = null;
 let updateWindow: BrowserWindow | null = null;
 let isQuitting = false;
 
+function showMainWindowSafely(message?: string, retries = 10) {
+  const tryShow = () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      if (!mainWindow.isVisible()) mainWindow.show();
+      mainWindow.focus();
+      return true;
+    }
+    return false;
+  };
+
+  if (tryShow()) return;
+  if (retries > 0) {
+    setTimeout(() => showMainWindowSafely(message, retries - 1), 150);
+  } else {
+    log.warn("Não foi possível exibir a janela principal após falha no verificador de atualização.");
+  }
+}
+
+function proceedAfterUpdateCheckFailure(reason: unknown) {
+  log.warn("Verificação de atualização falhou. Prosseguindo com o app.", reason);
+  try {
+    if (updateWindow && !updateWindow.isDestroyed()) {
+      updateWindow.close();
+    }
+  } catch (e) {
+    log.warn("Falha ao fechar updateWindow após erro de atualização:", e);
+  }
+  const msg = reason instanceof Error ? reason.message : String(reason ?? "Erro desconhecido");
+  showMainWindowSafely(msg);
+}
+
 function setupTutorialFiles() {
   if (!app.isPackaged) {
     return;
@@ -176,6 +208,7 @@ function createUpdateWindow(): void {
       await autoUpdater.checkForUpdates();
     } catch (error) {
       console.log("Erro ao verificar atualizações:", error);
+      proceedAfterUpdateCheckFailure(error);
     }
   });
 
@@ -238,8 +271,8 @@ if (!gotTheLock) {
       });
     }
 
-    createUpdateWindow();
     createMainWindow();
+    createUpdateWindow();
     try {
       createAudioWindow();
     } catch (error) {

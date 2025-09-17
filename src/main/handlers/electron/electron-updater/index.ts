@@ -61,6 +61,29 @@ export function registerElectronUpdaterHandlers(
 
   autoUpdater.on("error", (err) => {
     log.error("Erro no autoUpdater: ", err);
+
+  
+    const resumeMain = () => {
+      try {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        if (!mainWindow.isVisible()) mainWindow.show();
+        mainWindow.focus();
+        mainWindow.webContents.send("update-error", {
+          message: err instanceof Error ? err.message : String(err),
+        });
+      } catch (e) {
+        log.warn("Falha ao retomar janela principal após erro do updater:", e);
+      }
+    };
+
+    if (mainWindow) {
+      if (mainWindow.webContents.isLoading()) {
+        mainWindow.webContents.once("did-finish-load", resumeMain);
+      } else {
+        resumeMain();
+      }
+    }
   });
 
   ipcMain.on("download-update", () => {
