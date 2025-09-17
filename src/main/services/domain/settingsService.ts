@@ -18,8 +18,20 @@ export async function getSettings(db: DbOrTx): Promise<SettingsSchema[]> {
 export async function getSettingByType(db: DbOrTx, type: SettingsSchema["type"]) {
   return await db.query.SettingsTable.findFirst({ where: eq(SettingsTable.type, type) });
 }
+
+export async function getSettingStatusByType(db: DbOrTx, type: SettingsSchema["type"]) {
+  const setting = await db.query.SettingsTable.findFirst({ where: eq(SettingsTable.type, type) });
+  return setting?.isActive ?? false;
+}
+
 export async function createSettings(db: DbOrTx, settings: NewSettings[]) {
-  await db.insert(SettingsTable).values(settings);
+  for (const setting of settings) {
+    const exists = await db
+      .select({ count: count() })
+      .from(SettingsTable)
+      .where(eq(SettingsTable.type, setting.type));
+    if (exists[0].count === 0) await db.insert(SettingsTable).values(setting);
+  }
 }
 
 export async function toggleSettingActive(

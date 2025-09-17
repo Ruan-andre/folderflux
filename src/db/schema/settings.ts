@@ -3,7 +3,7 @@ import { integer, text, sqliteTable } from "drizzle-orm/sqlite-core";
 export const SettingsTable = sqliteTable("settings", {
   id: integer("id").primaryKey(),
   title: text("title").notNull(),
-  type: text("type", { enum: ["realTime", "startWithOS", "darkMode", "notifications"] }).notNull(),
+  type: text("type", { enum: ["realTime", "startWithOS", "darkMode", "notifications", "autoUpdate"] }).notNull(),
   description: text("description"),
   category: text("category", {
     enum: ["general", "appearance"],
