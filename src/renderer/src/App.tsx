@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
+import { useReloadShortcut } from "./hooks/useReloadShortcut";
 import { BrowserRouter, Routes, Route, HashRouter, RouteObject, useNavigate } from "react-router-dom";
 import { useTourStore } from "./store/tourStore";
 
@@ -48,8 +49,8 @@ function GlobalTourManager() {
 function App() {
   const setUpdateAvailable = useUpdateStore((state) => state.setUpdateAvailable);
 
+  useReloadShortcut();
   useEffect(() => {
-  
     const cleanup = window.api.ElectronUpdater.onUpdateDownloaded(() => {
       setUpdateAvailable(true);
     });
