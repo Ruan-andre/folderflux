@@ -1,16 +1,36 @@
 import React, { useEffect, useState } from "react";
 import Icon from "../../assets/icons";
 import ContentWrapper from "../../components/ContentWrapper";
-import { Box, Divider, Stack, Typography, Link } from "@mui/material";
+import {
+  Box,
+  Divider,
+  Stack,
+  Typography,
+  Button,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
 import logoImg from "../../assets/img/logo.svg";
+import ChangelogModal from "../../components/ChangelogModal";
+import styled from "@emotion/styled";
 
 const openExternal = (url: string) => {
   window.open(url, "_blank");
 };
 
+const ListItemTextStyled = styled(ListItemText)({
+  "& .MuiTypography-root": {
+    fontSize: 17,
+    fontWeight: 500,
+  },
+});
+
 const AboutPage = () => {
   // Obtém a versão do app via preload (exposta pelo Electron)
   const [version, setVersion] = useState<string>("");
+  const [isChangelogOpen, setIsChangelogOpen] = useState<boolean>(false);
   useEffect(() => {
     if (window.api?.app?.getVersion) {
       window.api.app.getVersion().then((v: string) => {
@@ -24,9 +44,14 @@ const AboutPage = () => {
       <Stack direction="column" spacing={1} justifyContent="center" alignItems="center">
         <Box component={"img"} alt="FolderFlux Logo" src={logoImg} sx={{ height: 180 }} />
         {version && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Versão: {version}
-          </Typography>
+          <>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Versão: {version}
+            </Typography>
+            <Button variant="text" size="small" sx={{ mt: 0.5 }} onClick={() => setIsChangelogOpen(true)}>
+              Ver histórico de versões
+            </Button>
+          </>
         )}
       </Stack>
 
@@ -69,43 +94,26 @@ const AboutPage = () => {
         <Typography variant="h4" gutterBottom>
           Contato
         </Typography>
-        <Stack spacing={2}>
-          <Link
-            onClick={() => openExternal("https://www.linkedin.com/in/andré-ruan-554854250")}
-            underline="hover"
-            display="flex"
-            alignItems="center"
-            sx={{ cursor: "pointer" }}
-            gap={1}
-          >
-            <Icon icon="mdi:linkedin" color="#0077B5" width="32" height="32" />
-            LinkedIn
-          </Link>
-
-          <Link
-            onClick={() => openExternal("https://a-ruan-portfolio.vercel.app/")}
-            underline="hover"
-            display="flex"
-            alignItems="center"
-            sx={{ cursor: "pointer" }}
-            gap={1}
-          >
-            <Icon icon="noto:briefcase" color="#4CAF50" width="32" height="32" />
-            Portfólio
-          </Link>
-          <Link
-            onClick={() => openExternal("https://folderflux.com/")}
-            target="_blank"
-            underline="hover"
-            display="flex"
-            alignItems="center"
-            gap={1}
-            sx={{ cursor: "pointer" }}
-          >
-            <Icon icon="mdi:web" color="#2196F3" width="32" height="32" />
-            Página Oficial do Projeto
-          </Link>
-        </Stack>
+        <List sx={{ width: "100%", maxWidth: 560 }}>
+          <ListItemButton onClick={() => openExternal("https://www.linkedin.com/in/andré-ruan-554854250")}>
+            <ListItemIcon>
+              <Icon icon="mdi:linkedin" color="#0077B5" width="28" height="28" />
+            </ListItemIcon>
+            <ListItemTextStyled primary="LinkedIn" />
+          </ListItemButton>
+          <ListItemButton onClick={() => openExternal("https://andreruan.dev/")}>
+            <ListItemIcon>
+              <Icon icon="noto:briefcase" color="#4CAF50" width="28" height="28" />
+            </ListItemIcon>
+            <ListItemTextStyled primary="Portfólio" />
+          </ListItemButton>
+          <ListItemButton onClick={() => openExternal("https://folderflux.com/")}>
+            <ListItemIcon>
+              <Icon icon="mdi:web" color="#2196F3" width="28" height="28" />
+            </ListItemIcon>
+            <ListItemTextStyled primary="Página Oficial do Projeto" />
+          </ListItemButton>
+        </List>
       </Box>
 
       <Divider />
@@ -116,6 +124,7 @@ const AboutPage = () => {
           © {new Date().getFullYear()} André Ruan. Lançado sob a Licença MIT.
         </Typography>
       </Box>
+      <ChangelogModal open={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
     </ContentWrapper>
   );
 };
