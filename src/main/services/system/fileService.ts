@@ -10,18 +10,26 @@ export async function getFilesInfo(directoryPath: string): Promise<FileInfo[] | 
     if (files && files.length > 0) {
       const statsPromises = files.map(async (file) => {
         const filePath = path.join(directoryPath, file);
-        const stats = await fs.promises.stat(filePath);
-        if (!stats.isDirectory()) {
-          return {
-            name: path.parse(filePath).name,
-            nameWithExtension: file,
-            size: stats.size,
-            ctime: stats.ctime,
-            mtime: stats.mtime,
-            fullPath: filePath,
-            parentDirectory: directoryPath,
-            extension: path.extname(filePath),
-          };
+        try {
+          const stats = await fs.promises.stat(filePath);
+          if (!stats.isDirectory()) {
+            return {
+              name: path.parse(filePath).name,
+              nameWithExtension: file,
+              size: stats.size,
+              ctime: stats.ctime,
+              mtime: stats.mtime,
+              fullPath: filePath,
+              parentDirectory: directoryPath,
+              extension: path.extname(filePath),
+            };
+          }
+        } catch (err: any) {
+          if (err && (err.code === "EPERM" || err.code === "EACCES")) {
+            // Ignora arquivos/pastas protegidos
+            return null;
+          }
+          return null;
         }
         return null;
       });
@@ -42,6 +50,10 @@ export async function getFilesInfo(directoryPath: string): Promise<FileInfo[] | 
 
     return [];
   } catch (error) {
+    // Ignora erro de permissão na pasta raiz
+    if ((error && (error as any).code === "EPERM") || (error as any).code === "EACCES") {
+      return [];
+    }
     console.error(`[DEBUG] Erro crítico em getFilesInfo para ${directoryPath}:`, error);
     return [];
   }
@@ -97,28 +109,50 @@ export async function copyFile(srcPath: string, destPath: string) {
 }
 
 export async function deleteFile(filePath: string) {
-  if (fs.existsSync(filePath)) {
-    await fs.promises.rm(filePath).catch();
+  try {
+    if (fs.existsSync(filePath)) {
+      await fs.promises.rm(filePath).catch((err) => {
+        if (err && (err.code === "EPERM" || err.code === "EACCES")) {
+          // Ignora arquivos protegidos
+          return;
+        }
+      });
+    }
+  } catch (err: any) {
+    if (err && (err.code === "EPERM" || err.code === "EACCES")) {
+      // Ignora arquivos protegidos
+      return;
+    }
   }
 }
 export async function isDirectory(path: string) {
   try {
     return fs.statSync(path).isDirectory();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
+  } catch (e: any) {
+    if (e && (e.code === "EPERM" || e.code === "EACCES")) {
+      // Ignora arquivos protegidos
+      return false;
+    }
     return false;
   }
 }
 
 export async function getStats(paths: string[]) {
-  try {
-    return paths.map((p) => ({
-      path: p,
-      isDirectory: fs.statSync(p).isDirectory(),
-      name: path.basename(p),
-    }));
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
-    return []; // Retorna vazio se houver erro
+  const results: { path: string; isDirectory: boolean; name: string }[] = [];
+  for (const p of paths) {
+    try {
+      const stat = fs.statSync(p);
+      results.push({
+        path: p,
+        isDirectory: stat.isDirectory(),
+        name: path.basename(p),
+      });
+    } catch (e: any) {
+      if (e && (e.code === "EPERM" || e.code === "EACCES")) {
+        console.debug(`[getStats] Ignorado por permissão: ${p}`);
+        continue;
+      }
+    }
   }
+  return results;
 }

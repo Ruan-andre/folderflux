@@ -13,6 +13,20 @@ import { mainProcessEmitter } from "../emitter/mainProcessEmitter";
 import { LogMetadata } from "~/src/shared/types/LogMetaDataType";
 
 const temporaryFilePatterns = [/(^|[/\\])\../, "**/*.tmp", "**/*.part", "**/*.crdownload", "**/*.opdownload"];
+// Pastas protegidas do Windows que devem ser ignoradas
+const protectedFolders = [
+  "System Volume Information",
+  "$RECYCLE.BIN",
+  "RECYCLE.BIN",
+  "pagefile.sys",
+  "hiberfil.sys",
+  "swapfile.sys",
+];
+function isProtectedFolder(folderPath: string) {
+  return protectedFolders.some((name) =>
+    folderPath.replace(/\\/g, "/").toLowerCase().includes(`/${name.toLowerCase()}`)
+  );
+}
 
 class FolderMonitorService {
   private monitor: FSWatcher;
@@ -25,7 +39,16 @@ class FolderMonitorService {
 
   constructor() {
     this.monitor = chokidar.watch([], {
-      ignored: temporaryFilePatterns,
+      ignored: [
+        ...temporaryFilePatterns,
+        // Ignora explicitamente pastas protegidas do Windows
+        "**/System Volume Information/**",
+        "**/$RECYCLE.BIN/**",
+        "**/RECYCLE.BIN/**",
+        "**/pagefile.sys",
+        "**/hiberfil.sys",
+        "**/swapfile.sys",
+      ],
       persistent: true,
       ignoreInitial: true,
       depth: 0,
@@ -61,6 +84,7 @@ class FolderMonitorService {
   public async addFoldersToMonitor(paths: string[]) {
     const directories = await (await getStats(paths)).filter((x) => x.isDirectory).map((x) => x.path);
     for (const dir of directories) {
+      if (isProtectedFolder(dir)) continue;
       if (!this.watchedFolders.has(dir)) {
         this.watchedFolders.add(dir);
       }
@@ -185,12 +209,16 @@ class FolderMonitorService {
   }
 
   public startMonitoring(paths: string[] | string, startVerification: boolean = false) {
+    const addPath = (p: string) => {
+      if (isProtectedFolder(p)) return;
+      this.watchedFolders.add(p);
+      this.monitor.add(p);
+    };
     if (typeof paths === "string") {
-      this.watchedFolders.add(paths);
+      addPath(paths);
     } else if (typeof paths === "object") {
-      paths.forEach((p) => this.watchedFolders.add(p));
+      paths.forEach(addPath);
     }
-    this.monitor.add(paths);
 
     if (startVerification) {
       RuleEngine.processAll(this.db, this.onLogAdded);
