@@ -28,8 +28,8 @@ import { registerEmitterHandlers } from "./handlers/emitter";
 import { registerAudioPlayerHandlers } from "./handlers/audio-player";
 import { registerTtsHandlers } from "./handlers/tts";
 import { registerTourHandlers } from "./handlers/domain/tour";
-import { registerElectronStoreHandlers } from "./handlers/electronStore";
-import { registerElectronUpdaterHandlers } from "./handlers/electron-updater";
+import { registerElectronStoreHandlers } from "./handlers/electron/electronStore";
+import { registerElectronUpdaterHandlers } from "./handlers/electron/electron-updater";
 import fs from "fs";
 
 log.transports.file.level = "info";
@@ -75,32 +75,18 @@ export function getQuitting() {
   return isQuitting;
 }
 
-function registerShortcuts(win: BrowserWindow | null) {
-  if (!win) return;
-  const register = () => {
-    globalShortcut.register("CommandOrControl+R", () => {
-      win.reload();
-    });
-    globalShortcut.register("F5", () => {
-      win.reload();
-    });
-  };
-  const unregister = () => {
-    globalShortcut.unregister("CommandOrControl+R");
-    globalShortcut.unregister("F5");
-  };
-  win.on("show", register);
-  win.on("focus", register);
-  win.on("hide", unregister);
-  win.on("minimize", unregister);
-  win.on("close", unregister);
-}
+// Atalhos globais removidos. Use listener no renderer para F5/CTRL+R e envie IPC para recarregar a janela.
+ipcMain.on("window:reload", (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win) win.reload();
+});
 
 function createMainWindow(): void {
   const favicon = app.isPackaged
     ? path.join(process.resourcesPath, "favicon.ico") // Em produção
     : path.join(app.getAppPath(), "public", "favicon.ico");
   mainWindow = new BrowserWindow({
+    type: "mainWindow",
     width: 1200,
     height: 880,
     show: false,
@@ -182,7 +168,7 @@ function createUpdateWindow(): void {
   });
 
   updateWindow.on("ready-to-show", async () => {
-    // autoUpdater.forceDevUpdateConfig = true; // apenas para testar o electron-updater em dev
+    autoUpdater.forceDevUpdateConfig = true; // apenas para testar o electron-updater em dev
     // audioWindow?.webContents.openDevTools({ mode: "detach" });
     updateWindow?.show();
 
@@ -243,14 +229,14 @@ if (!gotTheLock) {
     if (app.isPackaged) {
       Menu.setApplicationMenu(null);
     }
-
-    registerShortcuts(mainWindow);
-    // Default open or close DevTools by F12 in development
-    // and ignore CommandOrControl + R in production.
-    // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-    app.on("browser-window-created", (_, window) => {
-      optimizer.watchWindowShortcuts(window);
-    });
+    if (is.dev) {
+      // Default open or close DevTools by F12 in development
+      // and ignore CommandOrControl + R in production.
+      // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+      app.on("browser-window-created", (_, window) => {
+        optimizer.watchWindowShortcuts(window);
+      });
+    }
 
     createUpdateWindow();
     createMainWindow();
