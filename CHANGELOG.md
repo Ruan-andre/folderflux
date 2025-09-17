@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.4.0](https://github.com/Ruan-andre/folderflux/compare/v1.3.0...v1.4.0) (2025-09-17)
+
+
+### Features
+
+* adiciona hook para atalho de recarregar a aplicação com F5 ou Ctrl+R ([34f3ebf](https://github.com/Ruan-andre/folderflux/commit/34f3ebf1a4793239da9fc8e072491b3eeeb7a1ea))
+* adiciona hook useReloadShortcut no componente App ([f234e5c](https://github.com/Ruan-andre/folderflux/commit/f234e5c6c471a8ab2855f16a0d3e7a14555388fa))
+* adiciona modal de changelog para exibir histórico de versões ([b381433](https://github.com/Ruan-andre/folderflux/commit/b38143353fa8b200b9565bb4be10764f3cbc01cb))
+* Adicionado coleção de ícones para uso offline. ([38ef7ee](https://github.com/Ruan-andre/folderflux/commit/38ef7ee1a6a22a83377cc5c8ac47fabf0bd4a7c0))
+* registra coleções de ícones Iconify para uso offline ([cff802a](https://github.com/Ruan-andre/folderflux/commit/cff802a88774908a17a19d3d455eee7c44b6d07a))
+
+
+### Bug Fixes
+
+* ajusta o tempo de espera para exibir o passo do tour e navegação após a conclusão ([d2c5ac0](https://github.com/Ruan-andre/folderflux/commit/d2c5ac094ea38bb516a0beea2126731407a4cb94))
+* corrige botões de navegação nos passos do tour para evitar que seja possível voltar/avançar em passos de transição de tela/componente ([228c7d8](https://github.com/Ruan-andre/folderflux/commit/228c7d8d477369b2b846d5a09df8565fd9c426b0))
+* ignora arquivos e pastas protegidos em operações de monitoramento e manipulação de arquivos ([bbbf69b](https://github.com/Ruan-andre/folderflux/commit/bbbf69b5f43ac552ba5c2d5e1244b0b3247e3945))
+* melhora a recuperação da janela principal após erro no autoUpdater e adiciona tratamento de falhas na verificação de atualizações ([3c4cf0d](https://github.com/Ruan-andre/folderflux/commit/3c4cf0dff7a508652930343bbb6762cac8f85b5f))
+
 ## [1.3.0](https://github.com/Ruan-andre/folderflux/compare/v1.2.1...v1.3.0) (2025-09-17)
 
 
