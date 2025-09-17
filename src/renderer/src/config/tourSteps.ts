@@ -387,6 +387,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     text: 'Dê um nome ao seu perfil. Exemplo: "Organizar Trabalho".',
     attachTo: { element: 'input[name="profileName"]', on: "bottom" },
     canClickTarget: true,
+    buttons: [tourButtons.next],
   },
 
   {
@@ -450,6 +451,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     title: "Pastas Vinculadas",
     text: "Ótimo! Agora este perfil sabe quais pastas monitorar.",
     attachTo: { element: "#folder-management", on: "top" },
+    buttons: [tourButtons.next],
   },
   {
     id: "profile-form-manage-rules-action",
@@ -464,6 +466,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     title: "Vincular Regra",
     text: "Aqui está a lista de regras disponíveis. Vamos vincular a que criamos.",
     attachTo: { element: ".rule", on: "bottom" },
+    buttons: [tourButtons.next],
   },
   {
     id: "profile-form-check-rule-action",
@@ -495,7 +498,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     text: 'Com tudo configurado, clique em "Criar" para salvar seu novo perfil.',
     attachTo: { element: "#confirm-profile", on: "top" },
     canClickTarget: true,
-    buttons: [tourButtons.back],
+    buttons: [],
     scrollTo: true,
     advanceOn: {
       event: "click",
@@ -507,6 +510,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     title: "Perfil Criado!",
     text: "Seu novo perfil está pronto e ativo. O FolderFlux já está monitorando as pastas vinculadas a ele, aplicando as regras que você definiu.",
     attachTo: { element: "#profile-cards", on: "top" },
+    buttons: [tourButtons.next],
   },
   {
     id: "navigate-to-folders",
@@ -526,6 +530,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     title: "Gerenciador de Pastas",
     text: "Este painel centraliza todas as pastas que você já cadastrou. Já vimos seu funcionamento ao criar o perfil.",
     attachTo: { element: "#folder-management", on: "left" },
+    buttons: [tourButtons.next],
   },
 
   {
@@ -610,6 +615,7 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     title: "Precisa de Ajuda?",
     text: 'Se tiver qualquer dúvida ou problema, o menu "Ajuda" é o seu ponto de contato.',
     attachTo: { element: "#help", on: "right" },
+    buttons: [tourButtons.next],
   },
 
   {
@@ -634,12 +640,12 @@ export const advancedTourSteps: CustomizedStepOptions[] = [
     attachTo: { element: "#force-verification-card", on: "bottom" },
   },
   {
-    title: "Card Forçar Verificação",
+    title: "Status dos Perfis",
     text: `Este card mostrará o status dos perfis. Ao clicar nele, você será redirecionado para a página de perfis que vimos anteriormente.`,
     attachTo: { element: "#profile-status-card", on: "bottom" },
   },
   {
-    title: "Card Forçar Verificação",
+    title: "Card Doação",
     text: `Ao clicar neste card você verá informações sobre como doar para ajudar o desenvolvimento do projeto.`,
     attachTo: { element: "#donation-card", on: "bottom" },
   },
