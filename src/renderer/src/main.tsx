@@ -12,6 +12,8 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "./context/ThemeContext";
 import AudioPlayer from "./components/audioPlayer/main";
 import { TourController } from "./components/TourController";
+// Registro de coleções de ícones Iconify para uso offline
+import "./icons/registerCollections";
 
 const container = document.getElementById("root");
 
