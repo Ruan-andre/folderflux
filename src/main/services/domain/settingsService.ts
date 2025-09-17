@@ -67,23 +67,15 @@ const appLauncher = new AutoLaunch({
 /**
  * Ativa a inicialização do aplicativo com o sistema operacional.
  */
-export async function enableLaunchOnLogin(): Promise<void> {
+async function enableLaunchOnLogin(): Promise<void> {
   await appLauncher.enable();
 }
 
 /**
  * Desativa a inicialização do aplicativo com o sistema operacional.
  */
-export async function disableLaunchOnLogin(): Promise<void> {
+async function disableLaunchOnLogin(): Promise<void> {
   await appLauncher.disable();
-}
-
-/**
- * Verifica se a inicialização automática está atualmente ativada.
- * @returns `true` se estiver ativado, `false` caso contrário.
- */
-export async function isLaunchOnLoginEnabled(): Promise<boolean> {
-  return await appLauncher.isEnabled();
 }
 
 export async function syncAppSettings(db: DbOrTx) {
