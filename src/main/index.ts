@@ -1,3 +1,7 @@
+// Handler para expor a versão do app para o renderer
+ipcMain.handle("app:get-version", () => {
+  return app.getVersion();
+});
 import { app, shell, BrowserWindow, globalShortcut, Menu, ipcMain } from "electron";
 import { autoUpdater } from "electron-updater";
 import log from "electron-log";
@@ -30,11 +34,12 @@ import fs from "fs";
 
 log.transports.file.level = "info";
 autoUpdater.logger = log;
-
 autoUpdater.autoDownload = true;
+autoUpdater.autoInstallOnAppQuit = false;
 
 let mainWindow: BrowserWindow | null = null;
 let audioWindow: BrowserWindow | null = null;
+let updateWindow: BrowserWindow | null = null;
 let isQuitting = false;
 
 function setupTutorialFiles() {
@@ -91,7 +96,7 @@ function registerShortcuts(win: BrowserWindow | null) {
   win.on("close", unregister);
 }
 
-function createWindow(): void {
+function createMainWindow(): void {
   const favicon = app.isPackaged
     ? path.join(process.resourcesPath, "favicon.ico") // Em produção
     : path.join(app.getAppPath(), "public", "favicon.ico");
@@ -111,15 +116,9 @@ function createWindow(): void {
     },
   });
 
-  mainWindow.on("ready-to-show", async () => {
-    mainWindow?.show();
-    // autoUpdater.forceDevUpdateConfig = true; -- apenas para testar o electron-updater em dev
-    try {
-      await autoUpdater.checkForUpdates();
-    } catch (error) {
-      console.log("Erro ao verificar atualizações:", error);
-    }
-  });
+  // mainWindow.on("ready-to-show", async () => {
+  //   mainWindow?.show();
+  // });
 
   createTray(mainWindow);
 
@@ -165,6 +164,48 @@ function createAudioWindow() {
   // audioWindow.webContents.openDevTools();
 }
 
+function createUpdateWindow(): void {
+  const favicon = app.isPackaged
+    ? path.join(process.resourcesPath, "favicon.ico") // Em produção
+    : path.join(app.getAppPath(), "public", "favicon.ico");
+  updateWindow = new BrowserWindow({
+    width: 670,
+    height: 330,
+    show: false,
+    icon: favicon,
+    frame: false,
+    autoHideMenuBar: true,
+    center: true,
+    resizable: false,
+    maximizable: false,
+    // ...(process.platform === 'linux' ? { icon } : {}),
+  });
+
+  updateWindow.on("ready-to-show", async () => {
+    // autoUpdater.forceDevUpdateConfig = true; // apenas para testar o electron-updater em dev
+    // audioWindow?.webContents.openDevTools({ mode: "detach" });
+    updateWindow?.show();
+
+    try {
+      await autoUpdater.checkForUpdates();
+    } catch (error) {
+      console.log("Erro ao verificar atualizações:", error);
+    }
+  });
+
+  updateWindow.on("close", (event) => {
+    updateWindow?.destroy();
+  });
+
+  // HMR for renderer base on electron-vite cli.
+  // Load the remote URL for development or the local html file for production.
+  if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
+    updateWindow.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}/update.html`);
+  } else {
+    updateWindow.loadFile(join(__dirname, "../renderer/update.html"));
+  }
+}
+
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
@@ -203,7 +244,7 @@ if (!gotTheLock) {
       Menu.setApplicationMenu(null);
     }
 
-  registerShortcuts(mainWindow);
+    registerShortcuts(mainWindow);
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.
     // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -211,7 +252,8 @@ if (!gotTheLock) {
       optimizer.watchWindowShortcuts(window);
     });
 
-    createWindow();
+    createUpdateWindow();
+    createMainWindow();
     try {
       createAudioWindow();
     } catch (error) {
@@ -221,7 +263,7 @@ if (!gotTheLock) {
     app.on("activate", function () {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+      if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
     });
 
     ipcMain.handle("app:is-packaged", () => {
@@ -242,10 +284,16 @@ if (!gotTheLock) {
     registerAudioPlayerHandlers(audioWindow);
     registerTtsHandlers();
     registerTourHandlers();
-    registerElectronUpdaterHandlers(autoUpdater, mainWindow, log);
+    registerElectronUpdaterHandlers(autoUpdater, mainWindow, updateWindow, log);
 
     await folderMonitorService.start(db);
     handleFolderPathArgument(process.argv);
+
+    try {
+      createAudioWindow();
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   function handleFolderPathArgument(argv: string[]) {
