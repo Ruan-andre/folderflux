@@ -74,6 +74,14 @@ pnpm build:linux
 - **IDs de componentes:** Usados para tours guiados (Shepherd.js).
 - **Estilo:** Siga os padrões do Material-UI.
 
+## 🖼️ Ícones (offline)
+
+- Usamos **Iconify** em modo offline, gerando coleções mínimas automaticamente em `src/renderer/src/icons/.generated/` via `pnpm icons:build`.
+- Esse script roda automaticamente em `predev` e `prebuild` (ver `package.json`).
+- A pasta `.generated/` é ignorada pelo Git (gitignored) e não deve ser commitada.
+- O registrador `src/renderer/src/icons/registerCollections.ts` carrega todos os JSONs gerados com `import.meta.glob` e registra via `addCollection`.
+- Para detalhes operacionais (regex, coleções suportadas, troubleshooting), veja `src/renderer/src/icons/README.md`.
+
 ## 👩‍💻 Contribuindo
 
 1. Crie uma branch a partir da `main`
