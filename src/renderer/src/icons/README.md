@@ -28,9 +28,9 @@ Este projeto usa **Iconify** de forma 100% offline. Para manter o bundle enxuto 
 ## Dicas e troubleshooting
 
 - "Ícone não aparece":
-  1) Verifique se a string `prefix:name` aparece no código (a regex precisa encontrá-la). 
-  2) Rode `pnpm icons:build` manualmente.
-  3) Confirme se existe o pacote `@iconify-json/<prefix>` instalado.
+  1. Verifique se a string `prefix:name` aparece no código (a regex precisa encontrá-la).
+  2. Rode `pnpm icons:build` manualmente.
+  3. Confirme se existe o pacote `@iconify-json/<prefix>` instalado.
 - "Preciso de um logo específico":
   - Se houver em `@iconify-json/logos`, referencie `logos:nome`. Senão, considere usar um SVG local com `SvgIcon`.
 - "Quero incluir outro prefixo":

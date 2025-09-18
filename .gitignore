@@ -14,6 +14,9 @@ dist-ssr
 *.local
 out
 
+# Iconify generated icons (build-time)
+src/renderer/src/icons/.generated/
+
 
 # Editor directories and files
 .vscode/*
