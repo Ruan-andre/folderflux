@@ -2,7 +2,7 @@
 ipcMain.handle("app:get-version", () => {
   return app.getVersion();
 });
-import { app, shell, BrowserWindow, globalShortcut, Menu, ipcMain } from "electron";
+import { app, shell, BrowserWindow, Menu, ipcMain } from "electron";
 import { autoUpdater } from "electron-updater";
 import log from "electron-log";
 import path, { join } from "path";
@@ -162,6 +162,9 @@ function createMainWindow(): void {
 }
 
 function createAudioWindow() {
+  if (audioWindow && !audioWindow.isDestroyed()) {
+    return;
+  }
   audioWindow = new BrowserWindow({
     show: false,
     webPreferences: {
@@ -212,7 +215,7 @@ function createUpdateWindow(): void {
     }
   });
 
-  updateWindow.on("close", (event) => {
+  updateWindow.on("close", () => {
     updateWindow?.destroy();
   });
 
@@ -308,10 +311,15 @@ if (!gotTheLock) {
     await folderMonitorService.start(db);
     handleFolderPathArgument(process.argv);
 
-    try {
-      createAudioWindow();
-    } catch (error) {
-      console.log(error);
+    // Log simples de memória em DEV para diagnóstico
+    if (is.dev) {
+      setInterval(() => {
+        const mem = process.memoryUsage();
+        log.info(
+          "mem(main)",
+          `rss=${(mem.rss / 1024 / 1024).toFixed(0)}MB heapUsed=${(mem.heapUsed / 1024 / 1024).toFixed(0)}MB`
+        );
+      }, 15000);
     }
   });
 

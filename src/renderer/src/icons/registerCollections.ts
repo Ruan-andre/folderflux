@@ -4,7 +4,10 @@ import type { IconifyJSON } from "@iconify/types";
 
 export function registerIconCollections() {
   // Carrega todos os JSONs gerados dinamicamente da pasta .generated
-  const modules = import.meta.glob("./.generated/*.json", { eager: true }) as Record<string, { default: IconifyJSON } | IconifyJSON>;
+  const modules = import.meta.glob("./.generated/*.json", { eager: true }) as Record<
+    string,
+    { default: IconifyJSON } | IconifyJSON
+  >;
 
   const toJSON = (m: { default: IconifyJSON } | IconifyJSON): IconifyJSON => {
     return (m as { default: IconifyJSON }).default ?? (m as IconifyJSON);
