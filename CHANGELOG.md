@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/Ruan-andre/folderflux/compare/v1.4.0...v1.5.0) (2025-09-18)
+
+
+### Features
+
+* adiciona suporte a ícones offline com geração automática de coleções mínimas ([791cd40](https://github.com/Ruan-andre/folderflux/commit/791cd40ce4431a462b158ca85302b600a57fcf1d))
+
 ## [1.4.0](https://github.com/Ruan-andre/folderflux/compare/v1.3.0...v1.4.0) (2025-09-17)
 
 
