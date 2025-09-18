@@ -1,7 +1,7 @@
 {
   "name": "foldeflux-app",
   "productName": "FolderFlux",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "FolderFlux - Organização inteligente",
   "main": "./out/main/index.js",
   "author": "André Ruan <ruan.fullstack@gmail.com>",
