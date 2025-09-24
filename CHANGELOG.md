@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/Ruan-andre/folderflux/compare/v1.5.0...v1.6.0) (2025-09-24)
+
+
+### Features
+
+* aprimora a lógica de seeds do banco de dados e atualiza regras de backup com novas condições ([309ab9c](https://github.com/Ruan-andre/folderflux/commit/309ab9c5061c130093c57169046acb9a0541e941))
+
 ## [1.5.0](https://github.com/Ruan-andre/folderflux/compare/v1.4.0...v1.5.0) (2025-09-18)
 
 
