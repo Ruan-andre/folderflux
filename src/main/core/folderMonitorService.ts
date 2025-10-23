@@ -133,7 +133,7 @@ class FolderMonitorService {
       if (uniqueFolders.length > 0) {
         this.process("folders", uniqueFolders);
         this.monitor.add(uniqueFolders);
-        this.watchedFolders.intersection(new Set(uniqueFolders));
+        uniqueFolders.forEach((f) => this.watchedFolders.add(f));
       }
     }
   }
@@ -167,14 +167,12 @@ class FolderMonitorService {
           );
           for (const profile of associatedProfiles) {
             const activeRules = profile.rules.filter((r) => r.isActive);
+            // Somente as pastas que pertencem ao perfil atual devem ser processadas
+            const profileDirSet = new Set(profile.folders.map((f) => f.fullPath));
+            const dirsForProfile = Array.from(dirnames).filter((d) => profileDirSet.has(d));
+            if (dirsForProfile.length === 0) continue;
 
-            await RuleEngine.process(
-              this.db,
-              activeRules,
-              Array.from(dirnames),
-              profile.name,
-              this.onLogAdded
-            );
+            await RuleEngine.process(this.db, activeRules, dirsForProfile, profile.name, this.onLogAdded);
           }
         }
       }
