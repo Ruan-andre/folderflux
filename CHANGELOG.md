@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/Ruan-andre/folderflux/compare/v1.6.0...v1.6.1) (2025-10-28)
+
+
+### Bug Fixes
+
+* substitui chamada direta para defaultOrganization por execução em worker para poder gerar registro de log ([a21c038](https://github.com/Ruan-andre/folderflux/commit/a21c0380eead8ac90b3610126aa2006e22d46560))
+
 ## [1.6.0](https://github.com/Ruan-andre/folderflux/compare/v1.5.0...v1.6.0) (2025-09-24)
 
 
