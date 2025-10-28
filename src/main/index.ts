@@ -21,8 +21,7 @@ import { registerChokidarHandlers } from "./handlers/system/chokidar";
 import { folderMonitorService } from "./core/folderMonitorService";
 import { createTray } from "./tray";
 import { syncAppSettings } from "./services/domain/settingsService";
-import { defaultOrganization } from "./core/organizationService";
-import { registerWorkerHandlers } from "./handlers/workers";
+import { registerWorkerHandlers, runTaskInWorker } from "./handlers/workers";
 import { db } from "../db";
 import { registerEmitterHandlers } from "./handlers/emitter";
 import { registerAudioPlayerHandlers } from "./handlers/audio-player";
@@ -332,7 +331,7 @@ if (!gotTheLock) {
     );
 
     if (folderPath && mainWindow) {
-      defaultOrganization(db, [folderPath]);
+      runTaskInWorker("defaultOrganization", { paths: [folderPath] });
     }
   }
   app.on("quit", () => {
