@@ -95,8 +95,9 @@ export async function createFullProfile(
   }
 }
 
-export async function getAllProfiles(db: DbOrTx): Promise<DbResponse<FullProfile[]>> {
+export async function getAllProfiles(db: DbOrTx, active?: boolean): Promise<DbResponse<FullProfile[]>> {
   const profilesWithRelations = await db.query.ProfileTable.findMany({
+    where: active !== undefined ? eq(ProfileTable.isActive, active) : undefined,
     with: {
       profileFolders: { with: { folder: true } },
       profileRules: { with: { rule: { with: { conditionsTree: true, action: true } } } },

@@ -158,7 +158,7 @@ const api = {
   },
   ElectronUpdater: {
     onUpdateDownloaded: (callback: () => void) => {
-      const listener = (event: IpcRendererEvent, ...args: any[]) => callback();
+      const listener = () => callback();
       ipcRenderer.on("update-downloaded", listener);
       return () => {
         ipcRenderer.removeListener("update-downloaded", listener);

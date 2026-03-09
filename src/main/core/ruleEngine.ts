@@ -157,7 +157,7 @@ export default class RuleEngine {
     onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void
   ): Promise<DbResponse<number>> {
     try {
-      const profiles = (await getAllProfiles(db)).items;
+      const profiles = (await getAllProfiles(db, true)).items;
 
       if (!profiles || profiles.length === 0) {
         return createResponse(true, "Nenhum perfil encontrado.", 0);
