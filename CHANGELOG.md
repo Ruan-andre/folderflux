@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.2](https://github.com/Ruan-andre/folderflux/compare/v1.6.1...v1.6.2) (2026-03-09)
+
+
+### Bug Fixes
+
+* ajusta a função getAllProfiles para aceitar parâmetro de atividade e modifica chamada em process ([a1ff60d](https://github.com/Ruan-andre/folderflux/commit/a1ff60d0bae6bbbb0f2222a1894717444bf2d665))
+* corrige listener de atualização para evitar argumentos desnecessários ([a1ff60d](https://github.com/Ruan-andre/folderflux/commit/a1ff60d0bae6bbbb0f2222a1894717444bf2d665))
+
 ## [1.6.1](https://github.com/Ruan-andre/folderflux/compare/v1.6.0...v1.6.1) (2025-10-28)
 
 
