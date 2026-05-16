@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.3](https://github.com/Ruan-andre/folderflux/compare/v1.6.2...v1.6.3) (2026-05-16)
+
+
+### Bug Fixes
+
+* atualiza URL do vídeo para o portfolio ([e3a1e95](https://github.com/Ruan-andre/folderflux/commit/e3a1e957d4cf28695c9b6d093d968de103ccd5d5))
+
 ## [1.6.2](https://github.com/Ruan-andre/folderflux/compare/v1.6.1...v1.6.2) (2026-03-09)
 
 
