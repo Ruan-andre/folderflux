@@ -6,6 +6,14 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'portfolio-content/**'
+      - '.github/**'
+      - '.vscode/**'
+      - '.gitignore'
+      - 'README.md'
+      - 'PRIVACY.md'
+      - 'TERMS.md'
 
 # Tarefa (Job)
 jobs:
