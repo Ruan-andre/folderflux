@@ -22,6 +22,7 @@ import {
 import Link from "@mui/material/Link";
 import Chip from "@mui/material/Chip";
 import Icon from "../assets/icons";
+import { useUpdateStore } from "../store/updateStore";
 
 type ChangelogModalProps = {
   open: boolean;
@@ -188,6 +189,15 @@ const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
   const [releases, setReleases] = useState<Release[]>([]);
   const [offline, setOffline] = useState<boolean>(false);
   const [appVersion, setAppVersion] = useState<string | null>(null);
+  
+  const isUpdateAvailable = useUpdateStore((state) => state.isUpdateAvailable);
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isUpdateAvailable) {
+      setIsCheckingUpdate(false);
+    }
+  }, [isUpdateAvailable]);
 
   useEffect(() => {
     if (!open) return;
@@ -320,7 +330,40 @@ const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
                       <Chip label="Versão atual" size="small" color="success" />
                     )}
                     {idx === 0 && normalize(rel.tag_name) !== normalizedApp && (
-                      <Chip label="Mais recente" size="small" color="primary" />
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: "wrap", gap: 1 }}>
+                        <Chip label="Mais recente" size="small" color="primary" />
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color={isUpdateAvailable ? "success" : "info"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isUpdateAvailable) {
+                              window.api.ElectronUpdater.installUpdate();
+                            } else {
+                              setIsCheckingUpdate(true);
+                              window.api.ElectronUpdater.checkForUpdates();
+                              setTimeout(() => setIsCheckingUpdate(false), 5000);
+                            }
+                          }}
+                          disabled={isCheckingUpdate}
+                          startIcon={
+                            isCheckingUpdate ? (
+                              <CircularProgress size={14} color="inherit" />
+                            ) : (
+                              <Icon icon={isUpdateAvailable ? "line-md:downloading-loop" : "mdi:cloud-download"} width="16" height="16" color="white" />
+                            )
+                          }
+                          sx={{ ml: 1, textTransform: "none", py: 0.2, fontSize: "1.2rem" }}
+                        >
+                          {isCheckingUpdate 
+                            ? "Buscando/Baixando..." 
+                            : isUpdateAvailable 
+                              ? "Instalar Atualização" 
+                              : "Baixar e Instalar"
+                          }
+                        </Button>
+                      </Stack>
                     )}
                   </Stack>
                   {rel.name && rel.name.trim() !== rel.tag_name.trim() && (
