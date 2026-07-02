@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.8.0](https://github.com/Ruan-andre/folderflux/compare/v1.7.0...v1.8.0) (2026-07-02)
+
+
+### Features
+
+* **update:** adicionar verificação periódica de atualizações em segundo plano a cada 1 hora ([42e16eb](https://github.com/Ruan-andre/folderflux/commit/42e16eb220a3ba350f2e392ee5dcf69c23326543))
+* **update:** expor canal IPC check-for-updates para solicitação manual de atualização ([ba6f04f](https://github.com/Ruan-andre/folderflux/commit/ba6f04ffbf148ffa1ef67421c077667791fa9c5e))
+* **update:** implementar botão reativo de download/instalação no histórico de versões ([0c92465](https://github.com/Ruan-andre/folderflux/commit/0c924658368ab125acda1f709774c392983d1285))
+
 ## [1.7.0](https://github.com/Ruan-andre/folderflux/compare/v1.6.2...v1.7.0) (2026-07-02)
 
 
