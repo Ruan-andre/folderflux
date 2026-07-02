@@ -32,3 +32,26 @@ export function formatSmartTime(date: Date | string | number): string {
 
   return format(dateToFormat, "dd/MM/yyyy");
 }
+
+export function maskDate(value: string): string {
+  let v = value.replace(/\D/g, "");
+  if (v.length > 8) v = v.slice(0, 8);
+  if (v.length >= 5) v = `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`;
+  else if (v.length >= 3) v = `${v.slice(0, 2)}/${v.slice(2)}`;
+  return v;
+}
+
+export function isValidDate(dateStr: string): boolean {
+  if (dateStr.length !== 10) return false;
+  const [d, m, y] = dateStr.split("/");
+  const numY = Number(y);
+  if (numY < 1900 || numY > 9999) return false;
+  const date = new Date(numY, Number(m) - 1, Number(d));
+  return date.getFullYear() === numY && date.getMonth() === Number(m) - 1 && date.getDate() === Number(d);
+}
+
+export function convertToApiFormat(dateStr: string): string | undefined {
+  if (!isValidDate(dateStr)) return undefined;
+  const [d, m, y] = dateStr.split("/");
+  return `${y}-${m}-${d}`;
+}
