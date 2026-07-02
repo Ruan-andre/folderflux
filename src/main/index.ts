@@ -275,6 +275,16 @@ if (!gotTheLock) {
 
     createMainWindow();
     createUpdateWindow();
+
+    setInterval(async () => {
+      try {
+        log.info("Iniciando verificação periódica de atualizações em segundo plano...");
+        await autoUpdater.checkForUpdates();
+      } catch (error) {
+        log.error("Erro na verificação periódica de atualizações em segundo plano:", error);
+      }
+    }, 60 * 60 * 1000);
+
     try {
       createAudioWindow();
     } catch (error) {
