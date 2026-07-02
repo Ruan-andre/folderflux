@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.7.0](https://github.com/Ruan-andre/folderflux/compare/v1.6.2...v1.7.0) (2026-07-02)
+
+
+### Features
+
+* **deps:** adicionar dependência Recharts para visualizações de relatórios ([926ddbd](https://github.com/Ruan-andre/folderflux/commit/926ddbdcc98f43d468bbd743390f282e620c7c14))
+* **report:** atualizar IPC e Preload para suportar logs paginados com filtros tipados ([13ff076](https://github.com/Ruan-andre/folderflux/commit/13ff0764a8e8860bfad4e9dec58484b9a68fbbd6))
+* **report:** criar tipos e utilitários de data compartilhados para relatórios ([cf51ec6](https://github.com/Ruan-andre/folderflux/commit/cf51ec65c4520942c1b79509ed0d933bbc89beec))
+* **report:** implementar tela de relatórios com paginação, filtros e checkboxes dinâmicos ([33038ec](https://github.com/Ruan-andre/folderflux/commit/33038ecab83dc7e4b67fd34f6b7cf2e90f4b481e))
+* **report:** otimizar serviço de logs com filtragem nativa e utilitários compartilhados ([cc83bf8](https://github.com/Ruan-andre/folderflux/commit/cc83bf82b5f922befe4e15cdf0d9aad39162c86c))
+
+
+### Bug Fixes
+
+* adiciona paths-ignore no workflow de release para evitar execuções desnecessárias ([70cdaa1](https://github.com/Ruan-andre/folderflux/commit/70cdaa1808c42cb0d03d98ee37555da4846949eb))
+* atualiza URL do vídeo para o portfolio ([e3a1e95](https://github.com/Ruan-andre/folderflux/commit/e3a1e957d4cf28695c9b6d093d968de103ccd5d5))
+
 ## [1.6.2](https://github.com/Ruan-andre/folderflux/compare/v1.6.1...v1.6.2) (2026-03-09)
 
 
