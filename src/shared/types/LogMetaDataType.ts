@@ -26,5 +26,25 @@ interface ErrorMetadata extends BaseLogMetadata {
 
 type LogTypes = "organization" | "cleanup" | "error";
 
+export interface ReportStatsFilters {
+  startDate?: string;
+  endDate?: string;
+  searchTerm?: string;
+  type?: LogTypes;
+}
+
+export interface ReportStats {
+  totalOrganized: number;
+  totalCleaned: number;
+  totalSpaceFreedMB: string;
+  totalErrors: number;
+  chartData: {
+    date: string;
+    Organizados: number;
+    Excluidos: number;
+    Falhas: number;
+  }[];
+}
+
 export type LogMetadata = OrganizationMetadata | CleanupMetadata | ErrorMetadata;
 export type { OrganizationMetadata, CleanupMetadata, ErrorMetadata, LogTypes };
