@@ -6,7 +6,7 @@ import { DbResponse } from "../shared/types/DbResponse";
 import { FullProfile, NewFullProfile } from "../shared/types/ProfileWithDetails";
 import { FullRule, NewFullRulePayload } from "../shared/types/RuleWithDetails";
 import { PathStats } from "../shared/types/pathStatsType";
-import { LogMetadata } from "../shared/types/LogMetaDataType";
+import { LogMetadata, ReportStatsFilters, ReportStats } from "../shared/types/LogMetaDataType";
 import { FullFolder } from "../shared/types/FolderWithDetails";
 
 declare global {
@@ -134,8 +134,10 @@ const api = {
       paths: string[]
     ): Promise<DbResponse<number>> =>
       ipcRenderer.invoke("worker:organizeWithSelectedProfiles", profiles, paths),
-    getLogs: async (lastId?: number): Promise<DbResponse<LogMetadata[]>> =>
-      ipcRenderer.invoke("get-logs", lastId),
+    getLogs: async (lastId?: number, filters?: ReportStatsFilters): Promise<DbResponse<LogMetadata[]>> =>
+      ipcRenderer.invoke("get-logs", lastId, filters),
+    getReportStats: async (filters?: ReportStatsFilters): Promise<DbResponse<ReportStats>> =>
+      ipcRenderer.invoke("get-report-stats", filters),
     getLogsFromTourCount: (): Promise<number> => ipcRenderer.invoke("get-logs-from-tour-count"),
     deleteLogById: async (logId: number): Promise<DbResponse<void>> =>
       ipcRenderer.invoke("delete-log-by-id", logId),

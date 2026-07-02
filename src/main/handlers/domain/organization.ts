@@ -4,12 +4,19 @@ import {
   deleteLogById,
   getLogs,
   getLogsFromTourCount,
+  getReportStats,
 } from "../../services/domain/organizationLogsService";
 import { db } from "../../../db";
 
+import { ReportStatsFilters } from "../../../shared/types/LogMetaDataType";
+
 export function registerOrganizationHandlers() {
-  ipcMain.handle("get-logs", async (_e, lastId?: number) => {
-    return await getLogs(db, lastId);
+  ipcMain.handle("get-logs", async (_e, lastId?: number, filters?: ReportStatsFilters) => {
+    return await getLogs(db, lastId, filters);
+  });
+
+  ipcMain.handle("get-report-stats", async (_e, filters?: ReportStatsFilters) => {
+    return await getReportStats(db, filters);
   });
 
   ipcMain.handle("get-logs-from-tour-count", async () => {
