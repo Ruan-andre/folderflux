@@ -66,6 +66,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.5.3",
+    "recharts": "^3.8.1",
     "shepherd.js": "^14.5.1",
     "use-immer": "^0.11.0",
     "vite-plugin-electron": "^0.29.0",
