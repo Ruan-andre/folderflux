@@ -94,4 +94,11 @@ export function registerElectronUpdaterHandlers(
     mainWindow?.hide();
     autoUpdater.quitAndInstall(true, true);
   });
+
+  ipcMain.on("check-for-updates", () => {
+    log.info("Verificação manual de atualizações solicitada via IPC.");
+    autoUpdater.checkForUpdates().catch((err) => {
+      log.error("Erro ao verificar atualizações via IPC manual:", err);
+    });
+  });
 }

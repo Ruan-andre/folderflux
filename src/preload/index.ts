@@ -167,6 +167,7 @@ const api = {
       };
     },
     installUpdate: () => ipcRenderer.send("install-update"),
+    checkForUpdates: () => ipcRenderer.send("check-for-updates"),
   },
 };
 // Use `contextBridge` APIs to expose Electron APIs to
