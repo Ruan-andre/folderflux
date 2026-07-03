@@ -14,20 +14,22 @@ export function registerElectronUpdaterHandlers(
     log.info("Update available.", info);
     const autoUpdateSetting = await getSettingStatusByType(db, "autoUpdate");
     if (!autoUpdateSetting) {
-      if (updateWindow) {
+      const isStartup = updateWindow && !updateWindow.isDestroyed();
+      if (isStartup) {
         updateWindow?.close();
+        mainWindow?.show();
       }
-      if (mainWindow) {
-        mainWindow.show();
-        mainWindow?.webContents.send("update-available", info.version);
-      }
+      mainWindow?.webContents.send("update-available", info.version);
     }
   });
 
   autoUpdater.on("update-not-available", () => {
     log.info("Update not available.");
-    updateWindow?.close();
-    mainWindow?.show();
+    const isStartup = updateWindow && !updateWindow.isDestroyed();
+    if (isStartup) {
+      updateWindow?.close();
+      mainWindow?.show();
+    }
   });
 
   autoUpdater.on("update-downloaded", async (info) => {
@@ -49,8 +51,10 @@ export function registerElectronUpdaterHandlers(
         } else {
           mainWindow.webContents.send("update-downloaded");
         }
-        if (updateWindow) {
-          updateWindow.close();
+        
+        const isStartup = updateWindow && !updateWindow.isDestroyed();
+        if (isStartup) {
+          updateWindow?.close();
         }
       }
     } else {
@@ -62,13 +66,18 @@ export function registerElectronUpdaterHandlers(
   autoUpdater.on("error", (err) => {
     log.error("Erro no autoUpdater: ", err);
 
-  
+    const isStartup = updateWindow && !updateWindow.isDestroyed();
+
     const resumeMain = () => {
       try {
         if (!mainWindow || mainWindow.isDestroyed()) return;
-        if (mainWindow.isMinimized()) mainWindow.restore();
-        if (!mainWindow.isVisible()) mainWindow.show();
-        mainWindow.focus();
+        
+        if (isStartup) {
+          if (mainWindow.isMinimized()) mainWindow.restore();
+          if (!mainWindow.isVisible()) mainWindow.show();
+          mainWindow.focus();
+        }
+        
         mainWindow.webContents.send("update-error", {
           message: err instanceof Error ? err.message : String(err),
         });
