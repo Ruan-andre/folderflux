@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/Ruan-andre/folderflux/compare/v1.8.0...v1.8.1) (2026-07-03)
+
+
+### Bug Fixes
+
+* **update:** silenciar exibição/foco de janelas durante checagens em segundo plano ([740cb9e](https://github.com/Ruan-andre/folderflux/commit/740cb9e1f98aab266519df3bb9971e4f711ff655))
+
 ## [1.8.0](https://github.com/Ruan-andre/folderflux/compare/v1.7.0...v1.8.0) (2026-07-02)
 
 
