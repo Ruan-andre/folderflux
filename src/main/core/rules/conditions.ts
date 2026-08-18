@@ -19,12 +19,17 @@ const diffDays = (value: ItemValue): number => (Date.now() - toDate(value).getTi
 const isSameDay = (a: Date, b: Date): boolean =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
+const parseDateLocal = (value: string): Date => {
+  const [y, m, d] = value.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
 const dateEvaluators: Record<string, EvaluatorFunc> = {
   // Compara o dia do calendário: o usuário informa uma data, o item tem
   // data e hora. Comparar o timestamp exato nunca casaria com nada.
   equals: (itemValue, value) => {
     if (!itemValue || !value) return false;
-    return isSameDay(toDate(itemValue), new Date(value));
+    return isSameDay(toDate(itemValue), parseDateLocal(value));
   },
   isBetween: (itemValue, value, value2) => {
     if (!value || !value2) return false;

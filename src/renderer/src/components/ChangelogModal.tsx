@@ -416,7 +416,7 @@ const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
         ))}
       </Stack>
     );
-  }, [loading, error, releases]);
+  }, [loading, error, releases, appVersion, isCheckingUpdate, isUpdateAvailable, offline]);
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
