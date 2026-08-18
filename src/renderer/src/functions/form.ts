@@ -3,22 +3,31 @@ let tempElement: HTMLElement | undefined;
 
 export const formHelper = {
   htmlInputFocus: (inputId: string, borderColor?: string) => {
-    const element = document.getElementById(inputId) as HTMLInputElement;
-    if (element) element.focus();
-    const nextSibling = element.nextElementSibling as HTMLElement;
+    const element = document.getElementById(inputId) as HTMLInputElement | null;
+    if (!element) return;
+
+    element.focus();
+
+    const nextSibling = element.nextElementSibling as HTMLElement | null;
+    if (!nextSibling) {
+      if (borderColor) formHelper.htmlElementBorderChange(inputId, borderColor);
+      return;
+    }
+
     nextSibling.id = crypto.randomUUID();
     tempElement = nextSibling;
-    if (borderColor) formHelper.htmlElementBorderChange(tempElement?.id, borderColor);
+    if (borderColor) formHelper.htmlElementBorderChange(nextSibling.id, borderColor);
   },
-  htmlElementBorderChange: (id: string, color: string = "red") => {
-    const element = document.getElementById(id!) as HTMLElement;
-    if (element) {
-      borderStyle = element.style.border;
-      element.style.border = `1px solid ${color}`;
 
-      if (tempElement) tempElement.parentElement?.addEventListener("mouseenter", restoreBorderColor);
-      else element.addEventListener("mouseenter", restoreBorderColor);
-    }
+  htmlElementBorderChange: (id: string, color: string = "red") => {
+    const element = document.getElementById(id) as HTMLElement | null;
+    if (!element) return;
+
+    borderStyle = element.style.border;
+    element.style.border = `1px solid ${color}`;
+
+    if (tempElement) tempElement.parentElement?.addEventListener("mouseenter", restoreBorderColor);
+    else element.addEventListener("mouseenter", restoreBorderColor);
   },
 };
 

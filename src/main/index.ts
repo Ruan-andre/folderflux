@@ -1,8 +1,4 @@
-// Handler para expor a versão do app para o renderer
-ipcMain.handle("app:get-version", () => {
-  return app.getVersion();
-});
-import { app, shell, BrowserWindow, Menu, ipcMain } from "electron";
+import { app, shell, BrowserWindow, Menu } from "electron";
 import { autoUpdater } from "electron-updater";
 import log from "electron-log";
 import path, { join } from "path";
@@ -29,6 +25,7 @@ import { registerTtsHandlers } from "./handlers/tts";
 import { registerTourHandlers } from "./handlers/domain/tour";
 import { registerElectronStoreHandlers } from "./handlers/electron/electronStore";
 import { registerElectronUpdaterHandlers } from "./handlers/electron/electron-updater";
+import { registerAppHandlers } from "./handlers/app";
 import fs from "fs";
 
 log.transports.file.level = "info";
@@ -36,12 +33,17 @@ autoUpdater.logger = log;
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = false;
 
+const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
+const MEMORY_LOG_INTERVAL_MS = 15 * 1000;
+const SHOW_WINDOW_RETRY_DELAY_MS = 150;
+const SHOW_WINDOW_MAX_RETRIES = 10;
+
 let mainWindow: BrowserWindow | null = null;
 let audioWindow: BrowserWindow | null = null;
 let updateWindow: BrowserWindow | null = null;
 let isQuitting = false;
 
-function showMainWindowSafely(message?: string, retries = 10) {
+function showMainWindowSafely(message?: string, retries = SHOW_WINDOW_MAX_RETRIES) {
   const tryShow = () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMinimized()) mainWindow.restore();
@@ -54,7 +56,7 @@ function showMainWindowSafely(message?: string, retries = 10) {
 
   if (tryShow()) return;
   if (retries > 0) {
-    setTimeout(() => showMainWindowSafely(message, retries - 1), 150);
+    setTimeout(() => showMainWindowSafely(message, retries - 1), SHOW_WINDOW_RETRY_DELAY_MS);
   } else {
     log.warn("Não foi possível exibir a janela principal após falha no verificador de atualização.");
   }
@@ -84,7 +86,7 @@ function setupTutorialFiles() {
     console.log(
       "Pasta de tutorial já existe. Apagando e copiando tudo novamente por precaução, processo rápido."
     );
-    fs.unlinkSync(destPath);
+    fs.rmSync(destPath, { recursive: true, force: true });
   }
 
   const sourcePath = path.join(process.resourcesPath, "tutorial-examples");
@@ -105,12 +107,6 @@ export function setQuitting(value: boolean) {
 export function getQuitting() {
   return isQuitting;
 }
-
-// Atalhos globais removidos. Use listener no renderer para F5/CTRL+R e envie IPC para recarregar a janela.
-ipcMain.on("window:reload", (event) => {
-  const win = BrowserWindow.fromWebContents(event.sender);
-  if (win) win.reload();
-});
 
 function createMainWindow(): void {
   const favicon = app.isPackaged
@@ -283,7 +279,7 @@ if (!gotTheLock) {
       } catch (error) {
         log.error("Erro na verificação periódica de atualizações em segundo plano:", error);
       }
-    }, 60 * 60 * 1000);
+    }, UPDATE_CHECK_INTERVAL_MS);
 
     try {
       createAudioWindow();
@@ -297,9 +293,7 @@ if (!gotTheLock) {
       if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
     });
 
-    ipcMain.handle("app:is-packaged", () => {
-      return app.isPackaged;
-    });
+    registerAppHandlers();
     registerElectronStoreHandlers();
     registerRuleHandlers();
     registerDialogHandlers();
@@ -328,7 +322,7 @@ if (!gotTheLock) {
           "mem(main)",
           `rss=${(mem.rss / 1024 / 1024).toFixed(0)}MB heapUsed=${(mem.heapUsed / 1024 / 1024).toFixed(0)}MB`
         );
-      }, 15000);
+      }, MEMORY_LOG_INTERVAL_MS);
     }
   });
 
