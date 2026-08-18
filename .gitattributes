@@ -1,0 +1,36 @@
+# Finais de linha
+#
+# O repositório guarda tudo em LF. No working tree, o Git entrega o formato
+# nativo do sistema (CRLF no Windows) e normaliza de volta ao comitar.
+#
+# Sem este arquivo, um clone no Windows faz o `git status` mostrar centenas de
+# arquivos "modificados" que só diferem no CRLF — o que esconde as alterações
+# reais no meio do ruído.
+* text=auto
+
+# Arquivos que devem ficar em LF em qualquer sistema (scripts e formatos que
+# quebram ou geram diff instável com CRLF).
+*.sh        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+pnpm-lock.yaml text eol=lf merge=binary
+
+# Binários — nunca aplicar conversão nem tentar merge textual
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.icns   binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.onnx   binary
+*.exe    binary
+*.dll    binary
+*.node   binary
+*.db     binary
+*.sqlite binary
+
+# Estatísticas de linguagem do GitHub: não contar código gerado
+src/db/migrations/** linguist-generated=true

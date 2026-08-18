@@ -1,0 +1,9 @@
+node_modules
+out
+dist
+release
+pnpm-lock.yaml
+resources
+src/db/migrations
+src/renderer/src/icons/.generated
+CHANGELOG.md

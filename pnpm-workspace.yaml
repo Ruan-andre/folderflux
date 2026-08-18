@@ -1,7 +1,15 @@
-ignoredBuiltDependencies:
-  - '@scarf/scarf'
-
-onlyBuiltDependencies:
-  - better-sqlite3
-  - electron
-  - esbuild
+# Aprovação de scripts de build de dependências.
+#
+# No pnpm 11 o `allowBuilds` substituiu `onlyBuiltDependencies`,
+# `ignoredBuiltDependencies`, `neverBuiltDependencies`, `onlyBuiltDependenciesFile`
+# e `ignoreDepScripts`. É um mapa nome -> booleano, e o install falha com
+# ERR_PNPM_IGNORED_BUILDS enquanto houver pacote pendente de decisão.
+allowBuilds:
+  # Módulo nativo: sem o rebuild o app não abre o banco.
+  better-sqlite3: true
+  # O postinstall baixa o binário do Electron.
+  electron: true
+  # O postinstall instala o binário da plataforma, usado pelo Vite.
+  esbuild: true
+  # Telemetria da Scarf: sem função no produto.
+  "@scarf/scarf": false
