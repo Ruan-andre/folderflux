@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.9.1](https://github.com/Ruan-andre/folderflux/compare/v1.9.0...v1.9.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **build:** corrigir alias ~ no Vite para apontar para a raiz do projeto ([8266ad2](https://github.com/Ruan-andre/folderflux/commit/8266ad2464c19a7b6757eceb953b90a7160b018e))
+* corrigir bug de timezone em creationDate/equals e deps ausentes no useMemo do ChangelogModal ([bd86844](https://github.com/Ruan-andre/folderflux/commit/bd86844770d348ce413caa6afef42210fe3f8150))
+
 ## [1.9.0](https://github.com/Ruan-andre/folderflux/compare/v1.8.1...v1.9.0) (2026-08-18)
 
 
