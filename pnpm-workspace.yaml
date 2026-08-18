@@ -13,3 +13,9 @@ allowBuilds:
   esbuild: true
   # Telemetria da Scarf: sem função no produto.
   "@scarf/scarf": false
+
+# Força node-abi 4.x para que @electron/rebuild consiga detectar o ABI
+# do Electron 43. O electron-builder traz node-abi 3.x que não tem esse
+# mapeamento.
+overrides:
+  node-abi: "^4.33.0"
