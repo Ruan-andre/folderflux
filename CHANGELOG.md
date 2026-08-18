@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.0](https://github.com/Ruan-andre/folderflux/compare/v1.8.1...v1.9.0) (2026-08-18)
+
+
+### Features
+
+* **rules:** suportar regras aplicadas a pastas ([75454ce](https://github.com/Ruan-andre/folderflux/commit/75454cee846dfa92e4f184680ee3407f31cd741e))
+
+
+### Bug Fixes
+
+* **fs:** propagar erros de filesystem em vez de engoli-los ([bfbdd0d](https://github.com/Ruan-andre/folderflux/commit/bfbdd0d40ec49fbe126a7c39f00fd0d7918f15fb))
+
 ## [1.8.1](https://github.com/Ruan-andre/folderflux/compare/v1.8.0...v1.8.1) (2026-07-03)
 
 
