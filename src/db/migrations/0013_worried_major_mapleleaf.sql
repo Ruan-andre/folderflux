@@ -1,0 +1,1 @@
+ALTER TABLE `rules` ADD `target_type` text DEFAULT 'file' NOT NULL;

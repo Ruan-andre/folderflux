@@ -11,6 +11,9 @@ export const RuleTable = sqliteTable("rules", {
   id: integer("id").primaryKey(),
   name: text("name").notNull().unique(),
   description: text("description", { length: 255 }),
+  targetType: text("target_type", { enum: ["file", "directory"] })
+    .notNull()
+    .default("file"),
   isSystem: integer("is_system", { mode: "boolean" }).notNull().default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   fromTour: integer("from_tour", { mode: "boolean" }).default(false),

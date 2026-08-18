@@ -8,6 +8,7 @@ import { useTourStore } from "../../store/tourStore";
 type ConditionGroupProps = {
   group: IConditionGroup;
   parentId?: string | number;
+  targetType?: "file" | "directory";
   onUpdateNode: (
     nodeId: string | number,
     parentId: string | number,
@@ -17,11 +18,18 @@ type ConditionGroupProps = {
   onRemoveNode: (nodeId: string | number, parentId: string | number) => void;
 };
 
-const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode }: ConditionGroupProps) => {
+const ConditionGroup = ({
+  group,
+  parentId,
+  targetType,
+  onUpdateNode,
+  onAddNode,
+  onRemoveNode,
+}: ConditionGroupProps) => {
   const tourNext = useTourStore((state) => state.tourNext);
   const isTourActive = useTourStore((state) => state.isTourActive);
   const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
-  
+
   const handleOperatorChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const effectiveParentId = parentId ?? "root";
@@ -100,6 +108,7 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
                 key={child.id}
                 group={child}
                 parentId={group.id}
+                targetType={targetType}
                 onUpdateNode={onUpdateNode}
                 onAddNode={onAddNode}
                 onRemoveNode={onRemoveNode}
@@ -110,6 +119,7 @@ const ConditionGroup = ({ group, parentId, onUpdateNode, onAddNode, onRemoveNode
               <ConditionInput
                 key={child.id}
                 condition={child}
+                targetType={targetType}
                 onChange={(updatedCondition) => onUpdateNode(child.id, group.id, updatedCondition)}
                 onRemove={() => onRemoveNode(child.id, group.id)}
               />

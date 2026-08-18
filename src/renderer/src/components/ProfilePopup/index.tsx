@@ -365,7 +365,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 placeholder="Ex: Trabalho, Celular, Casa"
                 label="Nome do Perfil"
                 inputSize="small"
-                maxLength={25}
+                maxLength={50}
                 required
               />
 
@@ -378,7 +378,7 @@ const ProfilePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 multiline
                 rows={2}
                 inputSize="small"
-                maxLength={100}
+                maxLength={200}
               />
 
               <Box>

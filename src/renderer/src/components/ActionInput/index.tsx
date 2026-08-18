@@ -6,20 +6,28 @@ import { ActionSchema, NewAction } from "~/src/db/schema";
 type ActionInputProps = {
   action: ActionSchema | NewAction;
   onChange: (updated: ActionSchema | NewAction) => void;
+  targetType?: "file" | "directory";
 };
 
 type optionsType = {
   label: string;
   value: "move" | "copy" | "rename" | "delete";
 };
-const options: optionsType[] = [
+const fileOptions: optionsType[] = [
   { label: "Mover para pasta", value: "move" },
   { label: "Copiar para pasta", value: "copy" },
   { label: "Renomear arquivo", value: "rename" },
   { label: "Excluir arquivo", value: "delete" },
 ];
+const dirOptions: optionsType[] = [
+  { label: "Mover pasta", value: "move" },
+  { label: "Copiar pasta", value: "copy" },
+  { label: "Renomear pasta", value: "rename" },
+  { label: "Excluir pasta", value: "delete" },
+];
 
-const ActionInput = ({ action, onChange }: ActionInputProps) => {
+const ActionInput = ({ action, onChange, targetType = "file" }: ActionInputProps) => {
+  const options = targetType === "directory" ? dirOptions : fileOptions;
   const handleChangeOption = (typeSelected: string) => {
     onChange({ ...action, type: typeSelected as optionsType["value"] });
   };

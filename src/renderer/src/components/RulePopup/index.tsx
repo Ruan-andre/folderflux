@@ -57,9 +57,12 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
   const isTourActive = useTourStore((state) => state.isTourActive());
 
+  const [targetType, setTargetType] = useState<"file" | "directory">("file");
+
   const [initialData, setInitialData] = useState<{
     name: string;
     description: string;
+    targetType: "file" | "directory";
     rootGroup: IConditionGroup;
     action: NewAction;
   } | null>(null);
@@ -69,6 +72,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       if (ruleToEdit) {
         // MODO EDIÇÃO
         resetRuleForm({ name: ruleToEdit.name, description: ruleToEdit.description ?? "" });
+        setTargetType(ruleToEdit.targetType ?? "file");
         setRootGroup(ruleToEdit.conditionsTree);
         setAction(ruleToEdit.action);
         // Guarda o estado inicial para comparação
@@ -77,6 +81,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           cloneDeep({
             name: ruleToEdit.name,
             description: ruleToEdit.description ?? "",
+            targetType: ruleToEdit.targetType ?? "file",
             rootGroup: ruleToEdit.conditionsTree,
             action: actionClone,
           })
@@ -84,11 +89,13 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       } else {
         // MODO CRIAÇÃO
         resetRuleForm({ name: "", description: "" });
+        setTargetType("file");
         setRootGroup(initialTreeState);
         resetActionForm(initialActionState);
         setInitialData({
           name: "",
           description: "",
+          targetType: "file",
           rootGroup: initialTreeState,
           action: initialActionState,
         });
@@ -100,7 +107,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
     // Validação
     if (!isTourActive && !validate()) return;
 
-    const currentData = { name, description, rootGroup, action };
+    const currentData = { name, description, targetType, rootGroup, action };
 
     let rootGroupTour;
     let actionTour;
@@ -136,6 +143,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
           ...ruleToEdit,
           name: currentData.name,
           description: currentData.description,
+          targetType: currentData.targetType,
           action: currentData.action as ActionSchema,
           conditionsTree: currentData.rootGroup,
         };
@@ -145,7 +153,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
       } else {
         // --- LÓGICA DE CRIAÇÃO ---
         const payload: NewFullRulePayload = {
-          rule: { name, description, isActive: true, isSystem: false },
+          rule: { name, description, targetType, isActive: true, isSystem: false },
           conditionsTree: rootGroup,
           action: action as NewAction,
         };
@@ -253,7 +261,7 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 value={name}
                 onChangeInput={(e) => setName(e.target.value)}
                 required
-                maxLength={65}
+                maxLength={130}
               />
               <GenericInput
                 id="ruleDescription"
@@ -261,20 +269,36 @@ const RulePopup = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
                 label="Descrição"
                 placeholder="Descreva o que esta regra faz"
                 multiline
-                maxLength={110}
+                maxLength={220}
                 rows={2}
                 value={description}
                 onChangeInput={(e) => setDescription(e.target.value)}
+              />
+              <GenericInput
+                id="targetTypeSelect"
+                name="targetTypeSelect"
+                select
+                label="Aplicar a"
+                value={targetType}
+                selectOptions={[
+                  { label: "Arquivos", value: "file" },
+                  { label: "Pastas", value: "directory" },
+                ]}
+                onChangeInput={(e) => {
+                  setTargetType(e.target.value as "file" | "directory");
+                  setRootGroup(cloneDeep(initialTreeState));
+                }}
               />
             </Box>
             <ConditionGroupComponent
               group={rootGroup}
               parentId="root"
+              targetType={targetType}
               onAddNode={conditionTreeHandlers.addNode}
               onRemoveNode={conditionTreeHandlers.removeNode}
               onUpdateNode={conditionTreeHandlers.updateNode}
             />
-            <ActionInput action={action!} onChange={setAction} />
+            <ActionInput action={action!} onChange={setAction} targetType={targetType} />
           </ContentWrapper>
           <Stack
             direction="row"

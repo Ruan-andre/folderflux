@@ -16,7 +16,7 @@ export const ConditionsTreeTable = sqliteTable("conditions_tree", {
   operator: text("operator", { enum: ["AND", "OR"] }),
   // Colunas específicas de CONDIÇÃO (podem ser nulas)
   field: text("field", {
-    enum: ["fileName", "fileExtension", "creationDate", "modifiedDate", "fileSize"],
+    enum: ["fileName", "fileExtension", "creationDate", "modifiedDate", "fileSize", "itemCount", "isEmpty"],
   }),
   fieldOperator: text("field_operator", {
     enum: [

@@ -11,6 +11,7 @@ import { getStats } from "../services/system/fileService";
 import { DbOrTx } from "~/src/db";
 import { mainProcessEmitter } from "../emitter/mainProcessEmitter";
 import { LogMetadata } from "~/src/shared/types/LogMetaDataType";
+import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
 
 const temporaryFilePatterns = [/(^|[/\\])\../, "**/*.tmp", "**/*.part", "**/*.crdownload", "**/*.opdownload"];
 // Pastas protegidas do Windows que devem ser ignoradas
@@ -28,13 +29,19 @@ function isProtectedFolder(folderPath: string) {
   );
 }
 
+/** `child` é a própria pasta ou está dentro dela? */
+function isInside(child: string, parent: string): boolean {
+  return child === parent || child.startsWith(parent + path.sep);
+}
+
 class FolderMonitorService {
   private monitor: FSWatcher;
-  private debounceTimer: NodeJS.Timeout | null = null;
+  private fileDebounceTimer: NodeJS.Timeout | null = null;
+  private folderDebounceTimer: NodeJS.Timeout | null = null;
   private changedFiles: Set<string> = new Set();
+  private changedDirs: Set<string> = new Set();
   private watchedFolders: Set<string> = new Set();
-  private debounceSeconds: number = 2 * 1000; // 2000ms = 2 segundos
-  private processingRequest: Set<string> = new Set();
+  private readonly debounceMs: number = 2 * 1000;
   private db!: DbOrTx;
 
   constructor() {
@@ -54,6 +61,7 @@ class FolderMonitorService {
       depth: 0,
     });
     this.monitor.on("add", (filePath) => this.handleFileEvent(filePath));
+    this.monitor.on("addDir", (dirPath) => this.handleDirEvent(dirPath));
   }
 
   public async start(db: DbOrTx) {
@@ -68,26 +76,24 @@ class FolderMonitorService {
   };
 
   private handleFileEvent(filePath: string): void {
-    if (this.processingRequest.has(filePath)) {
-      return;
-    }
-    try {
-      this.processingRequest.add(filePath);
-      this.changedFiles.add(filePath);
-      const filesToProcess = Array.from(this.changedFiles);
-      this.process("files", filesToProcess);
-    } finally {
-      this.processingRequest.delete(filePath);
+    this.process("files", [filePath]);
+  }
+
+  private handleDirEvent(dirPath: string): void {
+    // Ignora a própria pasta monitorada (chokidar emite addDir para ela mesma)
+    if (this.watchedFolders.has(dirPath)) return;
+
+    const parentDir = path.dirname(dirPath);
+    if (this.watchedFolders.has(parentDir)) {
+      this.process("folders", [parentDir]);
     }
   }
 
   public async addFoldersToMonitor(paths: string[]) {
-    const directories = await (await getStats(paths)).filter((x) => x.isDirectory).map((x) => x.path);
-    for (const dir of directories) {
+    const stats = await getStats(paths);
+    for (const dir of stats.filter((x) => x.isDirectory).map((x) => x.path)) {
       if (isProtectedFolder(dir)) continue;
-      if (!this.watchedFolders.has(dir)) {
-        this.watchedFolders.add(dir);
-      }
+      this.watchedFolders.add(dir);
       this.monitor.add(dir);
     }
   }
@@ -138,71 +144,103 @@ class FolderMonitorService {
     }
   }
 
-  private process(type: "files" | "folders", paths: string[], delayMS?: number) {
-    if (this.debounceTimer) {
-      clearTimeout(this.debounceTimer);
-    }
+  /**
+   * Acumula os caminhos alterados e agenda o processamento com debounce.
+   * Arquivos e pastas usam filas e timers separados.
+   */
+  private process(type: "files" | "folders", paths: string[], delayMS?: number): void {
+    const delay = delayMS ?? this.debounceMs;
+
     if (type === "files") {
-      this.debounceTimer = setTimeout(() => {
-        const filesToProcess = Array.from(this.changedFiles);
+      paths.forEach((p) => this.changedFiles.add(p));
+      if (this.fileDebounceTimer) clearTimeout(this.fileDebounceTimer);
+      this.fileDebounceTimer = setTimeout(() => {
+        this.fileDebounceTimer = null;
+        const batch = Array.from(this.changedFiles);
         this.changedFiles.clear();
-        handleFiles(filesToProcess);
-      }, delayMS ?? this.debounceSeconds);
-    } else {
-      this.debounceTimer = setTimeout(() => {
-        handleFolders(paths);
-      }, delayMS ?? this.debounceSeconds);
+        void this.handleFiles(batch);
+      }, delay);
+      return;
     }
 
-    /*REFATORAR ESSA FUNÇÃO PARA LIDAR COM O PROCESSAMENTO
-     DE SOMENTE OS ARQUIVOS RECEBIDOS COMO PARÂMETRO NO FILEPATHS */
-    const handleFiles = async (filePaths: string[]) => {
-      if (filePaths.length > 0) {
-        const activeProfiles = (await getAllProfiles(this.db)).items?.filter((p) => p.isActive);
-        if (activeProfiles) {
-          const filteredPaths = (await getStats(filePaths)).filter((f) => !f.isDirectory).map((f) => f.path);
-          const dirnames = new Set(filteredPaths.map((x) => path.dirname(x)));
-          const associatedProfiles = activeProfiles.filter((p) =>
-            p.folders.some((f) => dirnames.has(f.fullPath))
-          );
-          for (const profile of associatedProfiles) {
-            const activeRules = profile.rules.filter((r) => r.isActive);
-            // Somente as pastas que pertencem ao perfil atual devem ser processadas
-            const profileDirSet = new Set(profile.folders.map((f) => f.fullPath));
-            const dirsForProfile = Array.from(dirnames).filter((d) => profileDirSet.has(d));
-            if (dirsForProfile.length === 0) continue;
+    paths.forEach((p) => this.changedDirs.add(p));
+    if (this.folderDebounceTimer) clearTimeout(this.folderDebounceTimer);
+    this.folderDebounceTimer = setTimeout(() => {
+      this.folderDebounceTimer = null;
+      const batch = Array.from(this.changedDirs);
+      this.changedDirs.clear();
+      void this.handleFolders(batch);
+    }, delay);
+  }
 
-            await RuleEngine.process(this.db, activeRules, dirsForProfile, profile.name, this.onLogAdded);
-          }
-        }
-      }
-    };
+  private async activeProfiles(): Promise<FullProfile[]> {
+    return (await getAllProfiles(this.db)).items?.filter((p) => p.isActive) ?? [];
+  }
 
-    const handleFolders = async (dirnames: string[]) => {
-      const activeProfiles = (await getAllProfiles(this.db)).items?.filter((p) => p.isActive);
-      if (activeProfiles) {
-        const associatedProfiles = activeProfiles.filter((p) =>
-          p.folders.some((f) => dirnames.includes(f.fullPath))
-        );
-        for (const profile of associatedProfiles) {
-          const activeRules = profile.rules.filter((r) => r.isActive);
-          const associatedFolders = profile.folders.map((f) => f.fullPath);
-          await RuleEngine.process(this.db, activeRules, associatedFolders, profile.name, this.onLogAdded);
-        }
-      }
-    };
+  private async handleFiles(filePaths: string[]): Promise<void> {
+    if (filePaths.length === 0) return;
+
+    const profiles = await this.activeProfiles();
+    if (profiles.length === 0) return;
+
+    const stats = await getStats(filePaths);
+    const existingFiles = stats.filter((f) => !f.isDirectory).map((f) => f.path);
+    if (existingFiles.length === 0) return;
+
+    const dirnames = new Set(existingFiles.map((f) => path.dirname(f)));
+
+    for (const profile of profiles) {
+      const profileDirs = new Set(profile.folders.map((f) => f.fullPath));
+      const dirsForProfile = Array.from(dirnames).filter((d) => profileDirs.has(d));
+      if (dirsForProfile.length === 0) continue;
+
+      const specificPaths = existingFiles.filter((f) => profileDirs.has(path.dirname(f)));
+
+      await RuleEngine.process({
+        db: this.db,
+        rules: profile.rules.filter((r) => r.isActive),
+        folderPaths: dirsForProfile,
+        profileName: profile.name,
+        onLogAdded: this.onLogAdded,
+        specificPaths,
+      });
+    }
+  }
+
+  private async handleFolders(dirnames: string[]): Promise<void> {
+    if (dirnames.length === 0) return;
+
+    const profiles = await this.activeProfiles();
+    if (profiles.length === 0) return;
+
+    for (const profile of profiles) {
+      const profileDirs = profile.folders.map((f) => f.fullPath);
+      const specificPaths = dirnames.filter((d) => profileDirs.some((root) => isInside(d, root)));
+      if (specificPaths.length === 0) continue;
+
+      await RuleEngine.process({
+        db: this.db,
+        rules: profile.rules.filter((r) => r.isActive),
+        folderPaths: profileDirs,
+        profileName: profile.name,
+        onLogAdded: this.onLogAdded,
+        specificPaths,
+      });
+    }
   }
 
   public stopMonitoring(paths: string[] | string) {
     if (typeof paths === "string") {
       this.watchedFolders.delete(paths);
-    } else if (typeof paths === "object") {
+    } else {
       paths.forEach((p) => this.watchedFolders.delete(p));
     }
     this.monitor.unwatch(paths);
   }
 
   public stopMonitoringAll() {
+    if (this.fileDebounceTimer) clearTimeout(this.fileDebounceTimer);
+    if (this.folderDebounceTimer) clearTimeout(this.folderDebounceTimer);
     this.monitor.close();
   }
 
@@ -212,9 +250,10 @@ class FolderMonitorService {
       this.watchedFolders.add(p);
       this.monitor.add(p);
     };
+
     if (typeof paths === "string") {
       addPath(paths);
-    } else if (typeof paths === "object") {
+    } else {
       paths.forEach(addPath);
     }
 

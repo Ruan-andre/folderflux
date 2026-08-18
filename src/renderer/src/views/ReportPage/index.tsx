@@ -77,7 +77,6 @@ const ReportPage = () => {
   const isStartDateError = startDate.length > 0 && startDate.length === 10 && !isValidDate(startDate);
   const isEndDateError = endDate.length > 0 && endDate.length === 10 && !isValidDate(endDate);
 
-
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -122,7 +121,6 @@ const ReportPage = () => {
     };
     fetchFirstPage();
   }, [startDate, endDate, debouncedSearchTerm, logType]);
-
 
   useEffect(() => {
     const fetchNextPage = async () => {
@@ -205,6 +203,17 @@ const ReportPage = () => {
     );
   };
 
+  const formatSpaceFreed = (mbStr: string | undefined): string => {
+    if (!mbStr) return "0.00 MB";
+    const mb = parseFloat(mbStr);
+    if (isNaN(mb)) return "0.00 MB";
+    if (mb >= 1024) {
+      const gb = mb / 1024;
+      return `${gb.toFixed(2)} GB`;
+    }
+    return `${mb.toFixed(2)} MB`;
+  };
+
   return (
     <ContentWrapper
       id="report-page"
@@ -232,7 +241,7 @@ const ReportPage = () => {
         <ReportCard
           id="total-cleanup-card"
           title="Limpeza (Excluídos)"
-          subtitle={`${stats?.totalCleaned || 0} arquivos (${stats?.totalSpaceFreedMB || "0.00"} MB)`}
+          subtitle={`${stats?.totalCleaned || 0} arquivos (${formatSpaceFreed(stats?.totalSpaceFreedMB)})`}
           icon={<Icon icon="streamline-plump-color:clean-broom-wipe-flat" width="45" height="45" />}
           iconSx={{ backgroundColor: "transparent" }}
         />
@@ -256,29 +265,67 @@ const ReportPage = () => {
       >
         <ChartAndListWrapper elevation={8} sx={{ flex: 1.5, position: "relative" }}>
           {renderLoaderOverlay()}
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 3,
+              flexWrap: "wrap",
+              gap: 1,
+            }}
+          >
             <Typography variant="h5" color="text.primary">
               Atividade no Período
             </Typography>
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
               <FormControlLabel
-                control={<Checkbox size="small" checked={showOrganized} onChange={(e) => setShowOrganized(e.target.checked)} color="primary" />}
-                label={<Typography variant="body2" sx={{ fontSize: "1.2rem" }}>Organizados</Typography>}
-              />
-              <FormControlLabel
-                control={<Checkbox size="small" checked={showCleaned} onChange={(e) => setShowCleaned(e.target.checked)} color="error" />}
-                label={<Typography variant="body2" sx={{ fontSize: "1.2rem" }}>Excluídos</Typography>}
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={showOrganized}
+                    onChange={(e) => setShowOrganized(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label={
+                  <Typography variant="body2" sx={{ fontSize: "1.2rem" }}>
+                    Organizados
+                  </Typography>
+                }
               />
               <FormControlLabel
                 control={
-                  <Checkbox 
-                    size="small" 
-                    checked={showErrors} 
-                    onChange={(e) => setShowErrors(e.target.checked)} 
-                    sx={{ color: theme.palette.warning.main, '&.Mui-checked': { color: theme.palette.warning.main } }} 
+                  <Checkbox
+                    size="small"
+                    checked={showCleaned}
+                    onChange={(e) => setShowCleaned(e.target.checked)}
+                    color="error"
                   />
                 }
-                label={<Typography variant="body2" sx={{ fontSize: "1.2rem" }}>Falhas</Typography>}
+                label={
+                  <Typography variant="body2" sx={{ fontSize: "1.2rem" }}>
+                    Excluídos
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={showErrors}
+                    onChange={(e) => setShowErrors(e.target.checked)}
+                    sx={{
+                      color: theme.palette.warning.main,
+                      "&.Mui-checked": { color: theme.palette.warning.main },
+                    }}
+                  />
+                }
+                label={
+                  <Typography variant="body2" sx={{ fontSize: "1.2rem" }}>
+                    Falhas
+                  </Typography>
+                }
               />
             </Box>
           </Box>
@@ -312,20 +359,10 @@ const ReportPage = () => {
                 />
               )}
               {showCleaned && (
-                <Bar 
-                  dataKey="Excluidos" 
-                  fill={theme.palette.error.main} 
-                  radius={[4, 4, 0, 0]} 
-                  barSize={30} 
-                />
+                <Bar dataKey="Excluidos" fill={theme.palette.error.main} radius={[4, 4, 0, 0]} barSize={30} />
               )}
               {showErrors && (
-                <Bar 
-                  dataKey="Falhas" 
-                  fill={theme.palette.warning.main} 
-                  radius={[4, 4, 0, 0]} 
-                  barSize={30} 
-                />
+                <Bar dataKey="Falhas" fill={theme.palette.warning.main} radius={[4, 4, 0, 0]} barSize={30} />
               )}
             </BarChart>
           </ResponsiveContainer>

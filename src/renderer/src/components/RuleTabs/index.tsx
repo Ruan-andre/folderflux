@@ -39,6 +39,7 @@ const RuleTabs = ({
               id: rule.id,
               name: rule.name,
               description: rule.description,
+              targetType: rule.targetType,
               isActive: rule.isActive,
               isSystem: rule.isSystem,
               action: rule.action,

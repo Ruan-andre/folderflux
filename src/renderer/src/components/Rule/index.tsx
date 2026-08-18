@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Chip, Typography, useTheme } from "@mui/material";
 import ContentWrapper from "../ContentWrapper";
 import { useSnackbar } from "../../context/SnackBarContext";
 import { useRuleStore } from "../../store/ruleStore";
@@ -66,6 +66,15 @@ const Rule = (rule: FullRule) => {
       <Typography sx={{ color: theme.palette.text.secondary, fontSize: theme.typography.subtitle1 }}>
         {description}
       </Typography>
+
+      {rule.targetType === "directory" && (
+        <Chip
+          label="Pastas"
+          size="small"
+          variant="outlined"
+          sx={{ alignSelf: "flex-start", fontSize: "10px" }}
+        />
+      )}
 
       {extensions.length > 0 && (
         <Box style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>

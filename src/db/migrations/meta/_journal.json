@@ -92,6 +92,13 @@
       "when": 1757350239589,
       "tag": "0012_premium_tarot",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1784042680500,
+      "tag": "0013_worried_major_mapleleaf",
+      "breakpoints": true
     }
   ]
 }

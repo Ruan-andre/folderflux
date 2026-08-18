@@ -21,7 +21,14 @@ export async function defaultOrganization(
       return createResponse(false, "Nenhuma regra ativa no perfil padrão.", 0);
     }
 
-    return RuleEngine.process(db, rules, paths, defaultProfile.name, onLogAdded, isTourActive);
+    return RuleEngine.process({
+      db,
+      rules,
+      folderPaths: paths,
+      profileName: defaultProfile.name,
+      onLogAdded,
+      isTourActive,
+    });
   } else throw "Perfil padrão não encontrado";
 }
 
@@ -31,7 +38,7 @@ export async function organizeWithSelectedRules(
   paths: string[],
   onLogAdded?: (logs: LogMetadata | LogMetadata[]) => void
 ) {
-  return await RuleEngine.process(db, rules, paths, undefined, onLogAdded);
+  return await RuleEngine.process({ db, rules, folderPaths: paths, onLogAdded });
 }
 
 export async function organizeWithSelectedProfiles(
@@ -43,7 +50,13 @@ export async function organizeWithSelectedProfiles(
   let response;
   for (const profile of profiles) {
     const rules = profile.rules.filter((r) => r.isActive);
-    const responseOrganization = await RuleEngine.process(db, rules, paths, profile.name, onLogAdded);
+    const responseOrganization = await RuleEngine.process({
+      db,
+      rules,
+      folderPaths: paths,
+      profileName: profile.name,
+      onLogAdded,
+    });
     if (responseOrganization.items && responseOrganization.items > 0 && !response) {
       response = responseOrganization;
     }

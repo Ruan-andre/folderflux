@@ -29,6 +29,7 @@ export async function getAllRules(db: DbOrTx): Promise<DbResponse<FullRule[]>> {
       id: rule.id,
       name: rule.name,
       description: rule.description,
+      targetType: rule.targetType,
       isActive: rule.isActive,
       isSystem: rule.isSystem,
       conditionsTree: buildTreeFromDb(
@@ -54,11 +55,12 @@ export async function getRuleById(db: DbOrTx, ruleId: number): Promise<DbRespons
 
   if (!rule) return createResponse(false, "Regra não encontrada");
 
-  const { id, name, description, isActive, isSystem, conditionsTree, fromTour } = rule;
+  const { id, name, description, targetType, isActive, isSystem, conditionsTree, fromTour } = rule;
   const fullRule: FullRule = {
     id,
     name,
     description,
+    targetType,
     isActive,
     isSystem,
     action: rule.action!,
@@ -109,6 +111,7 @@ export async function updateRule(db: DbOrTx, ruleUpdated: FullRule): Promise<DbR
     .set({
       name: ruleUpdated.name,
       description: ruleUpdated.description,
+      targetType: ruleUpdated.targetType,
       isActive: ruleUpdated.isActive,
     })
     .where(eq(RuleTable.id, ruleUpdated.id));
@@ -140,6 +143,7 @@ export async function duplicateRule(db: DbOrTx, ruleIdToDuplicate: number): Prom
   const newRulePayload: NewRule = {
     name: newRuleName,
     description: original.description,
+    targetType: original.targetType,
     isSystem: false,
     isActive: original.isActive,
   };
@@ -174,6 +178,7 @@ export async function getSystemRules(db: DbOrTx): Promise<FullRule[]> {
       id: rule.id,
       name: rule.name,
       description: rule.description,
+      targetType: rule.targetType,
       isActive: rule.isActive,
       isSystem: rule.isSystem,
       conditionsTree: buildTreeFromDb(
