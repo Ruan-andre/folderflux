@@ -1,7 +1,7 @@
 import { FolderSchema, NewFolder, NewProfile, NewRule, ProfileSchema } from "~/src/db/schema";
 import { FullRule } from "./RuleWithDetails";
 
-export type FullProfile = (ProfileSchema) & {
+export type FullProfile = ProfileSchema & {
   folders: FolderSchema[];
   rules: FullRule[];
 };

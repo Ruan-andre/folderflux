@@ -18,7 +18,8 @@ export const settingSeed: NewSettings[] = [
 
   {
     title: "Atualizar automaticamente",
-    description: "Ao marcar esta opção, o FolderFlux irá se atualizar automaticamente quando uma nova versão for lançada.",
+    description:
+      "Ao marcar esta opção, o FolderFlux irá se atualizar automaticamente quando uma nova versão for lançada.",
     category: "general",
     isActive: false,
     type: "autoUpdate",

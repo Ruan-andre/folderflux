@@ -51,7 +51,7 @@ export function registerElectronUpdaterHandlers(
         } else {
           mainWindow.webContents.send("update-downloaded");
         }
-        
+
         const isStartup = updateWindow && !updateWindow.isDestroyed();
         if (isStartup) {
           updateWindow?.close();
@@ -71,13 +71,13 @@ export function registerElectronUpdaterHandlers(
     const resumeMain = () => {
       try {
         if (!mainWindow || mainWindow.isDestroyed()) return;
-        
+
         if (isStartup) {
           if (mainWindow.isMinimized()) mainWindow.restore();
           if (!mainWindow.isVisible()) mainWindow.show();
           mainWindow.focus();
         }
-        
+
         mainWindow.webContents.send("update-error", {
           message: err instanceof Error ? err.message : String(err),
         });

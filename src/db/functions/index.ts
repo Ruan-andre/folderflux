@@ -2,7 +2,6 @@ import { eq, sql } from "drizzle-orm";
 import { DbResponse } from "~/src/shared/types/DbResponse";
 import { DbOrTx } from "..";
 
-
 export function createResponse<T>(status: boolean, message: string, items?: T): DbResponse<T> {
   return { status, message, items };
 }

@@ -3,11 +3,5 @@
   "url_video": "https://youtu.be/WpY0mp0aZCQ",
   "url_linkedin": "https://www.linkedin.com/posts/andre-ruan-554854250_desenvolvimentodesoftware-opensource-electronjs-activity-7372690602200739840-hauj",
   "url_live_project": "https://folderflux.com",
-  "technologies": [
-    "Electron",
-    "React",
-    "TypeScript",
-    "Material UI",
-    "Node.js"
-  ]
+  "technologies": ["Electron", "React", "TypeScript", "Material UI", "Node.js"]
 }

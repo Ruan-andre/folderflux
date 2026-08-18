@@ -9,7 +9,7 @@ export function parseLocalDate(
   hours: number,
   minutes: number,
   seconds: number,
-  ms: number,
+  ms: number
 ): Date {
   const [yearStr, monthStr, dayStr] = dateStr.split("-");
   return new Date(
@@ -19,7 +19,7 @@ export function parseLocalDate(
     hours,
     minutes,
     seconds,
-    ms,
+    ms
   );
 }
 

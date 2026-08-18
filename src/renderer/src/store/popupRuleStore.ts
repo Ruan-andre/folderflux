@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { FullRule } from "../../../shared/types/RuleWithDetails"; 
+import { FullRule } from "../../../shared/types/RuleWithDetails";
 
 type PopupRuleState = {
   isOpen: boolean;
   mode: "create" | "edit";
-  ruleToEdit?: FullRule; 
+  ruleToEdit?: FullRule;
   openPopup: (mode: "create" | "edit", rule?: FullRule) => void;
   closePopup: () => void;
 };

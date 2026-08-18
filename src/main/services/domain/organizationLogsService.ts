@@ -91,12 +91,7 @@ export function buildFiltersCondition(dbInstance: DbOrTx, filters?: ReportStatsF
       const matchingLogsSubquery = dbInstance
         .select({ logId: AffectedFilesTable.logId })
         .from(AffectedFilesTable)
-        .where(
-          or(
-            like(AffectedFilesTable.currentValue, term),
-            like(AffectedFilesTable.newValue, term)
-          )
-        );
+        .where(or(like(AffectedFilesTable.currentValue, term), like(AffectedFilesTable.newValue, term)));
 
       conditions.push(
         or(
@@ -109,7 +104,11 @@ export function buildFiltersCondition(dbInstance: DbOrTx, filters?: ReportStatsF
   return conditions;
 }
 
-export async function getLogs(dbInstance: DbOrTx, lastId?: number, filters?: ReportStatsFilters): Promise<DbResponse<LogMetadata[]>> {
+export async function getLogs(
+  dbInstance: DbOrTx,
+  lastId?: number,
+  filters?: ReportStatsFilters
+): Promise<DbResponse<LogMetadata[]>> {
   try {
     const conditions = buildFiltersCondition(dbInstance, filters);
     if (lastId) conditions.push(lt(OrganizationLogsTable.id, lastId));
@@ -152,7 +151,6 @@ export async function getLogs(dbInstance: DbOrTx, lastId?: number, filters?: Rep
   }
 }
 
-
 export async function getReportStats(dbInstance: DbOrTx, filters?: ReportStatsFilters) {
   try {
     const conditions = buildFiltersCondition(dbInstance, filters);
@@ -194,7 +192,11 @@ export async function getReportStats(dbInstance: DbOrTx, filters?: ReportStatsFi
       }
 
       if (r.createdAt) {
-        const logMonthStart = new Date(new Date(r.createdAt).getFullYear(), new Date(r.createdAt).getMonth(), 1).getTime();
+        const logMonthStart = new Date(
+          new Date(r.createdAt).getFullYear(),
+          new Date(r.createdAt).getMonth(),
+          1
+        ).getTime();
 
         if (!chartDataMap.has(logMonthStart)) {
           chartDataMap.set(logMonthStart, {
@@ -232,7 +234,6 @@ export async function getReportStats(dbInstance: DbOrTx, filters?: ReportStatsFi
     return handleError(error, "Erro ao buscar stats do relatório");
   }
 }
-
 
 export async function deleteLogById(dbInstance: DbOrTx, logId: number): Promise<DbResponse<void>> {
   try {
