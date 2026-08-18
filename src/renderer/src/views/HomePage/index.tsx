@@ -66,6 +66,7 @@ const HomePage = () => {
       }, false);
     }
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleActionWithLoading não é estabilizado com useCallback; isLoading e hasMore omitidos intencionalmente para não disparar o efeito a cada mudança de estado de carregamento.
   }, [getLogs, lastLogId, isTourFinished]);
 
   useEffect(() => {

@@ -28,3 +28,6 @@ src/renderer/src/icons/.generated/
 *.njsproj
 *.sln
 *.sw?
+
+#Eslint cache
+.eslintcache
