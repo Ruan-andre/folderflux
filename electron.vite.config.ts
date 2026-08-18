@@ -9,7 +9,7 @@ export default defineConfig({
   main: {
     resolve: {
       alias: {
-        "~": resolve(rootDir, "src"),
+        "~": rootDir,
         "@": resolve(rootDir, "src"),
       },
     },
@@ -35,7 +35,7 @@ export default defineConfig({
   preload: {
     resolve: {
       alias: {
-        "~": resolve(rootDir, "src"),
+        "~": rootDir,
         "@": resolve(rootDir, "src"),
       },
     },
@@ -44,7 +44,7 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
-        "~": resolve(rootDir, "src"),
+        "~": rootDir,
         "@": resolve(rootDir, "src"),
         "@renderer": resolve(rootDir, "src/renderer/src"),
       },
