@@ -16,12 +16,19 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
       "~/*": ["./*"],
-      "@*": ["./src/*"]
+      "@*": ["./src/*"],
+      "@renderer/*": ["./src/renderer/src/*"]
     }
   },
-  "include": ["src", "src/preload/index.d.ts", "electron.vite.config.*", "drizzle.config.ts"],
+  "include": [
+    "src",
+    "src/preload/index.d.ts",
+    "tests",
+    "electron.vite.config.*",
+    "vitest.config.ts",
+    "drizzle.config.ts"
+  ],
   "exclude": ["node_modules"]
 }
