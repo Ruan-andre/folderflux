@@ -6,8 +6,13 @@ on:
       - "v*" # Roda sempre que uma tag começando com 'v' (ex: v1.0.1) for enviada
 
 jobs:
+  # Portão: se qualquer checagem falhar, nenhum instalador é gerado nem publicado.
+  verify:
+    uses: ./.github/workflows/ci.yml
+
   publish:
     name: Build and Publish
+    needs: verify
     strategy:
       matrix:
         include:
@@ -23,9 +28,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 10.15.1
+        # Sem `version`: a action lê o campo `packageManager` do package.json,
+        # então CI e máquina local usam exatamente o mesmo pnpm.
+        uses: pnpm/action-setup@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

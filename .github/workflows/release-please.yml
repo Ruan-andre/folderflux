@@ -1,23 +1,25 @@
-# Nome do workflow
 name: Create Release PR
 
-# Gatilho: Roda sempre que um commit for enviado para o branch 'main'
 on:
   push:
     branches:
       - main
     paths-ignore:
-      - 'portfolio-content/**'
-      - '.github/**'
-      - '.vscode/**'
-      - '.gitignore'
-      - 'README.md'
-      - 'PRIVACY.md'
-      - 'TERMS.md'
+      - "portfolio-content/**"
+      - ".github/**"
+      - ".vscode/**"
+      - ".gitignore"
+      - "README.md"
+      - "PRIVACY.md"
+      - "TERMS.md"
 
-# Tarefa (Job)
 jobs:
+  # Portão: nenhuma versão é gerada a partir de uma main quebrada.
+  verify:
+    uses: ./.github/workflows/ci.yml
+
   release-please:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v4

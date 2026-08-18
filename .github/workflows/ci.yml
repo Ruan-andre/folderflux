@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "portfolio-content/**"
+      - "**/*.md"
+      - ".vscode/**"
+  pull_request:
+    branches: [main]
+  # Permite que publish.yml e release-please.yml reutilizem este job como
+  # pré-requisito, em vez de duplicar os passos.
+  workflow_call:
+
+jobs:
+  verify:
+    name: Lint, formatação, typecheck e testes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        # Sem `version`: a action lê o campo `packageManager` do package.json,
+        # então CI e máquina local usam exatamente o mesmo pnpm.
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        # --ignore-scripts evita compilar binários nativos (better-sqlite3,
+        # electron) que não são necessários para as checagens.
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Formatação
+        run: pnpm run format:check
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Testes
+        run: pnpm run test
