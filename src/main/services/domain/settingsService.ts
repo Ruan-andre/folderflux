@@ -68,6 +68,7 @@ const appLauncher = new AutoLaunch({
  * Ativa a inicialização do aplicativo com o sistema operacional.
  */
 async function enableLaunchOnLogin(): Promise<void> {
+  if (!app.isPackaged) return;
   await appLauncher.enable();
 }
 
@@ -75,6 +76,7 @@ async function enableLaunchOnLogin(): Promise<void> {
  * Desativa a inicialização do aplicativo com o sistema operacional.
  */
 async function disableLaunchOnLogin(): Promise<void> {
+  if (!app.isPackaged) return;
   await appLauncher.disable();
 }
 
