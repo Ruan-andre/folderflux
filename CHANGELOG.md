@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.2](https://github.com/Ruan-andre/folderflux/compare/v1.9.1...v1.9.2) (2026-08-27)
+
+
+### Bug Fixes
+
+* **settings:** evitar registro de auto-launch no SO em modo de desenvolvimento ([c59d2d0](https://github.com/Ruan-andre/folderflux/commit/c59d2d06c4c042271c58818fce4efdd5ebe3d3b2))
+
 ## [1.9.1](https://github.com/Ruan-andre/folderflux/compare/v1.9.0...v1.9.1) (2026-08-18)
 
 
