@@ -43,18 +43,26 @@ export function registerElectronUpdaterHandlers(
       autoUpdater.quitAndInstall(true, true);
     } else if (!autoUpdateSetting) {
       log.info("Standard update. Notifying user to install.");
-      if (mainWindow) {
+
+      const isStartup = updateWindow && !updateWindow.isDestroyed();
+      if (isStartup) {
+        updateWindow?.close();
+      }
+
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        // Garante que a janela principal está visível antes de notificar o renderer.
+        // update-downloaded pode chegar antes de update-available ter exibido a janela.
+        if (!mainWindow.isVisible()) {
+          if (mainWindow.isMinimized()) mainWindow.restore();
+          mainWindow.show();
+        }
+
         if (mainWindow.webContents.isLoading()) {
           mainWindow.webContents.once("did-finish-load", () => {
             mainWindow.webContents.send("update-downloaded");
           });
         } else {
           mainWindow.webContents.send("update-downloaded");
-        }
-
-        const isStartup = updateWindow && !updateWindow.isDestroyed();
-        if (isStartup) {
-          updateWindow?.close();
         }
       }
     } else {
