@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.3](https://github.com/Ruan-andre/folderflux/compare/v1.9.2...v1.9.3) (2026-09-10)
+
+
+### Bug Fixes
+
+* **update:** garantir exibicao da janela principal antes de notificar update-downloaded ([ea5903c](https://github.com/Ruan-andre/folderflux/commit/ea5903ce714ecfbd5310f55d91060d3339c33c93))
+
 ## [1.9.2](https://github.com/Ruan-andre/folderflux/compare/v1.9.1...v1.9.2) (2026-08-27)
 
 
