@@ -39,13 +39,20 @@ jobs:
           node-version: 22.13.1
           cache: "pnpm"
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         env:
           npm_config_msvs_version: "2022"
+          npm_config_python: "python"
 
       - name: Build and Publish
         run: pnpm run ${{ matrix.script }}
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           npm_config_msvs_version: "2022"
+          npm_config_python: "python"
