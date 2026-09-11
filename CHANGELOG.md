@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.4](https://github.com/Ruan-andre/folderflux/compare/v1.9.3...v1.9.4) (2026-09-11)
+
+
+### Bug Fixes
+
+* **test:** corrigir tipos do mock para passar no typecheck ([fc66015](https://github.com/Ruan-andre/folderflux/commit/fc660159c999c6fe01fb954ef5fd55e02aed7ca7))
+
 ## [1.9.3](https://github.com/Ruan-andre/folderflux/compare/v1.9.2...v1.9.3) (2026-09-10)
 
 
