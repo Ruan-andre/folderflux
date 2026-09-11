@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.5](https://github.com/Ruan-andre/folderflux/compare/v1.9.4...v1.9.5) (2026-09-11)
+
+
+### Bug Fixes
+
+* **build:** adicionar node-addon-api como devDependency para evitar falha no postinstall do electron-builder ([f3b3ab9](https://github.com/Ruan-andre/folderflux/commit/f3b3ab9c0f7ce57a09ca4a7befaf4efeb2893e42))
+
 ## [1.9.4](https://github.com/Ruan-andre/folderflux/compare/v1.9.3...v1.9.4) (2026-09-11)
 
 
