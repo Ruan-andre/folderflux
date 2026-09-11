@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EventEmitter } from "events";
 import { registerElectronUpdaterHandlers } from "~/src/main/handlers/electron/electron-updater";
 
@@ -17,15 +17,17 @@ import { getSettingStatusByType } from "~/src/main/services/domain/settingsServi
 
 const mockGetSetting = vi.mocked(getSettingStatusByType);
 
-function makeWindow(opts = {}) {
+function makeWindow(
+  opts: { visible?: boolean; loading?: boolean; destroyed?: boolean; minimized?: boolean } = {}
+) {
   const { visible = false, loading = false, destroyed = false, minimized = false } = opts;
   let _visible = visible;
   let _destroyed = destroyed;
-  const onceCallbacks = {};
+  const onceCallbacks: Record<string, (() => void)[]> = {};
   const webContents = {
     send: vi.fn(),
     isLoading: vi.fn(() => loading),
-    once: vi.fn((event, cb) => {
+    once: vi.fn((event: string, cb: () => void) => {
       onceCallbacks[event] = onceCallbacks[event] ?? [];
       onceCallbacks[event].push(cb);
     }),
@@ -49,6 +51,8 @@ function makeWindow(opts = {}) {
   };
 }
 
+type MockWindow = ReturnType<typeof makeWindow>;
+
 function makeUpdater() {
   const emitter = new EventEmitter();
   return {
@@ -60,7 +64,26 @@ function makeUpdater() {
   };
 }
 
-const makeLog = () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() });
+type MockUpdater = ReturnType<typeof makeUpdater>;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const makeLog = () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }) as any;
+
+/** Passa mocks tipados para o handler usando casts pontuais. */
+function register(
+  updater: MockUpdater,
+  main: MockWindow | null,
+  update: MockWindow | null,
+  log: ReturnType<typeof makeLog>
+) {
+  registerElectronUpdaterHandlers(
+    updater as unknown as Parameters<typeof registerElectronUpdaterHandlers>[0],
+    main as unknown as Parameters<typeof registerElectronUpdaterHandlers>[1],
+    update as unknown as Parameters<typeof registerElectronUpdaterHandlers>[2],
+    log
+  );
+}
+
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 // ─── update-downloaded ────────────────────────────────────────────────────────
@@ -73,8 +96,8 @@ describe("update-downloaded", () => {
     const mainWindow = makeWindow({ loading: false });
     const updateWindow = makeWindow();
     mockGetSetting.mockResolvedValue(false);
-    registerElectronUpdaterHandlers(updater, mainWindow, updateWindow, makeLog());
-    const order = [];
+    register(updater, mainWindow, updateWindow, makeLog());
+    const order: string[] = [];
     updateWindow.close.mockImplementation(() => order.push("close"));
     mainWindow.webContents.send.mockImplementation(() => order.push("send"));
     await updater.emit("update-downloaded", { releaseNotes: "" });
@@ -87,7 +110,7 @@ describe("update-downloaded", () => {
     const mainWindow = makeWindow({ visible: false, loading: false });
     const updateWindow = makeWindow();
     mockGetSetting.mockResolvedValue(false);
-    registerElectronUpdaterHandlers(updater, mainWindow, updateWindow, makeLog());
+    register(updater, mainWindow, updateWindow, makeLog());
     await updater.emit("update-downloaded", { releaseNotes: "" });
     await tick();
     expect(mainWindow.show).toHaveBeenCalled();
@@ -98,7 +121,7 @@ describe("update-downloaded", () => {
     const updater = makeUpdater();
     const mainWindow = makeWindow({ visible: true, loading: false });
     mockGetSetting.mockResolvedValue(false);
-    registerElectronUpdaterHandlers(updater, mainWindow, null, makeLog());
+    register(updater, mainWindow, null, makeLog());
     await updater.emit("update-downloaded", { releaseNotes: "" });
     await tick();
     expect(mainWindow.show).not.toHaveBeenCalled();
@@ -109,7 +132,7 @@ describe("update-downloaded", () => {
     const updater = makeUpdater();
     const mainWindow = makeWindow({ visible: true, loading: true });
     mockGetSetting.mockResolvedValue(false);
-    registerElectronUpdaterHandlers(updater, mainWindow, null, makeLog());
+    register(updater, mainWindow, null, makeLog());
     await updater.emit("update-downloaded", { releaseNotes: "" });
     await tick();
     expect(mainWindow.webContents.send).not.toHaveBeenCalled();
@@ -121,7 +144,7 @@ describe("update-downloaded", () => {
     const updater = makeUpdater();
     const mainWindow = makeWindow();
     mockGetSetting.mockResolvedValue(false);
-    registerElectronUpdaterHandlers(updater, mainWindow, null, makeLog());
+    register(updater, mainWindow, null, makeLog());
     await updater.emit("update-downloaded", { releaseNotes: "fixes [critical] issue" });
     await tick();
     expect(updater.quitAndInstall).toHaveBeenCalledWith(true, true);
@@ -132,7 +155,7 @@ describe("update-downloaded", () => {
     const updater = makeUpdater();
     const mainWindow = makeWindow({ visible: true, loading: false });
     mockGetSetting.mockResolvedValue(true);
-    registerElectronUpdaterHandlers(updater, mainWindow, null, makeLog());
+    register(updater, mainWindow, null, makeLog());
     await updater.emit("update-downloaded", { releaseNotes: "" });
     await tick();
     expect(updater.quitAndInstall).toHaveBeenCalledWith(true, true);
@@ -143,7 +166,7 @@ describe("update-downloaded", () => {
     const updater = makeUpdater();
     const mainWindow = makeWindow({ destroyed: true });
     mockGetSetting.mockResolvedValue(false);
-    registerElectronUpdaterHandlers(updater, mainWindow, null, makeLog());
+    register(updater, mainWindow, null, makeLog());
     await updater.emit("update-downloaded", { releaseNotes: "" });
     await tick();
     expect(mainWindow.webContents.send).not.toHaveBeenCalled();
@@ -159,7 +182,7 @@ describe("update-not-available", () => {
     const updater = makeUpdater();
     const mainWindow = makeWindow();
     const updateWindow = makeWindow();
-    registerElectronUpdaterHandlers(updater, mainWindow, updateWindow, makeLog());
+    register(updater, mainWindow, updateWindow, makeLog());
     updater.emit("update-not-available");
     expect(updateWindow.close).toHaveBeenCalled();
     expect(mainWindow.show).toHaveBeenCalled();
@@ -169,7 +192,7 @@ describe("update-not-available", () => {
     const updater = makeUpdater();
     const mainWindow = makeWindow();
     const updateWindow = makeWindow({ destroyed: true });
-    registerElectronUpdaterHandlers(updater, mainWindow, updateWindow, makeLog());
+    register(updater, mainWindow, updateWindow, makeLog());
     updater.emit("update-not-available");
     expect(updateWindow.close).not.toHaveBeenCalled();
     expect(mainWindow.show).not.toHaveBeenCalled();
@@ -186,7 +209,7 @@ describe("update-available", () => {
     const mainWindow = makeWindow({ loading: false });
     const updateWindow = makeWindow();
     mockGetSetting.mockResolvedValue(false);
-    registerElectronUpdaterHandlers(updater, mainWindow, updateWindow, makeLog());
+    register(updater, mainWindow, updateWindow, makeLog());
     await updater.emit("update-available", { version: "1.9.2" });
     await tick();
     expect(updateWindow.close).toHaveBeenCalled();
@@ -199,7 +222,7 @@ describe("update-available", () => {
     const mainWindow = makeWindow({ loading: false });
     const updateWindow = makeWindow({ destroyed: true });
     mockGetSetting.mockResolvedValue(false);
-    registerElectronUpdaterHandlers(updater, mainWindow, updateWindow, makeLog());
+    register(updater, mainWindow, updateWindow, makeLog());
     await updater.emit("update-available", { version: "1.9.2" });
     await tick();
     expect(updateWindow.close).not.toHaveBeenCalled();
@@ -212,7 +235,7 @@ describe("update-available", () => {
     const mainWindow = makeWindow({ loading: false });
     const updateWindow = makeWindow();
     mockGetSetting.mockResolvedValue(true);
-    registerElectronUpdaterHandlers(updater, mainWindow, updateWindow, makeLog());
+    register(updater, mainWindow, updateWindow, makeLog());
     await updater.emit("update-available", { version: "1.9.2" });
     await tick();
     expect(mainWindow.webContents.send).not.toHaveBeenCalled();
