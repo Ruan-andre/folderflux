@@ -2,9 +2,11 @@ import { Box, styled, useTheme } from "@mui/material";
 import Icon from "../../assets/icons";
 import ContentWrapper from "../../components/ContentWrapper";
 import GenericCard from "../../components/GenericCard";
+import { useHowToUse } from "../../hooks/useHowToUse";
 
 const HelpPage = () => {
   const theme = useTheme();
+  const { handleHowToUse } = useHowToUse(true);
   const HelpPageCard = styled(GenericCard)(() => ({
     width: "32rem",
     height: "11rem",
@@ -20,6 +22,7 @@ const HelpPage = () => {
           subtitle="Guia rápido de início"
           icon={<Icon icon="fluent-emoji-flat:graduation-cap" width="45" height="45" />}
           iconColor="info"
+          onClick={handleHowToUse}
         />
         <HelpPageCard
           onClick={() => {

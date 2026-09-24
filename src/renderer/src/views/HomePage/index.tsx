@@ -24,6 +24,7 @@ import ProfileManagementView from "../ProfileManagementView";
 import { FullProfile } from "~/src/shared/types/ProfileWithDetails";
 import Loading from "../../components/Loading";
 import { useTourStore } from "../../store/tourStore";
+import { useHowToUse } from "../../hooks/useHowToUse";
 
 const HomePage = () => {
   const { showMessage } = useSnackbar();
@@ -46,7 +47,6 @@ const HomePage = () => {
   const deleteLog = useLogStore((state) => state.deleteLog);
   const addSavedLogFromBD = useLogStore((state) => state.addSavedLogFromBD);
   const [isDonationPopupOpen, setIsDonationPopupOpen] = useState(false);
-  const startTour = useTourStore((state) => state.startTour);
   const tourNext = useTourStore((state) => state.tourNext);
   const isTourActive = useTourStore((state) => state.isTourActive);
   const getCurrentStepId = useTourStore((state) => state.getCurrentStepId);
@@ -81,31 +81,7 @@ const HomePage = () => {
     setLastLogId(nextId);
   });
 
-  const handleHowToUse = async () => {
-    showConfirm(
-      {
-        title: "Escolha uma opção",
-        confirmText: "Tutorial Simples",
-        confirmBtnColor: "success",
-      },
-      async () => {
-        try {
-          startTour("simple");
-        } catch (error) {
-          console.error("Não foi possível iniciar o tour:", error);
-        }
-      },
-      [
-        {
-          text: "Tutorial Avançado",
-          action: () => {
-            startTour("advanced");
-          },
-          thirdButtonColor: "error",
-        },
-      ]
-    );
-  };
+  const { handleHowToUse } = useHowToUse();
 
   async function handleActionWithLoading<T>(
     action: () => Promise<DbResponse<T>> | Promise<void>,
