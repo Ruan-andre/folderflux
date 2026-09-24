@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.10.0](https://github.com/Ruan-andre/folderflux/compare/v1.9.5...v1.10.0) (2026-09-24)
+
+
+### Features
+
+* **help:** implementar botao Como usar na HelpPage ([f0a7291](https://github.com/Ruan-andre/folderflux/commit/f0a7291d3457a4681e321810e909c23de21dc159))
+
+
+### Bug Fixes
+
+* corrigir vulnerabilidades de seguranca e botao Como usar na HelpPage ([6ec7073](https://github.com/Ruan-andre/folderflux/commit/6ec70732447c44f726b1c206c30688f153b0d525))
+* **deps:** remover override de vite sem limite de versao ([5007d39](https://github.com/Ruan-andre/folderflux/commit/5007d3998ca557ffaae686e5994d0468b1eb0368))
+
 ## [1.9.5](https://github.com/Ruan-andre/folderflux/compare/v1.9.4...v1.9.5) (2026-09-11)
 
 
