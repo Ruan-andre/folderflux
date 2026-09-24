@@ -13,6 +13,8 @@ allowBuilds:
   esbuild: true
   # Telemetria da Scarf: sem função no produto.
   "@scarf/scarf": false
+  # Gerador de instalador Windows do electron-builder.
+  electron-winstaller: true
 
 # Força node-abi 4.x para que @electron/rebuild consiga detectar o ABI
 # do Electron 43. O electron-builder traz node-abi 3.x que não tem esse
@@ -38,3 +40,23 @@ overrides:
   "@humanfs/node": ">=0.16.8"
   # @babel/core: leitura de arquivo via sourceMappingURL (GHSA-4x5r-pxfx-6jf8)
   "@babel/core": ">=7.29.1"
+  # tar-fs: symlink validation bypass (GHSA via better-sqlite3 > prebuild-install)
+  tar-fs: ">=2.1.4"
+  # glob: command injection via -c/--cmd (GHSA via electron-builder)
+  glob: ">=10.5.0"
+  # minimatch: ReDoS via wildcards e extglobs (GHSA via electron-builder / node-gyp)
+  minimatch: ">=9.0.7"
+  # brace-expansion: DoS via expansao exponencial (GHSA via minimatch > node-gyp)
+  brace-expansion: ">=2.1.4"
+  # flatted: DoS via recursao ilimitada e prototype pollution (GHSA via eslint)
+  flatted: ">=3.4.2"
+  # lodash: code injection via _.template (GHSA via electron-builder > flatpak-bundler)
+  lodash: ">=4.17.24"
+  # tmp: path traversal via prefix/postfix (GHSA via electron-builder > flatpak-bundler)
+  tmp: ">=0.2.6"
+  # form-data: CRLF injection em multipart (GHSA via electron-builder)
+  form-data: ">=4.0.6"
+  # vite: bypass de server.fs.deny em caminhos alternativos Windows (GHSA via @vitejs/plugin-react)
+  vite: ">=6.4.3"
+  # builder-util-runtime: vazamento de token em redirect cross-origin (GHSA via electron-builder)
+  builder-util-runtime: ">=9.7.0"
