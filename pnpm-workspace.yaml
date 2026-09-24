@@ -56,7 +56,5 @@ overrides:
   tmp: ">=0.2.6"
   # form-data: CRLF injection em multipart (GHSA via electron-builder)
   form-data: ">=4.0.6"
-  # vite: bypass de server.fs.deny em caminhos alternativos Windows (GHSA via @vitejs/plugin-react)
-  vite: ">=6.4.3"
   # builder-util-runtime: vazamento de token em redirect cross-origin (GHSA via electron-builder)
   builder-util-runtime: ">=9.7.0"
